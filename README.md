@@ -1,5 +1,5 @@
 
-Ark is a next generation crypto-currency and decentralized application platform, written entirely in JavaScript. For more information please refer to our website: https://ark.io/.
+Persona testnet platform. For more information please refer to our website: https://persona.im.
 
 This version is still beta, use at your own risks
 
@@ -24,7 +24,7 @@ bash DARKcommander.sh
 
 ## Details
 
-This is a fork from Lisk with the following features:
+This is a fork from Ark with the following features:
 - Removed sidechains (deprecated in favor of smartbridge)
 - Removed custom node version
 - Removed UI for stability and security reasons
