@@ -6,5 +6,7 @@ module.exports = {
 	DELEGATE: 2,
 	VOTE: 3,
 	MULTI: 4,
-	IPFS: 5
+	IPFS: 5,
+	REGISTER: 6,
+	VERIFY: 7
 };

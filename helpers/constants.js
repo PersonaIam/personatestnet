@@ -12,7 +12,9 @@ module.exports = {
 		vote: 100000000,
 		secondsignature: 500000000,
 		delegate: 2500000000,
-		multisignature: 500000000
+		multisignature: 500000000,
+		register: 10000000,
+		verify: 10000000
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,

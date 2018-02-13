@@ -88,12 +88,18 @@ Transaction.prototype.validateAddress = function(address){
 
 //
 Transaction.prototype.attachAssetType = function (typeId, instance) {
-	if (instance && typeof instance.create === 'function' && typeof instance.getBytes === 'function' &&
-		typeof instance.calculateFee === 'function' && typeof instance.verify === 'function' &&
-		typeof instance.objectNormalize === 'function' && typeof instance.dbRead === 'function' &&
-		typeof instance.apply === 'function' && typeof instance.undo === 'function' &&
-		typeof instance.applyUnconfirmed === 'function' && typeof instance.undoUnconfirmed === 'function' &&
-		typeof instance.ready === 'function' && typeof instance.process === 'function'
+	if (instance && typeof instance.create === 'function' && 
+		typeof instance.getBytes === 'function' &&
+		typeof instance.calculateFee === 'function' && 
+		typeof instance.verify === 'function' &&
+		typeof instance.objectNormalize === 'function' && 
+		typeof instance.dbRead === 'function' &&
+		typeof instance.apply === 'function' && 
+		typeof instance.undo === 'function' &&
+		typeof instance.applyUnconfirmed === 'function' && 
+		typeof instance.undoUnconfirmed === 'function' &&
+		typeof instance.ready === 'function' && 
+		typeof instance.process === 'function'
 	) {
 		__private.types[typeId] = instance;
 		return instance;
