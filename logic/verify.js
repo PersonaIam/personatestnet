@@ -205,5 +205,3 @@ Verify.prototype.ready = function (trs, sender) {
 
 // Export
 module.exports = Verify;
-
-

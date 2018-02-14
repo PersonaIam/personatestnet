@@ -95,6 +95,24 @@ CREATE TABLE IF NOT EXISTS "peers"(
   "clock" BIGINT
 );
 
+CREATE TABLE IF NOT EXISTS "identity"(
+  "id" VARCHAR(32) PRIMARY KEY,
+  "owner" VARCHAR(36) NOT NULL,
+  "type" SMALLINT NOT NULL,
+  "data" TEXT,
+  "transactionId" VARCHAR(64) NOT NULL,
+  FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "verifications"(
+  "dataId" VARCHAR(32) NOT NULL,
+  "owner" VARCHAR(36) NOT NULL,
+  "verifier" VARCHAR(36) NOT NULL,
+  "signature" bytea NOT NULL,
+  "transactionId" VARCHAR(64) NOT NULL,
+  FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
+);
+
 /* Unique Indexes */
 CREATE UNIQUE INDEX IF NOT EXISTS "blocks_height" ON "blocks"("height");
 CREATE UNIQUE INDEX IF NOT EXISTS "blocks_previousBlock" ON "blocks"("previousBlock");

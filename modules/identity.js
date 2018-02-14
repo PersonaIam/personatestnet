@@ -6,7 +6,6 @@ var BlockReward = require('../logic/blockReward.js');
 var ByteBuffer = require('bytebuffer');
 var constants = require('../helpers/constants.js');
 var crypto = require('crypto');
-var genesisblock = null;
 var Inserts = require('../helpers/inserts.js');
 var ip = require('ip');
 var OrderBy = require('../helpers/orderBy.js');
@@ -14,15 +13,30 @@ var Router = require('../helpers/router.js');
 var schema = require('../schema/blocks.js');
 var slots = require('../helpers/slots.js');
 var sql = require('../sql/blocks.js');
+var Register = require('../logic/register.js');
+var Verify = require('../logic/verify.js');
 var transactionTypes = require('../helpers/transactionTypes.js');
 
 // Private fields
 var modules, library, self, __private = {}, shared = {};
 
+__private.assetTypes = {};
 
-function Identity (cb, scope) {
-	library = scope;
-	self = this;
+function Identity(cb, scope) {
+    library = scope;
+    self = this;
+
+    // register identity
+    __private.assetTypes[transactionTypes.REGISTER] = library.logic.transaction.attachAssetType(
+        transactionTypes.REGISTER, new Register()
+    );
+
+    // verify identity
+    __private.assetTypes[transactionTypes.VERIFY] = library.logic.transaction.attachAssetType(
+        transactionTypes.VERIFY, new Verify()
+    );
+
+    return cb(null, self);
 }
 
 __private.attachApi = function () {
@@ -33,9 +47,9 @@ __private.attachApi = function () {
 		res.status(500).send({success: false, error: 'Blockchain is loading'});
     });
 
-    router.map(shared, {
-        'get /get': 'getID'
-    });
+    // router.map(shared, {
+    //     'get /get': 'getID'
+    // });
 
     library.network.app.use('/api/identity', router);
 	library.network.app.use(function (err, req, res, next) {
@@ -49,5 +63,27 @@ Identity.prototype.onAttachPublicApi = function () {
     __private.attachApi();
 }
 
-shared.getID = function (req, cb) {
-}
+// Events
+//
+//__EVENT__ `onBind`
+
+//
+Identity.prototype.onBind = function (scope) {
+	modules = scope;
+
+	__private.assetTypes[transactionTypes.REGISTER].bind({
+		modules: modules, library: library
+	});
+
+	__private.assetTypes[transactionTypes.VERIFY].bind({
+		modules: modules, library: library
+	});
+};
+
+
+
+// shared.getID = function (req, cb) {
+// }
+
+// Export
+module.exports = Identity;

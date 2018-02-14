@@ -26,7 +26,10 @@ Register.prototype.bind = function (scope) {
 
 //
 Register.prototype.create = function (data, trs) {
-	trs.asset.code = data.code;
+    trs.asset.id = data.id
+    trs.asset.owner = data.owner;
+    trs.asset.type= data.type;
+    trs.asset.data = data.data;
 
 	return trs;
 };
@@ -126,12 +129,20 @@ Register.prototype.schema = {
 	id: 'contract',
 	type: 'object',
 	properties: {
-		name: {
-			type: 'string',
-			format: 'hex'
-		}
+        id: {
+			type: 'string'
+		},
+        owner: {
+            type: 'string'
+        },
+        type :{
+            type: 'integer'
+        },
+		data: {
+			type: 'string'
+        }
 	},
-	required: ['name']
+	required: ['id', 'owner', 'type', 'data']
 };
 
 //
@@ -156,20 +167,29 @@ Register.prototype.objectNormalize = function (trs) {
 //
 Register.prototype.dbRead = function (raw) {
 
-	if (!raw.name) {
+	if (!raw.data) {
 		return null;
 	} else {
 		var name = raw.name;
 
-		return {name: name};
+		return {
+            id: raw.id,
+            owner: raw.owner,
+            type: raw.type,
+            data: raw.data,
+            transactionId: raw.transactionId
+        };
 	}
 };
 
-Register.prototype.dbTable = 'name';
+Register.prototype.dbTable = 'identity';
 
 Register.prototype.dbFields = [
-	'name',
-	'transactionId'
+	'id',
+    'owner',
+    'type',
+    'data',
+    'transactionId'
 ];
 
 //
@@ -181,7 +201,10 @@ Register.prototype.dbSave = function (trs) {
 		table: this.dbTable,
 		fields: this.dbFields,
 		values: {
-			name: trs.asset.name,
+            id: trs.asset.id,
+            owner: trs.senderPublicKey,
+            type: trs.asset.type,
+            data: trs.asset.data,
 			transactionId: trs.id
 		}
 	};
@@ -202,8 +225,5 @@ Register.prototype.ready = function (trs, sender) {
 	}
 };
 
-
 // Export
 module.exports = Register;
-
-
