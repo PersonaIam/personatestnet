@@ -16,14 +16,16 @@ if(!networks[network_name]){
   network_name = "devnet";
 }
 
+var dir = './testnet';
+
 // directory to export passphrases of premine account and genesis delegates. Should exist
-var private_dir = './demo';
+var private_dir = dir + '/private';
 
 // directory to export config and genesisBlock files. Should exist
-var output_dir = './demo';
+var output_dir = dir + '/output';
 
 // default port for node
-var default_port = 4100;
+var default_port = 4101;
 
 // version of network to set in the config file
 var config_version = '0.0.1';
@@ -33,7 +35,7 @@ var seed_peers = [
         {
         ip: "127.0.0.1",
         port: 4100
-      },{
+      }, {
         ip: "127.0.0.2",
         port: 4100
       },{
@@ -43,7 +45,19 @@ var seed_peers = [
         ip: "127.0.0.4",
         port: 4100
       },{
-        ip: "127.0.0.5",
+        ip: "127.0.0.6",
+        port: 4100
+      },{
+        ip: "127.0.0.7",
+        port: 4100
+      },{
+        ip: "127.0.0.8",
+        port: 4100
+      },{
+        ip: "127.0.0.9",
+        port: 4100
+      },{
+        ip: "127.0.0.10",
         port: 4100
       }
 ];
@@ -66,7 +80,7 @@ else {
 }
 
 // Total of premined token in satoshi. The premined accounts will be substracted to this
-var totalpremine = 2100000000000000;
+var totalpremine = 7000000000000000;
 
 
 // config file that will be tuned and exported

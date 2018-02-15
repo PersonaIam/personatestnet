@@ -79,8 +79,12 @@ Register.prototype.process = function (trs, sender, cb) {
 Register.prototype.getBytes = function (trs) {
 	var buf;
 
-	try {
-		buf = trs.asset.name ? new Buffer(trs.asset.name, 'utf8') : null;
+	try {     
+        var idBuff = Buffer.from(trs.asset.id, "utf8");;
+        var typeBuff = Buffer.from(trs.asset.type);
+        var dataBuf = Buffer.from(trs.asset.data, "utf8");
+
+        buf = Buffer.concat([idBuff, typeBuff, dataBuf], idBuff.length + typeBuff.length + dataBuf.length);
 	} catch (e) {
 		throw e;
 	}
@@ -170,8 +174,6 @@ Register.prototype.dbRead = function (raw) {
 	if (!raw.data) {
 		return null;
 	} else {
-		var name = raw.name;
-
 		return {
             id: raw.id,
             owner: raw.owner,

@@ -1,0 +1,133 @@
+{
+  "port": 4100,
+  "address": "0.0.0.0",
+  "version": "0.0.1",
+  "fileLogLevel": "info",
+  "logFileName": "logs/ark.log",
+  "consoleLogLevel": "debug",
+  "trustProxy": false,
+  "db": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "persona_localnet",
+    "user": null,
+    "password": "password",
+    "poolSize": 20,
+    "poolIdleTimeout": 30000,
+    "reapIntervalMillis": 1000,
+    "logEvents": [
+      "error"
+    ]
+  },
+  "api": {
+    "mount": true,
+    "access": {
+      "whiteList": []
+    },
+    "options": {
+      "limits": {
+        "max": 0,
+        "delayMs": 0,
+        "delayAfter": 0,
+        "windowMs": 60000
+      }
+    }
+  },
+  "peers": {
+    "minimumNetworkReach": 1,
+    "list": [
+      {
+        "ip": "127.0.0.1",
+        "port": 4100
+      }
+    ],
+    "blackList": [],
+    "options": {
+      "limits": {
+        "max": 0,
+        "delayMs": 0,
+        "delayAfter": 0,
+        "windowMs": 60000
+      },
+      "maxUpdatePeers": 20,
+      "timeout": 5000
+    }
+  },
+  "forging": {
+    "coldstart": 6,
+    "force": true,
+    "secret": [
+      "all cruise leave biology angle reopen famous film drama badge elder goddess",
+      "argue review patient width sister execute biology concert dial crisp flame level",
+      "drink cactus crater warfare eager elegant napkin tiny pumpkin door goddess smart",
+      "rival bulb list theme high rude differ envelope gown raise round lake",
+      "cushion motion when awkward liberty onion assume rigid lesson youth siren indicate",
+      "basket brother hurt depth phone floor cliff fury display concert exit rate",
+      "senior blue rain pencil wealth grain runway spell blast human cluster point",
+      "coin mountain marriage frog acoustic lady survey sun input myth negative armor",
+      "life rubber crater advice army special yard able egg copy rough strong",
+      "punch animal better speak silver leopard endless again orchard true session host",
+      "shiver cloud large arm example they brick before object ketchup random tilt",
+      "idle dutch action oval want summer come dog tube loyal rather auction",
+      "north velvet laugh mad mesh carry stomach rate caution damage open innocent",
+      "lawn obtain confirm electric grab abandon doctor bird joy illegal witness avocado",
+      "melt skate gadget depart blur oxygen session august sword box dune rally",
+      "smoke furnace seek wife snow caught casino unaware off piece ignore ensure",
+      "pepper favorite clay output liquid pear hedgehog advice list heart govern extend",
+      "plastic proud tourist harbor near host negative cousin become nest flavor about",
+      "stay genius gun brief obey bag comic type muscle buddy you romance",
+      "chuckle loop damp lucky hazard alien pride update story carbon whip frame",
+      "pony rescue slush typical measure grunt intact hover reward execute luxury easy",
+      "moral radar love cool pepper lobster orbit hub fence coyote novel weasel",
+      "recall stage cube curious twist parent solar throw there merry undo expose",
+      "size awesome pyramid divorce tonight judge gasp select grief face misery father",
+      "best random ladder depart toss sock tip borrow fog maximum trick right",
+      "ocean mutual permit bean ship oil hour detail hope excite olive soda",
+      "belt salt symptom novel hungry secret panda there unhappy title year cement",
+      "dynamic moment angry better remember radio struggle crunch rate deer decline kid",
+      "process front unveil extra mention upper afraid silly dwarf other hidden ten",
+      "coral scorpion book region sock veteran noise whisper deer witness lady empty",
+      "doctor gentle jungle develop outside pattern object fine hair sun prevent disorder",
+      "board topple cabbage mountain divide live forget mansion viable symbol ritual below",
+      "remove belt patient ahead chat half tip license gown shed van dad",
+      "test castle switch clerk brisk kiss butter diesel chase remain steak crunch",
+      "gravity lesson maximum rhythm gas length family album supreme sand mention wisdom",
+      "carbon ginger prison add quit ethics solve holiday inherit dose hard citizen",
+      "note tide ill fan impose erupt young exile unaware write convince join",
+      "flock legal absorb inhale card scheme almost thrive evidence grunt blossom peanut",
+      "detail survey warfare pumpkin device distance retire little fantasy trim drift valid",
+      "deliver oblige angle strike asset riot relief trip smoke balcony scatter brick",
+      "during logic bachelor consider gun daughter palace brave girl wolf kite valid",
+      "beef endorse wrestle carpet spell marine chest zero column nerve tuna trouble",
+      "wasp fog rhythm auto laptop account extra hurt photo nurse grid public",
+      "dilemma judge cattle poet laundry idea satisfy mango oblige beyond media rib",
+      "gauge copy rug toddler speed victory city tonight fly festival crazy recall",
+      "coast buzz pyramid furnace crazy silly crater corn blossom author ready broom",
+      "build walk thank state rich engine conduct kick private elegant skate empower",
+      "lucky elbow isolate hockey guess help peasant slow case wait helmet plug",
+      "uphold badge nature exhibit april link royal veteran program nephew pioneer false",
+      "twin brand claim attack kidney glide subject extend prevent word cactus day",
+      "sword alpha topple grunt cloth time mammal consider govern door term wear"
+    ],
+    "access": {
+      "whiteList": [
+        "127.0.0.1"
+      ]
+    }
+  },
+  "loading": {
+    "verifyOnLoading": false,
+    "loadPerIteration": 5000
+  },
+  "ssl": {
+    "enabled": false,
+    "options": {
+      "port": 443,
+      "address": "0.0.0.0",
+      "key": "./ssl/ark.key",
+      "cert": "./ssl/ark.crt"
+    }
+  },
+  "network": "localnet",
+  "nethash": "c0a05e20f07438ea30e20bf38855f2cf204d2d5706ac152d83496e625bee3d5b"
+}

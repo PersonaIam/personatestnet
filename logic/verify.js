@@ -26,7 +26,10 @@ Verify.prototype.bind = function (scope) {
 
 //
 Verify.prototype.create = function (data, trs) {
-	trs.asset.code = data.code;
+    trs.asset.dataId = data.dataId
+    trs.asset.owner = data.owner;
+    trs.asset.verifier= data.verifier;
+    trs.asset.signature = data.signature;
 
 	return trs;
 };
@@ -156,20 +159,27 @@ Verify.prototype.objectNormalize = function (trs) {
 //
 Verify.prototype.dbRead = function (raw) {
 
-	if (!raw.name) {
-		return null;
-	} else {
-		var name = raw.name;
-
-		return {name: name};
-	}
+    if (!raw.dataId) {
+        return null;
+    } else {
+        return {
+            dataId: raw.dataId,
+            owner: raw.owner,
+            verifier: raw.verifier,
+            signature: raw.signature,
+            transactionId: raw.transactionId
+        };
+    }
 };
 
-Verify.prototype.dbTable = 'name';
+Verify.prototype.dbTable = 'verifications';
 
 Verify.prototype.dbFields = [
-	'name',
-	'transactionId'
+	'dataId',
+    'owner',
+    'verifier',
+    'signature',
+    'transactionId'
 ];
 
 //
@@ -181,8 +191,11 @@ Verify.prototype.dbSave = function (trs) {
 		table: this.dbTable,
 		fields: this.dbFields,
 		values: {
-			name: trs.asset.name,
-			transactionId: trs.id
+			dataId: trs.asset.dataId,
+            owner: trs.senderPublicKey,
+            verifier: trs.senderPublicKey,
+            signature: trs.asset.signature,
+            transactionId: trs.id
 		}
 	};
 };
