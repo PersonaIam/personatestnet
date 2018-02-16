@@ -79,8 +79,13 @@ Verify.prototype.process = function (trs, sender, cb) {
 Verify.prototype.getBytes = function (trs) {
 	var buf;
 
-	try {
-		buf = trs.asset.name ? new Buffer(trs.asset.name, 'utf8') : null;
+	try {     
+        var dataIdBuff = Buffer.from(trs.asset.dataId, "utf8");
+        var ownerBuff = Buffer.from(trs.asset.owner, "utf8");
+        var verifierBuff = Buffer.from(trs.asset.verifier, "utf8");
+        var signatureBuff = Buffer.from(trs.asset.signature, "utf8");
+
+        buf = Buffer.concat([dataIdBuff, ownerBuff, verifierBuff, signatureBuff], dataIdBuff.length + ownerBuff.length + verifierBuff.length + signatureBuff.length);
 	} catch (e) {
 		throw e;
 	}
@@ -93,7 +98,7 @@ Verify.prototype.getBytes = function (trs) {
 
 //
 Verify.prototype.apply = function (trs, block, sender, cb) {
-	
+	return cb();
 };
 
 
@@ -126,15 +131,26 @@ Verify.prototype.undoUnconfirmed = function (trs, sender, cb) {
 
 // asset schema
 Verify.prototype.schema = {
-	id: 'contract',
+	id: 'Verify',
 	type: 'object',
 	properties: {
-		name: {
+        dataId: {
 			type: 'string',
-			format: 'hex'
-		}
+            format: 'address'
+		},
+        owner: {
+            type: 'string',
+            format: 'address'
+        },
+        verifier: {
+            type: 'string'
+        },
+        signature: {
+            type: 'string',
+			format: 'signature'
+        }
 	},
-	required: ['name']
+	required: ['dataId', 'owner', 'verifier', 'signature']
 };
 
 //
@@ -142,7 +158,7 @@ Verify.prototype.schema = {
 
 //
 Verify.prototype.objectNormalize = function (trs) {
-	var report = library.schema.validate(trs.asset, Contract.prototype.schema);
+	var report = library.schema.validate(trs.asset, Verify.prototype.schema);
 
 	if (!report) {
 		throw 'Failed to validate vote schema: ' + this.scope.schema.getLastErrors().map(function (err) {

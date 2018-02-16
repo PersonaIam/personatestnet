@@ -83,9 +83,9 @@ Register.prototype.getBytes = function (trs) {
         var idBuff = Buffer.from(trs.asset.id, "utf8");
         var ownerBuff = Buffer.from(trs.asset.owner, "utf8");
         var typeBuff = Buffer.from([trs.asset.type]);
-        var dataBuf = Buffer.from(trs.asset.data, "utf8");
+        var dataBuff = Buffer.from(trs.asset.data, "utf8");
 
-        buf = Buffer.concat([idBuff, ownerBuff, typeBuff, dataBuf], idBuff.length + ownerBuff.length + typeBuff.length + dataBuf.length);
+        buf = Buffer.concat([idBuff, ownerBuff, typeBuff, dataBuff], idBuff.length + ownerBuff.length + typeBuff.length + dataBuff.length);
 	} catch (e) {
 		throw e;
 	}

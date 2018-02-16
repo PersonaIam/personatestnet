@@ -10,9 +10,9 @@ var Inserts = require('../helpers/inserts.js');
 var ip = require('ip');
 var OrderBy = require('../helpers/orderBy.js');
 var Router = require('../helpers/router.js');
-var schema = require('../schema/blocks.js');
+var schema = require('../schema/identity.js');
 var slots = require('../helpers/slots.js');
-var sql = require('../sql/blocks.js');
+var sql = require('../sql/identity.js');
 var Register = require('../logic/register.js');
 var Verify = require('../logic/verify.js');
 var transactionTypes = require('../helpers/transactionTypes.js');
@@ -80,15 +80,22 @@ Identity.prototype.onBind = function (scope) {
 	});
 };
 
-Identity.prototype.schema = {
-
-}
-
-
 shared.getIdForAddress = function (req, cb) {
 
-    
-}
+    library.schema.validate(req.body, schema.getFragments, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        library.db.one(sql.getIdFragments, { address: req.body.address }).then(function (row) {
+            return cb(null, {fragments: "meh"});
+        }).catch(function (err) {
+            library.logger.error("stack", err.stack);
+            return cb('Failed to get indetity for address: ' + req.body.address);
+        });
+
+    });
+};
 
 // Export
 module.exports = Identity;
