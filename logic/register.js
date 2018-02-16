@@ -80,11 +80,12 @@ Register.prototype.getBytes = function (trs) {
 	var buf;
 
 	try {     
-        var idBuff = Buffer.from(trs.asset.id, "utf8");;
-        var typeBuff = Buffer.from(trs.asset.type);
+        var idBuff = Buffer.from(trs.asset.id, "utf8");
+        var ownerBuff = Buffer.from(trs.asset.owner, "utf8");
+        var typeBuff = Buffer.from([trs.asset.type]);
         var dataBuf = Buffer.from(trs.asset.data, "utf8");
 
-        buf = Buffer.concat([idBuff, typeBuff, dataBuf], idBuff.length + typeBuff.length + dataBuf.length);
+        buf = Buffer.concat([idBuff, ownerBuff, typeBuff, dataBuf], idBuff.length + ownerBuff.length + typeBuff.length + dataBuf.length);
 	} catch (e) {
 		throw e;
 	}
@@ -97,7 +98,7 @@ Register.prototype.getBytes = function (trs) {
 
 //
 Register.prototype.apply = function (trs, block, sender, cb) {
-	
+	return cb();
 };
 
 
@@ -130,7 +131,7 @@ Register.prototype.undoUnconfirmed = function (trs, sender, cb) {
 
 // asset schema
 Register.prototype.schema = {
-	id: 'contract',
+	id: 'Register',
 	type: 'object',
 	properties: {
         id: {
@@ -154,7 +155,7 @@ Register.prototype.schema = {
 
 //
 Register.prototype.objectNormalize = function (trs) {
-	var report = library.schema.validate(trs.asset, Contract.prototype.schema);
+	var report = library.schema.validate(trs.asset, Register.prototype.schema);
 
 	if (!report) {
 		throw 'Failed to validate vote schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -204,7 +205,7 @@ Register.prototype.dbSave = function (trs) {
 		fields: this.dbFields,
 		values: {
             id: trs.asset.id,
-            owner: trs.senderPublicKey,
+            owner: trs.asset.owner,
             type: trs.asset.type,
             data: trs.asset.data,
 			transactionId: trs.id

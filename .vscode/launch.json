@@ -11,15 +11,9 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run-script",
-                "start:testnetdbg"
+                "start:localnetdbg"
             ],
             "port": 9229
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach",
-            "protocol": "inspector"
         },
         {
             "type": "node",

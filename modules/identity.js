@@ -47,9 +47,9 @@ __private.attachApi = function () {
 		res.status(500).send({success: false, error: 'Blockchain is loading'});
     });
 
-    // router.map(shared, {
-    //     'get /get': 'getID'
-    // });
+    router.map(shared, {
+        'get /get': 'getIdForAddress'
+    });
 
     library.network.app.use('/api/identity', router);
 	library.network.app.use(function (err, req, res, next) {
@@ -80,10 +80,15 @@ Identity.prototype.onBind = function (scope) {
 	});
 };
 
+Identity.prototype.schema = {
+
+}
 
 
-// shared.getID = function (req, cb) {
-// }
+shared.getIdForAddress = function (req, cb) {
+
+    
+}
 
 // Export
 module.exports = Identity;
