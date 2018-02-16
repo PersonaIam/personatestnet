@@ -1,0 +1,181 @@
+{
+  "port": 4101,
+  "address": "0.0.0.0",
+  "version": "0.0.1",
+  "fileLogLevel": "info",
+  "logFileName": "logs/ark.log",
+  "consoleLogLevel": "debug",
+  "trustProxy": false,
+  "db": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "persona_testnet",
+    "user": null,
+    "password": "password",
+    "poolSize": 20,
+    "poolIdleTimeout": 30000,
+    "reapIntervalMillis": 1000,
+    "logEvents": [
+      "error"
+    ]
+  },
+  "api": {
+    "mount": true,
+    "access": {
+      "whiteList": []
+    },
+    "options": {
+      "limits": {
+        "max": 0,
+        "delayMs": 0,
+        "delayAfter": 0,
+        "windowMs": 60000
+      }
+    }
+  },
+  "peers": {
+    "minimumNetworkReach": 1,
+    "list": [
+      {
+        "ip": "5.135.75.64",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.65",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.66",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.67",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.68",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.69",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.70",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.71",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.72",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.73",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.74",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.75",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.76",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.77",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.78",
+        "port": 4100
+      },
+      {
+        "ip": "5.135.75.79",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.112",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.113",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.114",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.115",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.116",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.117",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.118",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.119",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.120",
+        "port": 4100
+      },
+      {
+        "ip": "54.37.188.121",
+        "port": 4100
+      }
+    ],
+    "blackList": [],
+    "options": {
+      "limits": {
+        "max": 0,
+        "delayMs": 0,
+        "delayAfter": 0,
+        "windowMs": 60000
+      },
+      "maxUpdatePeers": 20,
+      "timeout": 5000
+    }
+  },
+  "forging": {
+    "coldstart": 6,
+    "force": true,
+    "secret": [],
+    "access": {
+      "whiteList": [
+        "127.0.0.1"
+      ]
+    }
+  },
+  "loading": {
+    "verifyOnLoading": false,
+    "loadPerIteration": 5000
+  },
+  "ssl": {
+    "enabled": false,
+    "options": {
+      "port": 443,
+      "address": "0.0.0.0",
+      "key": "./ssl/ark.key",
+      "cert": "./ssl/ark.crt"
+    }
+  },
+  "network": "testnet",
+  "nethash": "1e3d1b397d99f472d6b49c4f670ae917a13084708001dcf77249b136f88751e3"
+}
