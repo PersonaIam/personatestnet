@@ -87,8 +87,8 @@ shared.getIdForAddress = function (req, cb) {
             return cb(err[0].message);
         }
 
-        library.db.one(sql.getIdFragments, { address: req.body.address }).then(function (row) {
-            return cb(null, {fragments: "meh"});
+        library.db.many(sql.getIdFragments, { address: req.body.address }).then(function (rows) {
+            return cb(null, {fragments: rows});
         }).catch(function (err) {
             library.logger.error("stack", err.stack);
             return cb('Failed to get indetity for address: ' + req.body.address);

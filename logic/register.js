@@ -81,11 +81,10 @@ Register.prototype.getBytes = function (trs) {
 
 	try {     
         var idBuff = Buffer.from(trs.asset.id, "utf8");
-        var ownerBuff = Buffer.from(trs.asset.owner, "utf8");
         var typeBuff = Buffer.from([trs.asset.type]);
         var dataBuff = Buffer.from(trs.asset.data, "utf8");
 
-        buf = Buffer.concat([idBuff, ownerBuff, typeBuff, dataBuff], idBuff.length + ownerBuff.length + typeBuff.length + dataBuff.length);
+        buf = Buffer.concat([idBuff, typeBuff, dataBuff], idBuff.length + typeBuff.length + dataBuff.length);
 	} catch (e) {
 		throw e;
 	}
@@ -137,9 +136,6 @@ Register.prototype.schema = {
         id: {
 			type: 'string'
 		},
-        owner: {
-            type: 'string'
-        },
         type :{
             type: 'integer'
         },
@@ -147,7 +143,7 @@ Register.prototype.schema = {
 			type: 'string'
         }
 	},
-	required: ['id', 'owner', 'type', 'data']
+	required: ['id', 'type', 'data']
 };
 
 //
@@ -205,7 +201,7 @@ Register.prototype.dbSave = function (trs) {
 		fields: this.dbFields,
 		values: {
             id: trs.asset.id,
-            owner: trs.asset.owner,
+            owner: trs.senderId,
             type: trs.asset.type,
             data: trs.asset.data,
 			transactionId: trs.id

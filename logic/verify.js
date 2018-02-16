@@ -39,7 +39,7 @@ Verify.prototype.create = function (data, trs) {
 
 //
 Verify.prototype.calculateFee = function (trs) {
-	return constants.fees.Verify;
+	return constants.fees.verify;
 };
 
 //
@@ -77,20 +77,15 @@ Verify.prototype.process = function (trs, sender, cb) {
 
 //
 Verify.prototype.getBytes = function (trs) {
-	var buf;
+	var buff;
 
 	try {     
-        var dataIdBuff = Buffer.from(trs.asset.dataId, "utf8");
-        var ownerBuff = Buffer.from(trs.asset.owner, "utf8");
-        var verifierBuff = Buffer.from(trs.asset.verifier, "utf8");
-        var signatureBuff = Buffer.from(trs.asset.signature, "utf8");
-
-        buf = Buffer.concat([dataIdBuff, ownerBuff, verifierBuff, signatureBuff], dataIdBuff.length + ownerBuff.length + verifierBuff.length + signatureBuff.length);
+        buff = Buffer.from(trs.asset.signature, "utf8");
 	} catch (e) {
 		throw e;
 	}
 
-	return buf;
+	return buff;
 };
 
 //
@@ -134,23 +129,12 @@ Verify.prototype.schema = {
 	id: 'Verify',
 	type: 'object',
 	properties: {
-        dataId: {
-			type: 'string',
-            format: 'address'
-		},
-        owner: {
-            type: 'string',
-            format: 'address'
-        },
-        verifier: {
-            type: 'string'
-        },
         signature: {
             type: 'string',
 			format: 'signature'
         }
 	},
-	required: ['dataId', 'owner', 'verifier', 'signature']
+	required: ['signature']
 };
 
 //
@@ -175,11 +159,10 @@ Verify.prototype.objectNormalize = function (trs) {
 //
 Verify.prototype.dbRead = function (raw) {
 
-    if (!raw.dataId) {
+    if (!raw.owner || !raw.verifier || !raw.signature) {
         return null;
     } else {
         return {
-            dataId: raw.dataId,
             owner: raw.owner,
             verifier: raw.verifier,
             signature: raw.signature,
@@ -191,7 +174,6 @@ Verify.prototype.dbRead = function (raw) {
 Verify.prototype.dbTable = 'verifications';
 
 Verify.prototype.dbFields = [
-	'dataId',
     'owner',
     'verifier',
     'signature',
@@ -207,9 +189,8 @@ Verify.prototype.dbSave = function (trs) {
 		table: this.dbTable,
 		fields: this.dbFields,
 		values: {
-			dataId: trs.asset.dataId,
-            owner: trs.senderPublicKey,
-            verifier: trs.senderPublicKey,
+            owner: trs.recipientId,
+            verifier: trs.senderId,
             signature: trs.asset.signature,
             transactionId: trs.id
 		}

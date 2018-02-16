@@ -105,7 +105,6 @@ CREATE TABLE IF NOT EXISTS "identity"(
 );
 
 CREATE TABLE IF NOT EXISTS "verifications"(
-  "dataId" VARCHAR(64) NOT NULL,
   "owner" VARCHAR(36) NOT NULL,
   "verifier" VARCHAR(36) NOT NULL,
   "signature" bytea NOT NULL,
