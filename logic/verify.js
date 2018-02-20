@@ -57,7 +57,7 @@ Verify.prototype.verify = function (trs, sender, cb) {
 	}
 
 	if(trs.senderId == trs.recipientId) {
-		return cb('User can`t validate himself');
+		return cb('User can`t verify himself');
 	}
 
 	if (!trs.asset || !trs.asset.data || !trs.asset.signature) {
@@ -65,9 +65,32 @@ Verify.prototype.verify = function (trs, sender, cb) {
 	}
 
 	// verify signature
+	var res = false;
+	try {
+		var hash = Buffer.from(trs.asset.data, "hex");
+		var signatureBuff = Buffer.from(trs.asset.signature, "hex");
+		var publicKeyBuff = Buffer.from(trs.senderPublicKey, "hex");
 
+		res = this.scope.crypto.verify(hash, signatureBuff, publicKeyBuff);
+	} catch (e) {
+		cb('Failed to validate id signature');
+	}
 
-	return cb(null, trs);
+	if(!res) {
+		cb('Failed to validate id signature');
+	}
+
+	// no double entries
+	modules.identity.isVerified(trs.asset.data, trs.senderId, function(err, res) {
+		if(err) {
+			return cb(err);
+		}
+
+		if(res.verifications.length > 0)
+			return cb('Trying to verify the same data again');
+
+		return cb(null, trs);
+	});
 };
 
 //
@@ -92,7 +115,7 @@ Verify.prototype.getBytes = function (trs) {
 		var dataBuff = Buffer.from(trs.asset.data, "utf8");
         var signatureBuff = Buffer.from(trs.asset.signature, "utf8");
 
-        buf = Buffer.concat([dataBuff, signatureBuff], dataBuff.length + signatureBuff.length);
+        buff = Buffer.concat([dataBuff, signatureBuff], dataBuff.length + signatureBuff.length);
 	} catch (e) {
 		throw e;
 	}

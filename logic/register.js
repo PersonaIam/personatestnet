@@ -1,6 +1,7 @@
 'use strict';
 
 var constants = require('../helpers/constants.js');
+var crypto = require("crypto");
 
 // Private fields
 var self, modules, library;
@@ -56,7 +57,7 @@ Register.prototype.verify = function (trs, sender, cb) {
 		return cb('Invalid transaction amount');
 	}
 
-	if (!trs.asset || !trs.asset.id || !trs.asset.type || !trs.asset.data) {
+	if (!trs.asset || !trs.asset.id || trs.asset.type == null || !trs.asset.data) {
 		return cb('Invalid transaction asset');
 	}
 
@@ -66,9 +67,31 @@ Register.prototype.verify = function (trs, sender, cb) {
 		return cb("Invalid data");
 	}
 
-    // verify hash
+	// verify hash
+	var typeBuff = Buffer.from([trs.asset.type]);
+	var dataBuff = Buffer.from(trs.asset.data, "utf8");
+	var id = Buffer.concat([typeBuff, dataBuff], typeBuff.length + dataBuff.length);
 
-	return cb(null, trs);
+	id = crypto.createHash("sha256").update(id).digest().toString('hex');
+
+	if (trs.asset.id !== id) {
+		return cb('Invalid ID');
+	}
+
+	// no double entries
+	modules.identity.getIdForAddress(trs.senderId, function(err, ids) {
+		if(err)
+			cb(err);
+
+		var found = ids.fragments.find(function(elem) {
+			return elem.id == id;
+		});
+
+		if(found)
+			return cb("Can`t add the same ID twice");
+
+		return cb(null, trs);
+	});
 };
 
 //

@@ -48,7 +48,8 @@ __private.attachApi = function () {
     });
 
     router.map(shared, {
-        'get /get': 'getIdForAddress'
+        'get /get': 'getIdForAddress',
+        'get /verifications': 'getVerifications'
     });
 
     library.network.app.use('/api/identity', router);
@@ -80,6 +81,24 @@ Identity.prototype.onBind = function (scope) {
 	});
 };
 
+Identity.prototype.getIdForAddress = function (address, cb) {
+    library.db.many(sql.getIdFragments, { address: address }).then(function (rows) {
+        return cb(null, {fragments: rows});
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb('Failed to get identity for address: ' + address);
+    });
+};
+
+Identity.prototype.isVerified = function(data, verifier, cb) {
+    library.db.any(sql.getVerificationFrom, { data: data, verifier: verifier }).then(function (row) {
+        return cb(null, {verifications: row});
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb('Failed to get verification for: ' + data);
+    });
+};
+
 shared.getIdForAddress = function (req, cb) {
 
     library.schema.validate(req.body, schema.getFragments, function (err) {
@@ -87,13 +106,40 @@ shared.getIdForAddress = function (req, cb) {
             return cb(err[0].message);
         }
 
-        library.db.many(sql.getIdFragments, { address: req.body.address }).then(function (rows) {
-            return cb(null, {fragments: rows});
+        modules.identity.getIdForAddress(req.body.address, cb);
+    });
+};
+
+shared.getVerifications = function(req, cb) {
+    library.schema.validate(req.body, schema.getVerifications, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        library.db.many(sql.getVerifications, { id: req.body.id }).then(function (rows) {
+            
+            var res = {
+                verifications: []
+            };
+
+            if(rows.length == 0)
+                return cb(null, res);
+
+            res.owner = rows[0].owner;
+
+            rows.forEach(function(elem) {
+                res.verifications.push({
+                    verifier: elem.verifier,
+                    signature: elem.signature.toString('hex')
+                });
+            });
+
+            return cb(null, res);
+            
         }).catch(function (err) {
             library.logger.error("stack", err.stack);
-            return cb('Failed to get indetity for address: ' + req.body.address);
+            return cb('Failed to get verifications for id: ' + id);
         });
-
     });
 };
 

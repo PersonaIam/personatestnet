@@ -12,5 +12,16 @@ module.exports = {
 			}
 		},
 		required: ['address']
+	},
+	getVerifications: {
+		id: 'identity.getVerifications',
+		type: 'object',
+		properties: {
+			id: {
+				type: 'string',
+				minLength: 1
+			}
+		},
+		required: ['id']
 	}
 };
