@@ -18,6 +18,7 @@ var util = require('util');
 var z_schema = require('./helpers/z_schema.js');
 var colors = require('colors');
 var vorpal = require('vorpal')();
+var figlet = require('figlet');
 var spawn = require('child_process').spawn;
 
 process.stdin.resume();
@@ -104,7 +105,7 @@ if(appConfig.network){
 }
 
 else {
-	appConfig.network = networks.ark;
+	appConfig.network = networks.localnet;
 }
 
 if(appConfig.modules){
@@ -124,18 +125,7 @@ d.on('error', function (err) {
 
 d.run(function () {
 	var modules = [];
-	console.log(colors.cyan("\n\
-      {_       {_______    {__   {__       {___     {__    {____     {_____    {________\n\
-     {_ __     {__    {__  {__  {__        {_ {__   {__  {__    {__  {__   {__ {__\n\
-    {_  {__    {__    {__  {__ {__         {__ {__  {__{__        {__{__    {__{__\n\
-   {__   {__   {_ {__      {_ {_           {__  {__ {__{__        {__{__    {__{______\n\
-  {______ {__  {__  {__    {__  {__        {__   {_ {__{__        {__{__    {__{__\n\
- {__       {__ {__    {__  {__   {__       {__    {_ __  {__     {__ {__   {__ {__\n\
-{__         {__{__      {__{__     {__     {__      {__    {____     {_____    {________\n\
-\n\n\
-	                     W E L C O M E  A B O A R D !\n\
-\n\
-"));
+	console.log(colors.blue(figlet.textSync("Persona Node","Slant")));
 	async.auto({
 		config: function (cb) {
 			try {
@@ -342,12 +332,12 @@ d.run(function () {
 			});
 
 			scope.network.server.listen(scope.config.port, scope.config.address, function (err) {
-				scope.logger.info('# Ark node server started on: ' + scope.config.address + ':' + scope.config.port);
+				scope.logger.info('# Persona node server started on: ' + scope.config.address + ':' + scope.config.port);
 
 				if (!err) {
 					if (scope.config.ssl.enabled) {
 						scope.network.https.listen(scope.config.ssl.options.port, scope.config.ssl.options.address, function (err) {
-							scope.logger.info('Ark https started: ' + scope.config.ssl.options.address + ':' + scope.config.ssl.options.port);
+							scope.logger.info('Persona https started: ' + scope.config.ssl.options.address + ':' + scope.config.ssl.options.port);
 
 							cb(err, scope.network);
 						});
@@ -680,9 +670,9 @@ function startInteractiveMode(scope){
 
 	  });
 
-	vorpal.history('ark-node');
+	vorpal.history('persona-node');
 
 	vorpal
-	  .delimiter('ark-node>')
+	  .delimiter('persona-node>')
 	  .show();
 }

@@ -124,19 +124,19 @@ npm install
 ```
 
 ## Launch
-To launch Ark on testnet:
+To launch Persona on testnet:
 ```
-createdb ark_testnet
+createdb persona_testnet
 npm run start:testnet
 ```
 
-To launch Ark on devtnet:
+To launch Persona on devtnet:
 ```
 createdb ark_devnet
 npm run start:devnet
 ```
 
-To launch Ark on mainnet (when launched):
+To launch Persona on mainnet (when launched):
 ```
 createdb ark_mainnet
 npm run start:mainnet
