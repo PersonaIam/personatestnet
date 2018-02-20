@@ -67,6 +67,18 @@ Register.prototype.verify = function (trs, sender, cb) {
 		return cb("Invalid data");
 	}
 
+	// verify data -> this needs to be expanded to take into accoutn the different types of data supported
+	var data;
+	try {
+		data = JSON.parse(trs.asset.data);
+	} catch (e) {
+		return cb("Could not parse data: " + trs.asset.data);
+	}
+
+	if(trs.asset.type !==0 || !data.firstname || !data.lastname) { // we only use name data atm
+		return cb("Invalid identity data");
+	}
+
 	// verify hash
 	var typeBuff = Buffer.from([trs.asset.type]);
 	var dataBuff = Buffer.from(trs.asset.data, "utf8");
