@@ -26,9 +26,8 @@ Verify.prototype.bind = function (scope) {
 
 //
 Verify.prototype.create = function (data, trs) {
-    trs.asset.dataId = data.dataId
-    trs.asset.owner = data.owner;
-    trs.asset.verifier= data.verifier;
+
+	trs.asset.data = data.data;
     trs.asset.signature = data.signature;
 
 	return trs;
@@ -48,15 +47,25 @@ Verify.prototype.calculateFee = function (trs) {
 //
 Verify.prototype.verify = function (trs, sender, cb) {
 
-	// var isAddress = /^[1-9A-Za-z]{1,35}$/g;
-	// if (!trs.recipientId || !isAddress.test(trs.recipientId)) {
-	// 	return cb('Invalid recipient');
-	// }
+	var isAddress = /^[1-9A-Za-z]{1,35}$/g;
+	if (!trs.recipientId || !isAddress.test(trs.recipientId)) {
+		return cb('Invalid recipient');
+	}
 
-	// if(trs.recipientId != this.generateAddress(trs))
-	// {
-	// 	return cb('Invalid contract address');
-	// }
+	if (trs.amount !== 0) {
+		return cb('Invalid transaction amount');
+	}
+
+	if(trs.senderId == trs.recipientId) {
+		return cb('User can`t validate himself');
+	}
+
+	if (!trs.asset || !trs.asset.data || !trs.asset.signature) {
+		return cb('Missing signature');
+	}
+
+	// verify signature
+
 
 	return cb(null, trs);
 };
@@ -80,7 +89,10 @@ Verify.prototype.getBytes = function (trs) {
 	var buff;
 
 	try {     
-        buff = Buffer.from(trs.asset.signature, "utf8");
+		var dataBuff = Buffer.from(trs.asset.data, "utf8");
+        var signatureBuff = Buffer.from(trs.asset.signature, "utf8");
+
+        buf = Buffer.concat([dataBuff, signatureBuff], dataBuff.length + signatureBuff.length);
 	} catch (e) {
 		throw e;
 	}
@@ -164,7 +176,8 @@ Verify.prototype.dbRead = function (raw) {
     } else {
         return {
             owner: raw.owner,
-            verifier: raw.verifier,
+			verifier: raw.verifier,
+			data: raw.data,
             signature: raw.signature,
             transactionId: raw.transactionId
         };
@@ -175,7 +188,8 @@ Verify.prototype.dbTable = 'verifications';
 
 Verify.prototype.dbFields = [
     'owner',
-    'verifier',
+	'verifier',
+	'data',
     'signature',
     'transactionId'
 ];
@@ -190,7 +204,8 @@ Verify.prototype.dbSave = function (trs) {
 		fields: this.dbFields,
 		values: {
             owner: trs.recipientId,
-            verifier: trs.senderId,
+			verifier: trs.senderId,
+			data: trs.asset.data,
             signature: trs.asset.signature,
             transactionId: trs.id
 		}

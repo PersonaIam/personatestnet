@@ -48,15 +48,25 @@ Register.prototype.calculateFee = function (trs) {
 //
 Register.prototype.verify = function (trs, sender, cb) {
 
-	// var isAddress = /^[1-9A-Za-z]{1,35}$/g;
-	// if (!trs.recipientId || !isAddress.test(trs.recipientId)) {
-	// 	return cb('Invalid recipient');
-	// }
+	if (trs.recipientId) {
+		return cb('Invalid recipient');
+	}
 
-	// if(trs.recipientId != this.generateAddress(trs))
-	// {
-	// 	return cb('Invalid contract address');
-	// }
+	if (trs.amount !== 0) {
+		return cb('Invalid transaction amount');
+	}
+
+	if (!trs.asset || !trs.asset.id || !trs.asset.type || !trs.asset.data) {
+		return cb('Invalid transaction asset');
+	}
+
+	try {
+		var data = JSON.parse(trs.asset.data);
+	} catch(e) {
+		return cb("Invalid data");
+	}
+
+    // verify hash
 
 	return cb(null, trs);
 };

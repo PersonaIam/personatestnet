@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS "identity"(
 CREATE TABLE IF NOT EXISTS "verifications"(
   "owner" VARCHAR(36) NOT NULL,
   "verifier" VARCHAR(36) NOT NULL,
+  "data" TEXT,
   "signature" bytea NOT NULL,
   "transactionId" VARCHAR(64) NOT NULL,
   FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE

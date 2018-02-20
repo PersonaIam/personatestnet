@@ -6,6 +6,7 @@
     "start": "node app.js",
     "doc": "docco -t docs/template/arkio.jst -c docs/template/arkio.css modules/* app.js README.md",
     "start:testnet": "node app.js --genesis genesisBlock.testnet.json --config config.testnet.json",
+    "start:testnetdbg": "node --inspect-brk app.js --genesis genesisBlock.testnet.json --config config.testnet.json",
     "start:localnet": "node app.js --genesis genesisBlock.localnet.json --config config.localnet.json",
     "start:localnetdbg": "node --inspect-brk app.js --genesis genesisBlock.localnet.json --config config.localnet.json",
     "start:test": "node app.js --genesis test/genesisBlock.json --config test/config.json",

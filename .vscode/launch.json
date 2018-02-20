@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch debug testnet",
+            "name": "Launch debug localnet",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run-script",
@@ -18,13 +18,12 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch testnet",
-            "protocol": "inspector",
-            "cwd": "${workspaceFolder}",
+            "name": "Launch debug testnet",
             "runtimeExecutable": "npm",
-            "runtimeArgs": [ "--inspect",
-                "run-script" , "start:testnet"
-            ]
+            "runtimeArgs": [ 
+                "run-script" , "start:testnetdbg"
+            ],
+            "port": 9229
         },
         {
             "type": "node",
