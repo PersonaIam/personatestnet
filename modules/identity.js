@@ -82,7 +82,7 @@ Identity.prototype.onBind = function (scope) {
 };
 
 Identity.prototype.getIdForAddress = function (address, cb) {
-    library.db.many(sql.getIdFragments, { address: address }).then(function (rows) {
+    library.db.any(sql.getIdFragments, { address: address }).then(function (rows) {
         return cb(null, {fragments: rows});
     }).catch(function (err) {
         library.logger.error("stack", err.stack);

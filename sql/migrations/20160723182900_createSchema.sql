@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS "peers"(
 );
 
 CREATE TABLE IF NOT EXISTS "identity"(
-  "id" VARCHAR(64) PRIMARY KEY,
+  "id" VARCHAR(64) NOT NULL,
   "owner" VARCHAR(36) NOT NULL,
   "type" SMALLINT NOT NULL,
   "data" TEXT,

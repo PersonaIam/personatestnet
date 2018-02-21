@@ -92,8 +92,9 @@ Register.prototype.verify = function (trs, sender, cb) {
 
 	// no double entries
 	modules.identity.getIdForAddress(trs.senderId, function(err, ids) {
-		if(err)
-			cb(err);
+		if(err) {
+			return cb(err);
+		}
 
 		var found = ids.fragments.find(function(elem) {
 			return elem.id == id;
