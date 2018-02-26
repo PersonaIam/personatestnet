@@ -82,7 +82,8 @@ Register.prototype.verify = function (trs, sender, cb) {
 	// verify hash
 	var typeBuff = Buffer.from([trs.asset.type]);
 	var dataBuff = Buffer.from(trs.asset.data, "utf8");
-	var id = Buffer.concat([typeBuff, dataBuff], typeBuff.length + dataBuff.length);
+	var publicKeyBuff = Buffer.from(trs.senderPublicKey, "utf8");
+	var id = Buffer.concat([typeBuff, dataBuff, publicKeyBuff], typeBuff.length + dataBuff.length + publicKeyBuff.length);
 
 	id = crypto.createHash("sha256").update(id).digest().toString('hex');
 

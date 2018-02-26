@@ -116,7 +116,7 @@ shared.getVerifications = function(req, cb) {
             return cb(err[0].message);
         }
 
-        library.db.many(sql.getVerifications, { id: req.body.id }).then(function (rows) {
+        library.db.any(sql.getVerifications, { id: req.body.id }).then(function (rows) {
             
             var res = {
                 verifications: []
