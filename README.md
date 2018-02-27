@@ -1,9 +1,9 @@
 
 Persona testnet platform. For more information please refer to our website: https://persona.im.
 
-This version is still beta, use at your own risks
+This version is still alpha, use at your own risks
 
-## Install, Upgrade etc...
+<!-- ## Install, Upgrade etc...
 You need to provision a linux (ubuntu tested) server (digital ocean, vultur or other).
 
 Then use the excellent ark-commander script
@@ -20,40 +20,27 @@ or Alternatively run
 cd
 wget https://ark.io/DARKcommander.sh
 bash DARKcommander.sh
-```
+``` -->
 
 ## Details
 
 This is a fork from Ark with the following features:
-- Removed sidechains (deprecated in favor of smartbridge)
-- Removed custom node version
-- Removed UI for stability and security reasons
-- Changed some constants (block rewards, blocktime etc...)
-- Added simple PBFT before forging new block
-- Ditch addresses from the protocol in favor of bitcoin like system, enabling HD Wallet as for BIP32
-- Completely rewritten node management using a single NodeManager and messaging system
-- Completely rewritten round management (removed mem_round, reward block fees to forger)
-- Added 64 bytes vendorField as first iteration of smart bridge
-- Made peers management entirely in-memory for efficiency
-- Strengthened the transaction management and broadcast (reject often, reject soon)
-- Rearchitect with relay nodes and forging nodes
-- Nodes broadcast only block headers.
+- Ability to register a name with an address
+- Ability to verify a user`s name through signing the registered name
+- Ability to list the verifications
 
 ### Planned features:
-- Simple blockchain validation for SPV and use in lite clients
-- Add IPFS as first class citizen (using smartbridge addressing)
-- Protocol improvements (uncle forging, voting weights).
-- Remove unsecured API
-- Routing tables
+- Add IPFS in order to register documents
+-
+
 
 ### Performance
-- stable on testnet at 5tx/s
-- pushed to 10tx/s on devnet
+- 
 
 
 ## Developer Installation
 
-### Vagrant
+<!-- ### Vagrant
 
 [Vagrant](https://www.vagrantup.com/) is a virtual development environment manager backed by a provider like [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
 
@@ -78,9 +65,9 @@ vagrant destroy
 vagrant up
 ```
 
-There will be a drive shared with the host machine inside the VM, mounted at `/vagrant`.
+There will be a drive shared with the host machine inside the VM, mounted at `/vagrant`. -->
 
-### Non-Vagrant
+### Install
 
 Install essentials:
 
@@ -94,7 +81,7 @@ Install PostgreSQL (min version: 9.5.2)
 ```
 sudo apt-get install -y postgresql postgresql-contrib
 sudo -u postgres createuser --createdb --password $USER
-createdb ark_test
+createdb persona_testnet
 ```
 
 Install Node.js (tested with version 6.9.2, but any recent LTS release should do):
@@ -113,8 +100,8 @@ sudo npm install grunt-cli -g
 
 Clone this repository
 ```
-git clone https://github.com/arkecosystem/ark-node.git
-cd ark-node
+git clone https://github.com/PersonaIam/personatestnet.git
+cd personatestnet
 ```
 
 Install node modules:
@@ -130,16 +117,10 @@ createdb persona_testnet
 npm run start:testnet
 ```
 
-To launch Persona on devtnet:
+To launch Persona on localnet:
 ```
-createdb ark_devnet
-npm run start:devnet
-```
-
-To launch Persona on mainnet (when launched):
-```
-createdb ark_mainnet
-npm run start:mainnet
+createdb persona_localnet
+npm run start:localnet
 ```
 
 **NOTE:** The **port**, **address**, **genesis block** and **config-path** can be overridden by providing the relevant command switch:
