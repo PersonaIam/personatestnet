@@ -30,7 +30,8 @@ Register.prototype.create = function (data, trs) {
     trs.asset.id = data.id
     trs.asset.owner = data.owner;
     trs.asset.type= data.type;
-    trs.asset.data = data.data;
+	trs.asset.data = data.data;
+	trs.asset.dataSig = data.dataSig;
 
 	return trs;
 };
@@ -57,35 +58,25 @@ Register.prototype.verify = function (trs, sender, cb) {
 		return cb('Invalid transaction amount');
 	}
 
-	if (!trs.asset || !trs.asset.id || trs.asset.type == null || !trs.asset.data) {
+	if (!trs.asset || !trs.asset.id || trs.asset.type == null || !trs.asset.data || !trs.asset.dataSig) {
 		return cb('Invalid transaction asset');
 	}
 
-	try {
-		var data = JSON.parse(trs.asset.data);
-	} catch(e) {
-		return cb("Invalid data");
+	// verifiy data length !!
+	if(trs.asset.length > 100) {
+		return cb('Data too long');
 	}
 
-	// verify data -> this needs to be expanded to take into accoutn the different types of data supported
-	var data;
-	try {
-		data = JSON.parse(trs.asset.data);
-	} catch (e) {
-		return cb("Could not parse data: " + trs.asset.data);
-	}
+	// verify id
+	var data = {
+		type: trs.asset.type,
+		data: trs.asset.data,
+		dataSig: trs.asset.dataSig
+	};
 
-	if(trs.asset.type !==0 || !data.firstname || !data.lastname) { // we only use name data atm
-		return cb("Invalid identity data");
-	}
-
-	// verify hash
-	var typeBuff = Buffer.from([trs.asset.type]);
-	var dataBuff = Buffer.from(trs.asset.data, "utf8");
-	var publicKeyBuff = Buffer.from(trs.senderPublicKey, "utf8");
-	var id = Buffer.concat([typeBuff, dataBuff, publicKeyBuff], typeBuff.length + dataBuff.length + publicKeyBuff.length);
-
-	id = crypto.createHash("sha256").update(id).digest().toString('hex');
+	var hmac = crypto.createHmac('sha256', trs.senderPublicKey);
+	hmac.update(JSON.stringify(data));
+	var id = hmac.digest('hex');
 
 	if (trs.asset.id !== id) {
 		return cb('Invalid ID');
@@ -127,11 +118,12 @@ Register.prototype.getBytes = function (trs) {
 	var buf;
 
 	try {     
-        var idBuff = Buffer.from(trs.asset.id, "utf8");
+        var idBuff = Buffer.from(trs.asset.id, "hex");
         var typeBuff = Buffer.from([trs.asset.type]);
-        var dataBuff = Buffer.from(trs.asset.data, "utf8");
+		var dataBuff = Buffer.from(trs.asset.data, "utf8");
+		var dataSigBuff = Buffer.from(trs.asset.dataSig, "hex");
 
-        buf = Buffer.concat([idBuff, typeBuff, dataBuff], idBuff.length + typeBuff.length + dataBuff.length);
+        buf = Buffer.concat([idBuff, typeBuff, dataBuff, dataSigBuff], idBuff.length + typeBuff.length + dataBuff.length + dataSigBuff.length);
 	} catch (e) {
 		throw e;
 	}
@@ -188,9 +180,13 @@ Register.prototype.schema = {
         },
 		data: {
 			type: 'string'
+		},
+		dataSig: {
+            type: 'string',
+			format: 'signature'
         }
 	},
-	required: ['id', 'type', 'data']
+	required: ['id', 'type', 'data', 'dataSig']
 };
 
 //
@@ -222,7 +218,8 @@ Register.prototype.dbRead = function (raw) {
             id: raw.id,
             owner: raw.owner,
             type: raw.type,
-            data: raw.data,
+			data: raw.data,
+			dataSig: raw.dataSig,
             transactionId: raw.transactionId
         };
 	}
@@ -234,7 +231,8 @@ Register.prototype.dbFields = [
 	'id',
     'owner',
     'type',
-    'data',
+	'data',
+	'dataSig',
     'transactionId'
 ];
 
@@ -250,7 +248,8 @@ Register.prototype.dbSave = function (trs) {
             id: trs.asset.id,
             owner: trs.senderId,
             type: trs.asset.type,
-            data: trs.asset.data,
+			data: trs.asset.data,
+			dataSig: trs.asset.dataSig,
 			transactionId: trs.id
 		}
 	};

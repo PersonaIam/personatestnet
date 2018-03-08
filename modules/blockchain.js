@@ -98,8 +98,11 @@ Blockchain.prototype.onStartBlockchain = function(){
 	setImmediate(function cleanBlockchain(){
 		var height = __private.lastBlock.height;
 		var blockremoved = __private.blockchain[height-200];
-		library.logger.debug("Removing from memory blockchain blocks with height under", height-200);
-		while(blockremoved){
+		
+		if(height > 200)
+			library.logger.debug("Removing from memory blockchain blocks with height under", height-200);
+		
+			while(blockremoved){
 			delete __private.blockchain[blockremoved.height];
 			blockremoved = __private.blockchain[""+(blockremoved.height-1)];
 		}
