@@ -1,6 +1,6 @@
 {
-  "testnet": {
-    "messagePrefix": "TESTNET message:\n",
+  "mainnet": {
+    "messagePrefix": "MAINNET message:\n",
     "bip32": {
       "public": 70617039,
       "private": 70615956
@@ -8,9 +8,23 @@
     "pubKeyHash": 55,
     "wif": 186,
     "client": {
-      "token":"PRS",
-      "symbol":"TPRS",
-      "explorer":""
+      "token": "PERSONA",
+      "symbol": "PERSONA",
+      "explorer": ""
+    }
+  },
+  "testnet": {
+    "messagePrefix": "TESTNET message:\n",
+    "bip32": {
+      "public": 70617039,
+      "private": 70615956
+    },
+    "pubKeyHash": 66,
+    "wif": 186,
+    "client": {
+      "token": "TPERSONA",
+      "symbol": "TPERSONA",
+      "explorer": ""
     }
   },
   "localnet": {
@@ -19,12 +33,12 @@
       "public": 70617039,
       "private": 70615956
     },
-    "pubKeyHash": 117,
+    "pubKeyHash": 48,
     "wif": 187,
     "client": {
-      "token":"DPRS",
-      "symbol":"DPRS",
-      "explorer":""
+      "token": "LPERSONA",
+      "symbol": "LPERSONA",
+      "explorer": ""
     }
   }
 }
