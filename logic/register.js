@@ -31,6 +31,7 @@ Register.prototype.create = function (data, trs) {
     trs.asset.owner = data.owner;
     trs.asset.type= data.type;
 	trs.asset.data = data.data;
+	trs.asset.format = data.format;
 	trs.asset.dataSig = data.dataSig;
 
 	return trs;
@@ -58,12 +59,16 @@ Register.prototype.verify = function (trs, sender, cb) {
 		return cb('Invalid transaction amount');
 	}
 
-	if (!trs.asset || !trs.asset.id || trs.asset.type == null || !trs.asset.data || !trs.asset.dataSig) {
+	if (!trs.asset || !trs.asset.id || trs.asset.type == null || !trs.asset.data || !trs.asset.format || !trs.asset.dataSig) {
 		return cb('Invalid transaction asset');
 	}
 
 	// verifiy data length !!
-	if(trs.asset.length > 100) {
+	if(trs.asset.data.length > 100) {
+		return cb('Data too long');
+	}
+
+	if(trs.asset.format.length > 36) {
 		return cb('Data too long');
 	}
 
@@ -71,6 +76,7 @@ Register.prototype.verify = function (trs, sender, cb) {
 	var data = {
 		type: trs.asset.type,
 		data: trs.asset.data,
+		format: trs.asset.format,
 		dataSig: trs.asset.dataSig
 	};
 
@@ -121,9 +127,10 @@ Register.prototype.getBytes = function (trs) {
         var idBuff = Buffer.from(trs.asset.id, "hex");
         var typeBuff = Buffer.from([trs.asset.type]);
 		var dataBuff = Buffer.from(trs.asset.data, "utf8");
+		var formatBuff = Buffer.from(trs.asset.format, "utf8");
 		var dataSigBuff = Buffer.from(trs.asset.dataSig, "hex");
 
-        buf = Buffer.concat([idBuff, typeBuff, dataBuff, dataSigBuff], idBuff.length + typeBuff.length + dataBuff.length + dataSigBuff.length);
+        buf = Buffer.concat([idBuff, typeBuff, dataBuff,formatBuff, dataSigBuff], idBuff.length + typeBuff.length + dataBuff.length + formatBuff + dataSigBuff.length);
 	} catch (e) {
 		throw e;
 	}
@@ -181,12 +188,15 @@ Register.prototype.schema = {
 		data: {
 			type: 'string'
 		},
+		format: {
+			type: 'string'
+		},
 		dataSig: {
             type: 'string',
 			format: 'signature'
         }
 	},
-	required: ['id', 'type', 'data', 'dataSig']
+	required: ['id', 'type', 'data', 'format', 'dataSig']
 };
 
 //
@@ -219,6 +229,7 @@ Register.prototype.dbRead = function (raw) {
             owner: raw.owner,
             type: raw.type,
 			data: raw.data,
+			format: raw.format,
 			dataSig: raw.dataSig,
             transactionId: raw.transactionId
         };
@@ -232,6 +243,7 @@ Register.prototype.dbFields = [
     'owner',
     'type',
 	'data',
+	'format',
 	'dataSig',
     'transactionId'
 ];
@@ -249,6 +261,7 @@ Register.prototype.dbSave = function (trs) {
             owner: trs.senderId,
             type: trs.asset.type,
 			data: trs.asset.data,
+			format: trs.asset.format,
 			dataSig: trs.asset.dataSig,
 			transactionId: trs.id
 		}
