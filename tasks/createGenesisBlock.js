@@ -10,7 +10,7 @@ var Crypto = require('../helpers/crypto.js');
 var networks = require('../networks.json');
 
 // network name that SHOULD already be preconfigured in ../networks.json
-var network_name = "localnet";
+var network_name = "testnet";
 if(!networks[network_name]){
   console.log("WARNING: no configuration found in networks.json for '"+network_name+"'. Defaulting to 'devnet'");
   network_name = "devnet";
@@ -46,70 +46,7 @@ var seed_peers = [
     },
     {
         ip: "5.135.75.68"
-    },
-    {
-        ip: "5.135.75.69"
-    },
-    {
-        ip: "5.135.75.70"
-    },
-    {
-        ip: "5.135.75.71"
-    },
-    {
-        ip: "5.135.75.72"
-    },
-    {
-        ip: "5.135.75.73"
-    },
-    {
-        ip: "5.135.75.74"
-    },
-    {
-        ip: "5.135.75.75"
-    },
-    {
-        ip: "5.135.75.76"
-    },
-    {
-        ip: "5.135.75.77"
-    },
-    {
-        ip: "5.135.75.78"
-    },
-    {
-        ip: "5.135.75.79"
-    },
-    {
-        ip: "54.37.188.112"
-    },
-    {
-        ip: "54.37.188.113"
-    },
-    {
-        ip: "54.37.188.114"
-    },
-    {
-        ip: "54.37.188.115"
-    },
-    {
-        ip: "54.37.188.116"
-    },
-    {
-        ip: "54.37.188.117"
-    },
-    {
-        ip: "54.37.188.118"
-    },
-    {
-        ip: "54.37.188.119"
-    },
-    {
-        ip: "54.37.188.120"
-    },
-    {
-        ip: "54.37.188.121"
-    },
+    }
 ];
 
 seed_peers.forEach(function(elem) {
@@ -454,7 +391,7 @@ for(var i=0;i<51;i++){
 }
 
 seed_peers.forEach(function(peer,index){
-  config.forging.secret = forging[index];
+  config.forging.secret = forging[index].secret;
   fs.writeFile(private_dir+"/config."+config.network+"."+peer.ip+".json", JSON.stringify(config, null, 2));
 });
 
