@@ -10,13 +10,13 @@ var Crypto = require('../helpers/crypto.js');
 var networks = require('../networks.json');
 
 // network name that SHOULD already be preconfigured in ../networks.json
-var network_name = "testnet";
+var network_name = "localnet";
 if(!networks[network_name]){
   console.log("WARNING: no configuration found in networks.json for '"+network_name+"'. Defaulting to 'devnet'");
   network_name = "devnet";
 }
 
-var dir = './testnet';
+var dir = network_name;
 
 // directory to export passphrases of premine account and genesis delegates. Should exist
 var private_dir = dir + '/private';
@@ -33,110 +33,88 @@ var config_version = '0.0.1';
 // ips of your nodes in your network
 var seed_peers = [
     {
-        ip: "5.135.75.64",
-        port: 4100
+        ip: "5.135.75.64"
     },
     {
-        ip: "5.135.75.65",
-        port: 4100
+        ip: "5.135.75.65"
     },
     {
-        ip: "5.135.75.66",
-        port: 4100
+        ip: "5.135.75.66"
     },
     {
-        ip: "5.135.75.67",
-        port: 4100
+        ip: "5.135.75.67"
     },
     {
-        ip: "5.135.75.68",
-        port: 4100
+        ip: "5.135.75.68"
     },
     {
-        ip: "5.135.75.69",
-        port: 4100
+        ip: "5.135.75.69"
     },
     {
-        ip: "5.135.75.70",
-        port: 4100
+        ip: "5.135.75.70"
     },
     {
-        ip: "5.135.75.71",
-        port: 4100
+        ip: "5.135.75.71"
     },
     {
-        ip: "5.135.75.72",
-        port: 4100
+        ip: "5.135.75.72"
     },
     {
-        ip: "5.135.75.73",
-        port: 4100
+        ip: "5.135.75.73"
     },
     {
-        ip: "5.135.75.74",
-        port: 4100
+        ip: "5.135.75.74"
     },
     {
-        ip: "5.135.75.75",
-        port: 4100
+        ip: "5.135.75.75"
     },
     {
-        ip: "5.135.75.76",
-        port: 4100
+        ip: "5.135.75.76"
     },
     {
-        ip: "5.135.75.77",
-        port: 4100
+        ip: "5.135.75.77"
     },
     {
-        ip: "5.135.75.78",
-        port: 4100
+        ip: "5.135.75.78"
     },
     {
-        ip: "5.135.75.79",
-        port: 4100
+        ip: "5.135.75.79"
     },
     {
-        ip: "54.37.188.112",
-        port: 4100
+        ip: "54.37.188.112"
     },
     {
-        ip: "54.37.188.113",
-        port: 4100
+        ip: "54.37.188.113"
     },
     {
-        ip: "54.37.188.114",
-        port: 4100
+        ip: "54.37.188.114"
     },
     {
-        ip: "54.37.188.115",
-        port: 4100
+        ip: "54.37.188.115"
     },
     {
-        ip: "54.37.188.116",
-        port: 4100
+        ip: "54.37.188.116"
     },
     {
-        ip: "54.37.188.117",
-        port: 4100
+        ip: "54.37.188.117"
     },
     {
-        ip: "54.37.188.118",
-        port: 4100
+        ip: "54.37.188.118"
     },
     {
-        ip: "54.37.188.119",
-        port: 4100
+        ip: "54.37.188.119"
     },
     {
-        ip: "54.37.188.120",
-        port: 4100
+        ip: "54.37.188.120"
     },
     {
-        ip: "54.37.188.121",
-        port: 4100
+        ip: "54.37.188.121"
     },
 ];
+
+seed_peers.forEach(function(elem) {
+    elem.port = default_port;
+});
 
 // default db named
 var db_name = "persona_" + network_name;
@@ -165,7 +143,7 @@ var config = {
     address: "0.0.0.0",
     version: config_version,
     fileLogLevel: "info",
-    logFileName: "logs/ark.log",
+    logFileName: "logs/persona.log",
     consoleLogLevel: "debug",
     trustProxy: false,
     db: {
