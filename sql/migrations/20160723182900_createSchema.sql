@@ -100,6 +100,8 @@ CREATE TABLE IF NOT EXISTS "peers"(
 --   "owner" VARCHAR(36) NOT NULL,
 --   "type" SMALLINT NOT NULL,
 --   "data" TEXT,
+--   "format" VARCHAR(36) NOT NULL,
+--   "dataSig" bytea NOT NULL,
 --   "transactionId" VARCHAR(64) NOT NULL,
 --   FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
 -- );
