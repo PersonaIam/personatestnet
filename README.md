@@ -123,6 +123,13 @@ createdb persona_localnet
 npm run start:localnet
 ```
 
+To test stuff on local net use the genesis address:
+
+```
+passphrase: blade early broken display angry wine diary alley panda left spy woman
+address: LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w
+```
+
 **NOTE:** The **port**, **address**, **genesis block** and **config-path** can be overridden by providing the relevant command switch:
 ```
 node app.js -p [port] -a [address] -c [config-path] -g [genesisBlock-path]
