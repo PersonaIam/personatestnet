@@ -95,25 +95,25 @@ CREATE TABLE IF NOT EXISTS "peers"(
   "clock" BIGINT
 );
 
--- CREATE TABLE IF NOT EXISTS "identity"(
---   "id" VARCHAR(64) NOT NULL,
---   "owner" VARCHAR(36) NOT NULL,
---   "type" SMALLINT NOT NULL,
---   "data" TEXT,
---   "format" VARCHAR(36) NOT NULL,
---   "dataSig" bytea NOT NULL,
---   "transactionId" VARCHAR(64) NOT NULL,
---   FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
--- );
+CREATE TABLE IF NOT EXISTS "identity"(
+  "id" VARCHAR(64) NOT NULL,
+  "owner" VARCHAR(36) NOT NULL,
+  "type" SMALLINT NOT NULL,
+  "data" TEXT,
+  "format" VARCHAR(36) NOT NULL,
+  "dataSig" bytea NOT NULL,
+  "transactionId" VARCHAR(64) NOT NULL,
+  FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
+);
 
--- CREATE TABLE IF NOT EXISTS "verifications"(
---   "owner" VARCHAR(36) NOT NULL,
---   "verifier" VARCHAR(36) NOT NULL,
---   "data" TEXT,
---   "signature" bytea NOT NULL,
---   "transactionId" VARCHAR(64) NOT NULL,
---   FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
--- );
+CREATE TABLE IF NOT EXISTS "verifications"(
+  "owner" VARCHAR(36) NOT NULL,
+  "verifier" VARCHAR(36) NOT NULL,
+  "data" TEXT,
+  "signature" bytea NOT NULL,
+  "transactionId" VARCHAR(64) NOT NULL,
+  FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
+);
 
 /* Unique Indexes */
 CREATE UNIQUE INDEX IF NOT EXISTS "blocks_height" ON "blocks"("height");
