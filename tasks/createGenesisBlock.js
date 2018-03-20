@@ -25,7 +25,7 @@ var private_dir = dir + '/private';
 var output_dir = dir + '/output';
 
 // default port for node
-var default_port = 4101;
+var default_port = 4102;
 
 // version of network to set in the config file
 var config_version = '0.0.1';
@@ -33,19 +33,19 @@ var config_version = '0.0.1';
 // ips of your nodes in your network
 var seed_peers = [
     {
-        ip: "5.135.75.64"
+        ip: "5.135.75.69"
     },
     {
-        ip: "5.135.75.65"
+        ip: "5.135.75.70"
     },
     {
-        ip: "5.135.75.66"
+        ip: "5.135.75.71"
     },
     {
-        ip: "5.135.75.67"
+        ip: "5.135.75.72"
     },
     {
-        ip: "5.135.75.68"
+        ip: "5.135.75.73"
     }
 ];
 
