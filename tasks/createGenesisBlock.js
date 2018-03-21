@@ -10,7 +10,7 @@ var Crypto = require('../helpers/crypto.js');
 var networks = require('../networks.json');
 
 // network name that SHOULD already be preconfigured in ../networks.json
-var network_name = "mainnet";
+var network_name = "testnet";
 if(!networks[network_name]){
   console.log("WARNING: no configuration found in networks.json for '"+network_name+"'. Defaulting to 'devnet'");
   network_name = "devnet";
@@ -71,7 +71,7 @@ else {
 }
 
 // Total of premined token in satoshi. The premined accounts will be substracted to this
-var totalpremine = 6677610400000000;
+var totalpremine = 6677610500000000;
 
 
 // config file that will be tuned and exported
@@ -335,6 +335,11 @@ for(var i=1; i<52; i++){
 }
 
 var total = 0;
+
+genesisAccounts.push({
+    address: "Tuo2S5FsZL74k8axgL73JVcNo9PSfM8kPc",
+    total: 6677610400000000
+});
 
 for(var i=0; i < genesisAccounts.length; i++){
   var account = genesisAccounts[i];
