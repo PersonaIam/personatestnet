@@ -130,7 +130,7 @@ Register.prototype.getBytes = function (trs) {
 		var formatBuff = Buffer.from(trs.asset.format, "utf8");
 		var dataSigBuff = Buffer.from(trs.asset.dataSig, "hex");
 
-        buf = Buffer.concat([idBuff, typeBuff, dataBuff,formatBuff, dataSigBuff], idBuff.length + typeBuff.length + dataBuff.length + formatBuff + dataSigBuff.length);
+        buf = Buffer.concat([idBuff, typeBuff, dataBuff,formatBuff, dataSigBuff], idBuff.length + typeBuff.length + dataBuff.length + formatBuff.length + dataSigBuff.length);
 	} catch (e) {
 		throw e;
 	}
