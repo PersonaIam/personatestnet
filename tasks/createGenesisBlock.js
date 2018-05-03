@@ -33,19 +33,16 @@ var config_version = '0.0.1';
 // ips of your nodes in your network
 var seed_peers = [
     {
-        ip: "5.135.75.69"
+        ip: "89.40.7.63"
     },
     {
-        ip: "5.135.75.70"
+        ip: "192.99.54.32"
     },
     {
-        ip: "5.135.75.71"
+        ip: "45.77.180.23"
     },
     {
-        ip: "5.135.75.72"
-    },
-    {
-        ip: "5.135.75.73"
+        ip: "5.135.75.77"
     }
 ];
 
@@ -71,7 +68,7 @@ else {
 }
 
 // Total of premined token in satoshi. The premined accounts will be substracted to this
-var totalpremine = 6677610400000000;
+var totalpremine = 8318249000000000;
 
 
 // config file that will be tuned and exported
