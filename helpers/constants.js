@@ -6,7 +6,7 @@ module.exports = {
 	addressLength: 208,
 	blockHeaderLength: 248,
 	confirmationLength: 77,
-	epochTime: new Date(Date.UTC(2018, 4, 21, 13, 0, 0, 0)),
+	epochTime: new Date(Date.UTC(2018, 1, 1, 0, 0, 0, 0)),
 	fees:{
 		send: 10000000,
 		vote: 100000000,
@@ -38,7 +38,7 @@ module.exports = {
 			200000000, // Milestone 2
 			100000000
 		],
-		offset: 151200,   // Start rewards at block, ie 7 days after net start
+		offset: 151200,   // Start rewards at block, ie 14 days after net start
 		distance: 7889400, // Distance between each milestone - 7889400 = 2 years
 	},
 	signatureLength: 196,
