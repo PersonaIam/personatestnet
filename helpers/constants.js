@@ -42,6 +42,6 @@ module.exports = {
 		distance: 7889400, // Distance between each milestone - 7889400 = 2 years
 	},
 	signatureLength: 196,
-	totalAmount: 6677610400000000,
+	totalAmount: 8318249000000000,
 	unconfirmedTransactionTimeOut: 10800 // 1080 blocks
 };
