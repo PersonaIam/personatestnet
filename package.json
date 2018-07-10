@@ -37,7 +37,7 @@
     "json-sql": "LiskHQ/json-sql#27e1ed1",
     "lodash": "=4.16.2",
     "method-override": "=2.3.6",
-    "personajs": "github:personaIam/persona-js#persona-dev",
+    "personajs": "github:personaIam/persona-js#master",
     "pg-monitor": "=0.5.11",
     "pg-native": "=1.10.0",
     "pg-promise": "=5.3.3",
