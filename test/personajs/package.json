@@ -1,0 +1,144 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "personajs@github:personaiam/persona-js#master",
+        "scope": null,
+        "escapedName": "personajs",
+        "name": "personajs",
+        "rawSpec": "github:personaiam/persona-js#master",
+        "spec": "github:personaiam/persona-js#master",
+        "type": "hosted",
+        "hosted": {
+          "type": "github",
+          "ssh": "git@github.com:personaiam/persona-js.git#master",
+          "sshUrl": "git+ssh://git@github.com/personaiam/persona-js.git#master",
+          "httpsUrl": "git+https://github.com/personaiam/persona-js.git#master",
+          "gitUrl": "git://github.com/personaiam/persona-js.git#master",
+          "shortcut": "github:personaiam/persona-js#master",
+          "directUrl": "https://raw.githubusercontent.com/personaiam/persona-js/master/package.json"
+        }
+      },
+      "/home/personaminer/personatestnet"
+    ]
+  ],
+  "_from": "personaiam/persona-js#master",
+  "_id": "personajs@0.2.1",
+  "_inCache": true,
+  "_location": "/personajs",
+  "_phantomChildren": {
+    "base64-js": "1.3.0",
+    "browserify-cipher": "1.0.1",
+    "browserify-sign": "4.0.4",
+    "create-ecdh": "4.0.3",
+    "create-hash": "1.2.0",
+    "create-hmac": "1.1.7",
+    "diffie-hellman": "5.0.3",
+    "ieee754": "1.1.12",
+    "inherits": "2.0.3",
+    "pbkdf2": "3.0.16",
+    "public-encrypt": "4.0.2",
+    "randombytes": "2.0.6",
+    "randomfill": "1.0.4"
+  },
+  "_requested": {
+    "raw": "personajs@github:personaiam/persona-js#master",
+    "scope": null,
+    "escapedName": "personajs",
+    "name": "personajs",
+    "rawSpec": "github:personaiam/persona-js#master",
+    "spec": "github:personaiam/persona-js#master",
+    "type": "hosted",
+    "hosted": {
+      "type": "github",
+      "ssh": "git@github.com:personaiam/persona-js.git#master",
+      "sshUrl": "git+ssh://git@github.com/personaiam/persona-js.git#master",
+      "httpsUrl": "git+https://github.com/personaiam/persona-js.git#master",
+      "gitUrl": "git://github.com/personaiam/persona-js.git#master",
+      "shortcut": "github:personaiam/persona-js#master",
+      "directUrl": "https://raw.githubusercontent.com/personaiam/persona-js/master/package.json"
+    }
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "git://github.com/personaiam/persona-js.git#81ac996325a14df81958971a882e1a1bffac5552",
+  "_shasum": "b25601fcf79774fa22f377ac49351fb5b07e7703",
+  "_shrinkwrap": null,
+  "_spec": "personajs@github:personaiam/persona-js#master",
+  "_where": "/home/personaminer/personatestnet",
+  "bugs": {
+    "url": "https://github.com/PersonaIam/persona-js/issues"
+  },
+  "dependencies": {
+    "bigi": "^1.4.2",
+    "bip66": "^1.1.5",
+    "browserify-bignum": "^1.3.0-2",
+    "bs58check": "^2.0.2",
+    "buffer": "^5.0.8",
+    "bytebuffer": "^5.0.1",
+    "create-hash": "^1.1.3",
+    "create-hmac": "^1.1.6",
+    "crypto-browserify": "^3.12.0",
+    "ecdsa": "^0.7.0",
+    "ecurve": "^1.0.5",
+    "js-nacl": "^1.2.2",
+    "randombytes": "^2.0.5",
+    "secp256k1": "^3.3.0",
+    "typeforce": "^1.11.7",
+    "wif": "^2.0.6"
+  },
+  "description": "JavaScript library for sending Persona transactions from the client or server",
+  "devDependencies": {
+    "browserify": "^14.4.0",
+    "eslint": "^4.10.0",
+    "jsdoc": "^3.5.5",
+    "marked": "^0.3.12",
+    "mocha": "^4.0.1",
+    "proxyquire": "^1.8.0",
+    "should": "^13.1.3",
+    "shx": "^0.2.2",
+    "sinon": "^4.1.1",
+    "sinon-test": "^2.1.2"
+  },
+  "directories": {
+    "doc": "./doc",
+    "lib": "./lib",
+    "test": "./test"
+  },
+  "engines": {
+    "node": ">=4"
+  },
+  "gitHead": "81ac996325a14df81958971a882e1a1bffac5552",
+  "homepage": "https://github.com/PersonaIam/persona-js",
+  "keywords": [
+    "api",
+    "persona",
+    "blockchain",
+    "client",
+    "cryptocurrency",
+    "javascript",
+    "server",
+    "transaction"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "personajs",
+  "optionalDependencies": {},
+  "readme": "# Persona JS\n\nPersona JS is a JavaScript library for sending Persona transactions.\nIt does not require a locally installed node, and instead utilizes the existing peers on the network.\nIt can be used from the client as a [browserify](http://browserify.org/) compiled module, or on the server as a standard Node.js module.\n\n## Building\n\nBuild the browserify module for client use:\n\n```sh\nnpm build:browserify\n```\n\nClean:\n\n```sh\nnpm clean:browserify\n```\n\n## Tests\n\n```\nnpm test\n```\n\nTests written using mocha + schedule.js.\n\n***\n\n## Usage\n\nOn the client:\n\n```html\n<script src=\"node_modules/persona/bundle.min.js\"></script>\n```\n\nOn the server:\n\n```js\nvar persona = require(\"personajs\");\n```\n\n### Generating a key pair\n\nTo generate a public / private key pair from a given passphrase:\n\n```js\nvar keys = persona.crypto.getKeys(\"passphrase\");\n```\n\nReturning:\n\n```js\n{\n  publicKey: \"02e012f0a7cac12a74bdc17d844cbc9f637177b470019c32a53cef94c7a56e2ea9\",\n  privateKey: \"\"\n}\n```\n\nTo get the private key:\n\n```js\nkeys.d.toBuffer().toString(\"hex\");\n```\n\nReturning:\n```\n1e089e3c5323ad80a90767bdd5907297b4138163f027097fd3bdbeab528d2d68\n```\n\n\n### Generating an address\n\nTo generate a unique Persona address from a given public key:\n\n```js\nvar address = persona.crypto.getAddress(\"5d036a858ce89f844491762eb89e2bfbd50a4a0a0da658e4b2628b25b117ae09\");\n```\n\nReturning:\n\n```\nAGihocTkwDygiFvmg6aG8jThYTic47GzU9\n```\n\n### Creating a transaction\n\nTo create a signed transaction object, which can then be broadcasted onto the network:\n\n```js\nvar amount      = 1000 * Math.pow(10, 8); // 100000000000\nvar transaction = persona.transaction.createTransaction(\"AGihocTkwDygiFvmg6aG8jThYTic47GzU9\", amount, null, \"passphrase\", \"secondPassphrase\");\n```\n\nReturning:\n\n```js\n{\n  type: 0, // Transaction type. 0 = Normal transaction.\n  amount: 100000000000, // The amount to send expressed as an integer value.\n  asset: {}, // Transaction asset, dependent on tx type.\n  fee: 100000000, // 0.1 Persona expressed as an integer value.\n  id: \"500224999259823996\", // Transaction ID.\n  recipientId: \"AGihocTkwDygiFvmg6aG8jThYTic47GzU9\", // Recipient ID.\n  senderPublicKey: \"56e106a1d4a53dbe22cac52fefd8fc4123cfb4ee482f8f25a4fc72eb459b38a5\", // Sender's public key.\n  signSignature: \"03fdd33bed30270b97e77ada44764cc8628f6ad3bbd84718571695262a5a18baa37bd76a62dd25bc21beacd61eaf2c63af0cf34edb0d191d225f4974cd3aa509\", // Sender's second passphrase signature.\n  signature: \"9419ca3cf11ed2e3fa4c63bc9a4dc18b5001648e74522bc0f22bda46a188e462da4785e5c71a43cfc0486af08d447b9340ba8b93258c4c7f50798060fff2d709\", // Transaction signature.\n  timestamp: 27953413 // Based on UTC time of genesis since epoch.\n}\n```\n\n### Network identification with Nethash\n\nYou need to obtain the nethash in order to be sure you are broadcasting to the right network (testnet, mainnet or others). The nethash is simply the payload hash from the genesisBlock. If no nethash or wrong nethash is provided in the headers, the request will be rejected returning the expected nethash.\n\n```json\n{ \"success\": false, \"message\": \"Request is made on the wrong network\", \"expected\":\"e2f8f69ec6ab4b12550a314bd867c46e64e429961bb427514a3a534c602ff467\", \"received\":\"wrong-nethash\" }\n```\n\nThe nethash for a given network can be obtained at the following API endpoint:\n\n```\n/api/blocks/getNetHash\n```\n\n### Posting a transaction\n\nTransaction objects are sent to `/peer/transactions`, using the `POST` method.\n\nExample:\n\n```js\nMethod: POST\nContent-Type: application/json\n\n{\n    \"transactions\" : [{\n        ...\n    }]\n}\n```\n\n#### Peer Response\n\nUpon successfully accepting a transaction, the receiving node will respond with:\n\n```json\n{ \"success\": true, \"result\": \"5318121831703437738\" }\n```\n\nIf the transaction is deemed invalid, or an error is encountered, the receiving node will respond with:\n\n```json\n{ \"success\": false, \"message\": \"Error message\" }\n```\n\n***\n\n### Other transaction types\n\n#### Creating a delegate transaction\n\n```js\nvar transaction = persona.delegate.createDelegate(\"secret\", \"username\", \"secondSecret\");\n```\n\n#### Creating a second signature transaction\n\n```js\nvar transaction = persona.signature.createSignature(\"secret\", \"secondSecret\");\n```\n\n#### Creating a vote transaction\n\n```js\nvar transaction = persona.vote.createVote(\"secret\", [\"+58199578191950019299181920120128129\"], \"secondSecret\");\n```\n\n## License\n\nThe MIT License (MIT)\n\nCopyright (c) 2016 Lisk<br />\nCopyright (c) 2015 Crypti\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PersonaIam/persona-js.git"
+  },
+  "scripts": {
+    "build:browserify": "browserify index.js -o app.js",
+    "build:docs": "jsdoc -c jsdoc.json",
+    "clean:browserify": "shx rm app.js",
+    "clean:docs": "shx rm -r ./docs",
+    "lint": "eslint .",
+    "test": "mocha test/persona.js test/*/*"
+  },
+  "version": "0.2.1"
+}

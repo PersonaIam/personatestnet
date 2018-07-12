@@ -43,7 +43,7 @@ Transaction.prototype.create = function (data) {
 		throw 'Invalid sender';
 	}
 
-	if (!data.keypair) {
+	if (!data.keypair && !data.signature) {
 		throw 'Invalid keypair';
 	}
 
@@ -57,11 +57,19 @@ Transaction.prototype.create = function (data) {
 		asset: {}
 	};
 
+	trs.ledger = false;
+	if (data.signature) {
+		trs.signature = data.signature;
+		trs.requesterPublicKey = data.sender.publicKey;
+		trs.ledger = true;
+	}
 	trs = __private.types[trs.type].create.call(this, data, trs);
 	trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
-	trs.signature = this.sign(data.keypair, trs);
+	if(!data.signature){
+		trs.signature = this.sign(data.keypair, trs);
+	}
 
-	if (data.sender.secondSignature && data.secondKeypair) {
+	if (!data.signature && data.sender.secondSignature && data.secondKeypair) {
 		trs.signSignature = this.sign(data.secondKeypair, trs);
 	}
 
@@ -398,6 +406,7 @@ Transaction.prototype.verify = function (trs, sender, requester, cb) {
 	var valid = false;
 	var err = null;
 
+
 	if (typeof requester === 'function') {
 		cb = requester;
 	}
@@ -485,32 +494,37 @@ Transaction.prototype.verify = function (trs, sender, requester, cb) {
 
 	// Check requester public key
 	if (trs.requesterPublicKey) {
+
 		multisignatures.push(trs.senderPublicKey);
 
-		if (sender.multisignatures.indexOf(trs.requesterPublicKey) < 0) {
+		if (sender.multisignatures && sender.multisignatures.indexOf(trs.requesterPublicKey) < 0) {
+
 			return cb('Account does not belong to multisignature group');
 		}
 	}
 
 	// Verify signature
-	try {
-		valid = false;
-		valid = this.verifySignature(trs, (trs.requesterPublicKey || trs.senderPublicKey), trs.signature);
-	} catch (e) {
-		this.scope.logger.error(e.stack);
-		return cb(e.toString());
-	}
+	if (!trs.ledger) {
 
-	if (!valid) {
-		err = 'Failed to verify signature';
+		try {
+			valid = false;
+			valid = this.verifySignature(trs, (trs.requesterPublicKey || trs.senderPublicKey), trs.signature);
+		} catch (e) {
+			this.scope.logger.error(e.stack);
+			return cb(e.toString());
+		}
 
-		if (exceptions.signatures.indexOf(trs.id) > -1) {
-			this.scope.logger.debug(err);
-			this.scope.logger.debug(JSON.stringify(trs));
-			valid = true;
-			err = null;
-		} else {
-			return cb(err);
+		if (!valid) {
+			err = 'Failed to verify signature ' + trs.requesterPublicKey + ' , ' + trs.senderPublicKey + ' , ' + trs.signature ;
+
+			if (exceptions.signatures.indexOf(trs.id) > -1) {
+				this.scope.logger.debug(err);
+				this.scope.logger.debug(JSON.stringify(trs));
+				valid = true;
+				err = null;
+			} else {
+				return cb(err);
+			}
 		}
 	}
 

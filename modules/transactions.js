@@ -413,19 +413,24 @@ shared.getUnconfirmedTransactions = function (req, cb) {
 
 shared.addTransactions = function (req, cb) {
 	library.schema.validate(req.body, schema.addTransactions, function (err) {
+
 		if (err) {
 			return cb(err[0].message);
 		}
 
-		var keypair = library.crypto.makeKeypair(req.body.secret);
+		var keypair;
+		if (!req.body.signature) {
+			keypair = library.crypto.makeKeypair(req.body.secret);
+		}
 
-		if (req.body.publicKey) {
+		if (keypair && req.body.publicKey) {
 			if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
 				return cb('Invalid passphrase');
 			}
 		}
 
 		var query = { address: req.body.recipientId };
+
 
 			modules.accounts.getAccount(query, function (err, recipient) {
 				if (err) {
@@ -508,7 +513,7 @@ shared.addTransactions = function (req, cb) {
 						});
 					});
 				} else {
-					modules.accounts.setAccountAndGet({publicKey: keypair.publicKey.toString('hex')}, function (err, account) {
+					modules.accounts.setAccountAndGet({publicKey: req.body.senderPublicKey}, function (err, account) {
 						if (err) {
 							return cb(err);
 						}
@@ -537,7 +542,8 @@ shared.addTransactions = function (req, cb) {
 								vendorField: req.body.vendorField,
 								recipientId: recipientId,
 								keypair: keypair,
-								secondKeypair: secondKeypair
+								secondKeypair: secondKeypair,
+								signature: req.body.signature
 							});
 
 							transaction.id=library.logic.transaction.getId(transaction);
@@ -550,9 +556,9 @@ shared.addTransactions = function (req, cb) {
 							if (err) {
 								return cb(err, transaction);
 							}
-
 							return cb(null, {transactionId: transactions[0].id});
 						});
+
 					});
 				}
 			});

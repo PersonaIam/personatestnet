@@ -103,7 +103,7 @@ module.exports = {
 		properties: {
 			secret: {
 				type: 'string',
-				minLength: 1,
+				minLength: 0,
 				maxLength: 100
 			},
 			amount: {

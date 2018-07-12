@@ -9,7 +9,7 @@
   "db": {
     "host": "localhost",
     "port": 5432,
-    "database": "ark_test",
+    "database": "persona_testnet",
     "user": null,
     "password": "password",
     "poolSize": 20,

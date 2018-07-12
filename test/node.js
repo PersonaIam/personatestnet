@@ -4,7 +4,7 @@
 var node = {};
 var networkName = "testnet"
 var network = require('../networks.json')[networkName];
-node.ark = require('./ark-js');
+node.ark = require('./personajs');
 node.ark.crypto.setNetworkVersion(network.pubKeyHash);
 
 // Requires
@@ -273,6 +273,12 @@ node.randomAccount = function () {
 	account.publicKey = node.ark.crypto.getKeys(account.password, network).publicKey;
 	account.address = node.ark.crypto.getAddress(account.publicKey, network.pubKeyHash);
 
+	console.log(node.ark.crypto.getAddress('03cfe988b6aec489efeecb15422c68ce5efe98eedba1edd6675469f661711966bf',network.pubKeyHash))
+	console.log(node.ark.crypto.getAddress('036b08b1ed34119c2f12b82b25aeaad9520e85c5b77b63b928dc0656f17b8eb4fe',66))
+	// console.log(account.publicKey);
+	// console.log(account.address);
+	// console.log(account.password);
+	console.log(network.pubKeyHash);
 	return account;
 };
 
@@ -300,7 +306,7 @@ function abstractRequest (options, done) {
 	request.set('nethash', node.config.nethash);
 	request.set('port', node.config.port);
 
-	request.expect('Content-Type', /json/);
+	// request.expect('Content-Type', /json/);
 	request.expect(200);
 
 	if (options.params) {
@@ -312,6 +318,7 @@ function abstractRequest (options, done) {
 
 	if (done) {
 		request.end(function (err, res) {
+			node.debug('err = ', err);
 			node.debug('> Response:'.grey, JSON.stringify(res.body));
 			done(err, res);
 		});

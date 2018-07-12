@@ -1,0 +1,83 @@
+{
+  "valid": [
+    {
+      "d": "107514198931263072119932154712205151313606989014478712620430420488895833616362",
+      "Q": "035a784662a4a20a65bf6aab9ae98a6c068a81c52e4b032c0fb5400c706cfccc56",
+      "compressed": true,
+      "network": "testnet",
+      "address": "TcL6j35AF9QizhhmGk22JEau3Rxzka8Qta",
+      "WIF": "CyMVwyS8LULzwe2PXMer2xqTp5Fz4pruz6sk3QV1ZfaGHZvaq9Fu"
+    },
+    {
+      "d": "27330865952962393682354619298863357974601910709070942983318049870895605429096",
+      "Q": "03501e454bf00751f24b1b489aa925215d66af2234e3891c3b21a52bedb3cd711c",
+      "compressed": true,
+      "network": "testnet",
+      "address": "TtRa8jAPwoTwPWXdg1TiWBPDku93rKdndH",
+      "WIF": "CsQuHengHUMKvhHVpFJJs2f4NcttwtxVRS9hzEpVVVPGxQQJGAD7"
+    }
+  ],
+  "invalid": {
+    "constructor": [
+      {
+        "exception": "Private key must be greater than 0",
+        "d": "-1"
+      },
+      {
+        "exception": "Private key must be greater than 0",
+        "d": "0"
+      },
+      {
+        "exception": "Private key must be less than the curve order",
+        "d": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      },
+      {
+        "exception": "Private key must be less than the curve order",
+        "d": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      },
+      {
+        "exception": "Expected property \"compressed\" of type \\?Boolean, got Number 2",
+        "d": "1",
+        "options": {
+          "compressed": 2
+        }
+      },
+      {
+        "exception": "Unexpected publicKey parameter",
+        "d": "1",
+        "Q": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      },
+      {
+        "exception": "Expected property \"network.messagePrefix\" of type Buffer|String, got undefined",
+        "d": "1",
+        "options": {
+          "network": {}
+        }
+      }
+
+    ],
+    "fromWIF": [
+      {
+        "exception": "Invalid network version",
+        "network": "persona",
+        "WIF": "7FP9Dnv6oxbmvmsEhrB9RMdYNXsUeEgDS8kJ2fFYtQqeVxBZpAC"
+      },
+      {
+        "exception": "Unknown network version",
+        "WIF": "brQnSed3Fia1w9VcbbS6ZGDgJ6ENkgwuQY2LS7pEC5bKHD1fMF"
+      },
+      {
+        "exception": "Invalid compression flag",
+        "WIF": "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sfZr2ym"
+      },
+      {
+        "exception": "Invalid WIF length",
+        "WIF": "3tq8Vmhh9SN5XhjTGSWgx8iKk59XbKG6UH4oqpejRuJhfYD"
+      },
+      {
+        "exception": "Invalid WIF length",
+        "WIF": "38uMpGARR2BJy5p4dNFKYg9UsWNoBtkpbdrXDjmfvz8krCtw3T1W92ZDSR"
+      }
+    ]
+  }
+}
