@@ -10,8 +10,8 @@
     "host": "localhost",
     "port": 5432,
     "database": "persona_testnet",
-    "user": null,
-    "password": "password",
+    "user": "postgres",
+    "password": "postgres",
     "poolSize": 20,
     "poolIdleTimeout": 30000,
     "reapIntervalMillis": 1000,
@@ -54,6 +54,10 @@
       },
       {
         "ip": "5.135.75.68",
+        "port": 4101
+      },
+      {
+        "ip": "5.135.75.69",
         "port": 4101
       }
     ],
