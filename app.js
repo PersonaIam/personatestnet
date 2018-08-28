@@ -83,6 +83,7 @@ var config = {
 	db: appConfig.db,
 	modules: {
 		accounts: './modules/accounts.js',
+        attributes: './modules/attributes.js',
 		transactions: './modules/transactions.js',
 		blocks: './modules/blocks.js',
 		signatures: './modules/signatures.js',

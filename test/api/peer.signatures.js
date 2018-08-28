@@ -30,7 +30,7 @@ describe('POST /peer/signatures', function () {
 
   var validParams;
 
-  var transaction = node.ark.transaction.createTransaction('AacRfTLtxAkR3Mind1XdPCddj1uDkHtwzD', 1, null, node.gAccount.password);
+  var transaction = node.ark.transaction.createTransaction('Tuo2S5FsZL74k8axgL73JVcNo9PSfM8kPc', 1, null, node.gAccount.password);
 
   beforeEach(function (done) {
     validParams = {

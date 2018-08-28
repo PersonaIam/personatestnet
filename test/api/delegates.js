@@ -84,7 +84,9 @@ describe('PUT /api/accounts/delegates with funds', function () {
 		sendArk({
 			secret: node.gAccount.password,
 			amount: node.Ark,
-			recipientId: account.address
+			recipientId: account.address,
+            senderPublicKey: '02831e7858be454ecdc28decdef8e25e6fafbb7fa7dff6ee0cfa7dbf414816d7ca',
+            signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
 		}, function (err, res) {
 			node.expect(res.body).to.have.property('success').to.be.ok;
 			node.expect(res.body).to.have.property('transactionId');
@@ -270,7 +272,9 @@ describe('PUT /api/delegates with funds', function () {
 		sendArk({
 			secret: node.gAccount.password,
 			amount: node.Ark,
-			recipientId: account.address
+			recipientId: account.address,
+            senderPublicKey: '02831e7858be454ecdc28decdef8e25e6fafbb7fa7dff6ee0cfa7dbf414816d7ca',
+            signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
 		}, function (err, res) {
 			node.expect(res.body).to.have.property('success').to.be.ok;
 			node.expect(res.body).to.have.property('transactionId');
@@ -655,7 +659,9 @@ describe('GET /api/delegates/voters', function () {
 		sendArk({
 			secret: node.gAccount.password,
 			amount: node.Ark,
-			recipientId: account.address
+			recipientId: account.address,
+            senderPublicKey: '02831e7858be454ecdc28decdef8e25e6fafbb7fa7dff6ee0cfa7dbf414816d7ca',
+            signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
 		}, function (err, res) {
 			node.expect(res.body).to.have.property('success').to.be.ok;
 			node.expect(res.body).to.have.property('transactionId');

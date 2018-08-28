@@ -23,6 +23,8 @@ function sendArk (account, i, done) {
 	var randomArk = node.randomArk();
 
 	node.put('/api/transactions/', {
+        senderPublicKey: '02831e7858be454ecdc28decdef8e25e6fafbb7fa7dff6ee0cfa7dbf414816d7ca',
+        signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
 		secret: node.gAccount.password,
 		amount: randomArk,
 		recipientId: account.address
@@ -37,6 +39,8 @@ function sendArk (account, i, done) {
 
 function sendArkFromMultisigAccount (amount, recipient, done) {
 	node.put('/api/transactions/', {
+        senderPublicKey: '02831e7858be454ecdc28decdef8e25e6fafbb7fa7dff6ee0cfa7dbf414816d7ca',
+        signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
 		secret: multisigAccount.password,
 		amount: amount,
 		recipientId: recipient
