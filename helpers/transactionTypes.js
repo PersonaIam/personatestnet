@@ -8,5 +8,6 @@ module.exports = {
 	MULTI: 4,
 	IPFS: 5,
 	REGISTER: 6,
-	VERIFY: 7
+	VERIFY: 7,
+	CREATE_ATTRIBUTE: 8
 };

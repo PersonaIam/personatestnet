@@ -5,6 +5,8 @@ let OrderBy = require('../helpers/orderBy.js');
 let schema = require('../schema/attributes.js');
 let slots = require('../helpers/slots.js');
 let sql = require('../sql/attributes.js');
+let transactionTypes = require('../helpers/transactionTypes.js');
+var async = require('async');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -15,6 +17,12 @@ __private.assetTypes = {};
 function Attributes(cb, scope) {
     library = scope;
     self = this;
+
+    var Attribute = require('../logic/attribute.js');
+    __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
+        transactionTypes.CREATE_ATTRIBUTE, new Attribute()
+    );
+
     return cb(null, self);
 }
 
@@ -32,6 +40,15 @@ Attributes.prototype.onAttachPublicApi = function () {
 //
 Attributes.prototype.onBind = function (scope) {
     modules = scope;
+
+    __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE].bind({
+        modules: modules, library: library
+    });
+};
+
+Attributes.prototype.verify = function (req, cb) {
+    // dummy verification
+    return cb(null,'');
 };
 
 
@@ -367,30 +384,98 @@ shared.addAttribute = function (req, cb) {
             return cb(err[0].message);
         }
 
+        if (!req.body.asset || !req.body.asset.attribute) {
+            return cb('Attribute is not provided. Nothing to create');
+        }
+
         let keypair;
         if (!req.body.signature) {
             keypair = library.crypto.makeKeypair(req.body.secret);
         }
-
         if (keypair && req.body.publicKey) {
             if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
                 return cb('Invalid passphrase');
             }
         }
+
         let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.type;
+        reqGetAttributeType.body.name = req.body.asset.attribute[0].type;
         __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
             if (err || !data.attribute_type) {
                 return cb('attribute type does not exist');
             }
-            req.body.type = data.attribute_type.name;
-            __private.getAttributesByFilter(req.body, function (err, data) {
+            let reqGetAttributesByFilter = req;
+            reqGetAttributesByFilter.body.type = data.attribute_type.name;
+            __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
                 if (err || data.attributes) {
                     return cb('attribute already exists');
                 }
-                __private.addAttribute(req.body, function (err, attributeData) {
-                    return cb(null, attributeData);
+
+                modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!requester) {
+                        return cb('Requester not found');
+                    }
+
+                    if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+                        // TBD
+                    } else {
+                        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            if (!account || !account.publicKey) {
+                                return cb('Account not found');
+                            }
+
+                            if (account.secondSignature && !req.body.secondSecret) {
+                                return cb('Missing second passphrase');
+                            }
+
+                            var secondKeypair = null;
+
+                            if (account.secondSignature) {
+                                secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
+                            }
+
+                            var transaction;
+
+                            try {
+                                transaction = library.logic.transaction.create({
+                                    type: transactionTypes.CREATE_ATTRIBUTE,
+                                    amount: 0,
+                                    requester: requester,
+                                    sender: account,
+                                    asset : req.body.asset,
+                                    keypair: keypair,
+                                    secondKeypair: secondKeypair,
+                                    signature: req.body.signature
+                                });
+                                transaction.id = library.logic.transaction.getId(transaction);
+                                if (req.body.asset) {
+                                    transaction.asset = req.body.asset;
+                                }
+
+                            } catch (e) {
+                                return cb(e.toString());
+                            }
+
+                            library.bus.message("transactionsReceived", [transaction], "api", function (err, transactions) {
+                                if (err) {
+                                    return cb(err, transaction);
+                                }
+                                return cb(null, {transactionId: transactions[0].id});
+                            });
+
+                        });
+                    }
                 });
+
+
             });
 
         });

@@ -560,6 +560,7 @@ NodeManager.prototype.onBlockProcessed = function(block, cb) {
 
 //
 NodeManager.prototype.onTransactionsReceived = function(transactions, source, cb) {
+	console.log('onTransactionsReceived ' + source);
 	library.managementSequence.add(function(mSequence){
 		if(!source || typeof source !== "string"){
 			mSequence && mSequence("Rejecting not sourced transactions", transactions);

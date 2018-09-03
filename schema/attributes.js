@@ -84,27 +84,26 @@ module.exports = {
         id: 'attributes.addAttribute',
         type: 'object',
         properties: {
-            value:{
-                minLength: 1
-            },
-            owner: {
+            secret: {
                 type: 'string',
                 minLength: 1,
-                format: 'address'
+                maxLength: 100
             },
-            type: {
+            publicKey: {
                 type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
                 minLength: 1
-            },
-            timestamp: {
-                type: 'integer',
-                minimum: 0
-            },
-            active: {
-                type: 'integer'
             }
         },
-        required: ['owner','type','value','timestamp','secret']
+        required: ['asset','secret','publicKey']
     },
     updateAttribute: {
         id: 'attributes.updateAttribute',
@@ -129,6 +128,6 @@ module.exports = {
                 type: 'integer'
             }
         },
-        required: ['owner','type','value','secret']
+        required: ['owner','type','value']
     }
 };

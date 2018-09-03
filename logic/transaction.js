@@ -54,28 +54,16 @@ Transaction.prototype.create = function (data) {
 		requesterPublicKey: data.requester ? data.requester.publicKey.toString('hex') : null,
 		timestamp: slots.getTime(),
 		vendorField: data.vendorField,
-		asset: {}
+		asset: data.asset
 	};
 
-	trs.ledger = false;
-	if (data.signature) {
-		trs.signature = data.signature;
-		trs.requesterPublicKey = data.sender.publicKey;
-		trs.ledger = true;
-	}
-	trs = __private.types[trs.type].create.call(this, data, trs);
-	trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
-	if(!data.signature){
-		trs.signature = this.sign(data.keypair, trs);
-	}
-
-	if (!data.signature && data.sender.secondSignature && data.secondKeypair) {
-		trs.signSignature = this.sign(data.secondKeypair, trs);
-	}
-
-	trs.id = this.getId(trs);
-
-	return trs;
+    trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
+    trs.signature = this.sign(data.keypair, trs);
+    if (data.sender.secondSignature && data.secondKeypair) {
+        trs.signSignature = this.sign(data.secondKeypair, trs);
+    }
+    trs.id = this.getId(trs);
+    return trs;
 };
 
 //
@@ -96,17 +84,17 @@ Transaction.prototype.validateAddress = function(address){
 
 //
 Transaction.prototype.attachAssetType = function (typeId, instance) {
-	if (instance && typeof instance.create === 'function' && 
+	if (instance && typeof instance.create === 'function' &&
 		typeof instance.getBytes === 'function' &&
-		typeof instance.calculateFee === 'function' && 
+		typeof instance.calculateFee === 'function' &&
 		typeof instance.verify === 'function' &&
-		typeof instance.objectNormalize === 'function' && 
+		typeof instance.objectNormalize === 'function' &&
 		typeof instance.dbRead === 'function' &&
-		typeof instance.apply === 'function' && 
+		typeof instance.apply === 'function' &&
 		typeof instance.undo === 'function' &&
-		typeof instance.applyUnconfirmed === 'function' && 
+		typeof instance.applyUnconfirmed === 'function' &&
 		typeof instance.undoUnconfirmed === 'function' &&
-		typeof instance.ready === 'function' && 
+		typeof instance.ready === 'function' &&
 		typeof instance.process === 'function'
 	) {
 		__private.types[typeId] = instance;
@@ -381,9 +369,10 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 	// Call process on transaction type
 	__private.types[trs.type].process.call(this, trs, sender, function (err, trs) {
 		if (err) {
+            console.log('Procezz ' + err)
 			return cb(err);
 		}
-
+        console.log('Process')
 		// Check for already confirmed transaction
 		this.scope.db.one(sql.countById, { id: trs.id }).then(function (row) {
 			if (row.count > 0) {
@@ -392,6 +381,7 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 
 			return cb(null, trs);
 		}).catch(function (err) {
+            console.log('Procezz1 ' + err)
 			this.scope.logger.error(err.stack);
 			return cb('Transaction#process error');
 		});

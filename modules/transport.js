@@ -527,6 +527,7 @@ Transport.prototype.onBroadcastBlock = function (block) {
 	// else {
 	// 	bloomfilter = new BloomFilter(serialized);
 	// }
+console.log('block ' + block.numberOfTransactions)
 
 	var blockheaders = {
 		id: block.id,
