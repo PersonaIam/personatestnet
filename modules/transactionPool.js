@@ -629,15 +629,18 @@ __private.applyUnconfirmedList = function (transactions, cb) {
 		if (!transaction) {
 			return eachSeriesCb();
 		}
-
+        console.log('before process verify ');
 		__private.processVerifyTransaction(transaction, function (err, sender) {
 			if (err) {
+				console.log('error ' + err);
 				library.logger.debug('Failed to process / verify unconfirmed transaction: ' + transaction.id, err);
 				self.removeUnconfirmedTransaction(transaction.id);
 				return eachSeriesCb();
 			}
+            console.log('before applyUnconfirmed ');
 			modules.transactions.applyUnconfirmed(transaction, function (err) {
 				if (err) {
+                   console.log('failed to apply unconfirmed ');
 					library.logger.debug('Failed to apply unconfirmed transaction: ' + transaction.id, err);
 					self.removeUnconfirmedTransaction(transaction.id);
 				}

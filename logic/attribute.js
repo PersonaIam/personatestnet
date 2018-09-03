@@ -82,7 +82,6 @@ Attribute.prototype.verify = function (trs, sender, cb) {
 
 //
 Attribute.prototype.process = function (trs, sender, cb) {
-    console.log('Attribute logic process')
     return cb(null, trs);
 };
 
@@ -138,6 +137,7 @@ Attribute.prototype.process = function (trs, sender, cb) {
 
 //
 Attribute.prototype.applyUnconfirmed = function (trs, sender, cb) {
+    console.log('inside logic apply unconfirmed ')
     return cb(null, trs);
 };
 
@@ -150,7 +150,7 @@ Attribute.prototype.undoUnconfirmed = function (trs, sender, cb) {
 };
 
 Attribute.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.multisignature, Attribute.prototype.schema);
+    var report = library.schema.validate(trs.asset.attribute[0], Attribute.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate attribute schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -184,7 +184,7 @@ Attribute.prototype.schema = {
 
 //
 Attribute.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.attribute, Attribute.prototype.schema);
+    var report = library.schema.validate(trs.asset.attribute[0], Attribute.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate attribute schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -217,7 +217,6 @@ Attribute.prototype.dbFields = [
 
 //
 Attribute.prototype.dbSave = function (trs) {
-    console.log('HHHHHHHHHHHHHHHHHHHHHHHHEEERE')
     return {
         table: this.dbTable,
         fields: this.dbFields,

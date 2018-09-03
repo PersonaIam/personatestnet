@@ -369,10 +369,8 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 	// Call process on transaction type
 	__private.types[trs.type].process.call(this, trs, sender, function (err, trs) {
 		if (err) {
-            console.log('Procezz ' + err)
 			return cb(err);
 		}
-        console.log('Process')
 		// Check for already confirmed transaction
 		this.scope.db.one(sql.countById, { id: trs.id }).then(function (row) {
 			if (row.count > 0) {
@@ -381,7 +379,6 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 
 			return cb(null, trs);
 		}).catch(function (err) {
-            console.log('Procezz1 ' + err)
 			this.scope.logger.error(err.stack);
 			return cb('Transaction#process error');
 		});
@@ -788,12 +785,12 @@ Transaction.prototype.applyUnconfirmed = function (trs, sender, requester, cb) {
 	}
 
 	amount = amount.toNumber();
-
+	console.log('inside transaction apply unconfirmed ')
 	this.scope.account.merge(sender.address, {u_balance: -amount}, function (err, sender) {
 		if (err) {
 			return cb(err);
 		}
-
+        console.log('before apply unconfirmed subcall ')
 		__private.types[trs.type].applyUnconfirmed.call(this, trs, sender, function (err) {
 			if (err) {
 				this.scope.account.merge(sender.address, {u_balance: amount}, function (err2) {

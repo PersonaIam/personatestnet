@@ -1098,7 +1098,6 @@ Blocks.prototype.verifyBlock = function (block, checkPreviousBlock) {
 
 // Apply the block, provided it has been verified.
 __private.applyBlock = function (block, cb) {
-	console.log('applying block ')
 	// Prevent shutdown during database writes.
 	__private.noShutdownRequired = true;
 
@@ -1129,7 +1128,6 @@ __private.applyBlock = function (block, cb) {
 		},
 		// Apply transactions to unconfirmed mem_accounts fields.
 		applyUnconfirmed: function (seriesCb) {
-            console.log('apply unconfirmed case')
 			async.eachSeries(keptTransactions, function (transaction, eachSeriesCb) {
 				modules.transactions.applyUnconfirmed(transaction, function (err) {
 					if (err) {
@@ -1166,19 +1164,15 @@ __private.applyBlock = function (block, cb) {
 		// Block and transactions are ok.
 		// Apply transactions to confirmed mem_accounts fields.
 		applyConfirmed: function (seriesCb) {
-			console.log('apply confirmed case')
 			async.eachSeries(block.transactions, function (transaction, eachSeriesCb) {
 				// DATABASE: write
-                console.log('HERE1')
 				modules.transactions.apply(transaction, block, function (err) {
 					if (err) {
-						console.log(err);
 						err = ['Failed to apply transaction:', transaction.id, '-', err].join(' ');
 						library.logger.error("error:",err);
 						library.logger.error('Transaction', transaction);
 						return eachSeriesCb(err);
 					}
-					console.log('HERE2')
 					appliedTransactions[transaction.id] = transaction;
 					// Transaction applied, removed from the unconfirmed list.
 					modules.transactionPool.removeUnconfirmedTransaction(transaction.id);
@@ -1553,11 +1547,9 @@ Blocks.prototype.generateBlock = function (keypair, timestamp, cb) {
 Blocks.prototype.onProcessBlock = function (block, cb) {
 	library.blockSequence.add(function(sequenceCb){
 		if(block.numberOfTransactions == 0){
-            console.log('processing empty block')
 			return self.processEmptyBlock(block, sequenceCb);
 		}
 		else{
-			console.log('processing block')
 			return self.processBlock(block, sequenceCb);
 		}
 	}, cb);
