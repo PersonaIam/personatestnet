@@ -526,7 +526,6 @@ Account.prototype.getAll = function (filter, fields, cb) {
 	db.query(sql.query, sql.values).then(function (rows) {
 		return cb(null, rows);
 	}).catch(function (err) {
-		console.log(err);
 		//library.logger.error("stack", err.stack);
 		return cb('Account#getAll error');
 	});

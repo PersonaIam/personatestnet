@@ -110,14 +110,14 @@ Attribute.prototype.getBytes = function (trs) {
 
 
 Attribute.prototype.apply = function (trs, block, sender, cb) {
-    let data = {
-        type: trs.asset.attribute.type,
-        value: trs.asset.attribute.value,
-        owner: trs.asset.attribute.owner,
-        timestamp: trs.asset.attribute.timestamp
-    };
 
-    modules.attributes.createAttribute(data, cb);
+    modules.accounts.mergeAccountAndGet({
+        address: trs.recipientId,
+        balance: trs.amount,
+        u_balance: trs.amount,
+        blockId: block.id,
+        round: modules.rounds.getRoundFromHeight(block.height)
+    }, cb);
 };
 
 //
@@ -137,7 +137,6 @@ Attribute.prototype.process = function (trs, sender, cb) {
 
 //
 Attribute.prototype.applyUnconfirmed = function (trs, sender, cb) {
-    console.log('inside logic apply unconfirmed ')
     return cb(null, trs);
 };
 
@@ -209,7 +208,7 @@ Attribute.prototype.dbFields = [
     'owner',
     'type',
     'value',
-    'transactionId'
+    'timestamp'
 ];
 
 //
@@ -221,10 +220,10 @@ Attribute.prototype.dbSave = function (trs) {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            owner: trs.asset.attribute.owner,
-            type: trs.asset.attribute.type,
-            value: trs.asset.attribute.value
-            // transactionId: trs.id
+            owner: trs.asset.attribute[0].owner,
+            type: trs.asset.attribute[0].type,
+            value: trs.asset.attribute[0].value,
+            timestamp: 1, // TODO temporary
         }
     };
 };

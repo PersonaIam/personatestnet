@@ -785,12 +785,10 @@ Transaction.prototype.applyUnconfirmed = function (trs, sender, requester, cb) {
 	}
 
 	amount = amount.toNumber();
-	console.log('inside transaction apply unconfirmed ')
 	this.scope.account.merge(sender.address, {u_balance: -amount}, function (err, sender) {
 		if (err) {
 			return cb(err);
 		}
-        console.log('before apply unconfirmed subcall ')
 		__private.types[trs.type].applyUnconfirmed.call(this, trs, sender, function (err) {
 			if (err) {
 				this.scope.account.merge(sender.address, {u_balance: amount}, function (err2) {
