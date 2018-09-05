@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS "attributes"(
   "type" VARCHAR(36) NOT NULL,
   "value" TEXT,
   "owner" VARCHAR(36) NOT NULL,
-  "timestamp" INT NOT NULL,
+  "timestamp" INT,
   "active" SMALLINT
 );
 
@@ -136,8 +136,9 @@ CREATE TABLE IF NOT EXISTS "attribute_validations"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_id" SERIAL NOT NULL,
   "validator" VARCHAR(36) NOT NULL,
-  "chunk" SMALLINT NOT NULL,
-  "timestamp" INT NOT NULL,
+  "chunk" SMALLINT,
+  "timestamp" INT,
+  "completed" SMALLINT,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
 );
 

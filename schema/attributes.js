@@ -129,5 +129,30 @@ module.exports = {
             }
         },
         required: ['owner','type','value']
-    }
+    },
+    requestAttributeValidation: {
+        id: 'attributes.requestAttributeValidation',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
 };

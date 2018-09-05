@@ -6,7 +6,6 @@ let schema = require('../schema/attributes.js');
 let slots = require('../helpers/slots.js');
 let sql = require('../sql/attributes.js');
 let transactionTypes = require('../helpers/transactionTypes.js');
-var async = require('async');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -18,9 +17,14 @@ function Attributes(cb, scope) {
     library = scope;
     self = this;
 
-    var Attribute = require('../logic/attribute.js');
+    let Attribute = require('../logic/attribute.js');
     __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.CREATE_ATTRIBUTE, new Attribute()
+    );
+
+    let AttributeValidationRequest = require('../logic/attributeValidationRequest.js');
+    __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_VALIDATION] = library.logic.transaction.attachAssetType(
+        transactionTypes.REQUEST_ATTRIBUTE_VALIDATION, new AttributeValidationRequest()
     );
 
     return cb(null, self);
@@ -33,6 +37,7 @@ function Attributes(cb, scope) {
 Attributes.prototype.onAttachPublicApi = function () {
     __private.attachApi();
 };
+
 // Events
 //
 //__EVENT__ `onBind`
@@ -42,6 +47,10 @@ Attributes.prototype.onBind = function (scope) {
     modules = scope;
 
     __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_VALIDATION].bind({
         modules: modules, library: library
     });
 };
@@ -67,10 +76,9 @@ __private.attachApi = function () {
         'get /list': 'listAttributes',
         'get /types/list': 'listAttributeTypes',
         'get /types': 'getAttributeType',
-        'post /types': 'createAttributeType',
         'get /': 'getAttribute',
         'post /': 'addAttribute',
-        'put /': 'updateAttribute',
+        'post /requestvalidation': 'requestAttributeValidation',
     });
 
     router.use(function (req, res, next) {
@@ -378,6 +386,11 @@ shared.getAttribute = function (req, cb) {
     });
 };
 
+//
+//__API__ `addAttribute`
+
+//
+
 shared.addAttribute = function (req, cb) {
     library.schema.validate(req.body, schema.addAttribute, function (err) {
         if (err) {
@@ -421,7 +434,7 @@ shared.addAttribute = function (req, cb) {
                     }
 
                     if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
-                        // TBD
+                        // TODO
                     } else {
                         modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
                             if (err) {
@@ -480,6 +493,105 @@ shared.addAttribute = function (req, cb) {
 
         });
     });
+};
+
+//
+//__API__ `requestAttributeValidation`
+//
+
+shared.requestAttributeValidation = function (req, cb) {
+    library.schema.validate(req.body, schema.requestAttributeValidation, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.validation) {
+            return cb('Validation is not provided. Nothing to do');
+        }
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb('Invalid passphrase');
+            }
+        }
+
+        __private.getAttributesByFilter(req.body, function (err, data) {
+            if (err || !data.attributes) {
+                return cb('Attribute does not exist. Cannot create validation request');
+            }
+
+                modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!requester) {
+                        return cb('Requester not found');
+                    }
+
+                    if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+                        // TODO
+                    } else {
+                        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            if (!account || !account.publicKey) {
+                                return cb('Account not found');
+                            }
+
+                            if (account.secondSignature && !req.body.secondSecret) {
+                                return cb('Missing second passphrase');
+                            }
+
+                            var secondKeypair = null;
+
+                            if (account.secondSignature) {
+                                secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
+                            }
+
+                            var transaction;
+
+                            try {
+                                transaction = library.logic.transaction.create({
+                                    type: transactionTypes.REQUEST_ATTRIBUTE_VALIDATION,
+                                    amount: 0,
+                                    requester: requester,
+                                    sender: account,
+                                    asset : req.body.asset,
+                                    keypair: keypair,
+                                    secondKeypair: secondKeypair,
+                                    signature: req.body.signature
+                                });
+                                transaction.id = library.logic.transaction.getId(transaction);
+                                if (req.body.asset) {
+                                    transaction.asset = req.body.asset;
+                                }
+
+                            } catch (e) {
+                                return cb(e.toString());
+                            }
+
+                            library.bus.message("transactionsReceived", [transaction], "api", function (err, transactions) {
+                                if (err) {
+                                    return cb(err, transaction);
+                                }
+                                return cb(null, {transactionId: transactions[0].id});
+                            });
+
+                        });
+                    }
+                });
+
+
+            });
+
+        });
 };
 
 

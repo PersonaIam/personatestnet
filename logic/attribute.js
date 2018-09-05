@@ -208,7 +208,8 @@ Attribute.prototype.dbFields = [
     'owner',
     'type',
     'value',
-    'timestamp'
+    'timestamp',
+    'active'
 ];
 
 //
@@ -224,6 +225,7 @@ Attribute.prototype.dbSave = function (trs) {
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
             timestamp: 1, // TODO temporary
+            active: 0
         }
     };
 };
