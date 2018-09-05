@@ -41,7 +41,7 @@ AttributeValidationRequest.prototype.create = function (data, trs) {
 
 //
 AttributeValidationRequest.prototype.calculateFee = function (trs) {
-    return constants.fees.validation;
+    return constants.fees.attributevalidationrequest;
 };
 
 //
