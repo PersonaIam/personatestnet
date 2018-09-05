@@ -26,7 +26,7 @@ AttributeValidationRequest.prototype.bind = function (scope) {
 AttributeValidationRequest.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
-    trs.asset.attributeValidationRequest = {
+    trs.asset.validation = {
         type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
@@ -41,7 +41,7 @@ AttributeValidationRequest.prototype.create = function (data, trs) {
 
 //
 AttributeValidationRequest.prototype.calculateFee = function (trs) {
-    return constants.fees.attributevalidationrequest;
+    return constants.fees.validation;
 };
 
 //
@@ -54,19 +54,19 @@ AttributeValidationRequest.prototype.verify = function (trs, sender, cb) {
         return cb('Invalid transaction amount');
     }
 
-    if (!trs.asset || !trs.asset.attributeValidationRequest) {
-        return cb('Invalid transaction asset. Attribute is missing');
+    if (!trs.asset || !trs.asset.validation) {
+        return cb('Invalid transaction asset. attributeValidationRequest is missing');
     }
 
-    if (!trs.asset.attributeValidationRequest[0].owner) {
+    if (!trs.asset.validation[0].owner) {
         return cb('Attribute owner is undefined');
     }
 
-    if (!trs.asset.attributeValidationRequest[0].type) {
+    if (!trs.asset.validation[0].type) {
         return cb('Attribute type is undefined');
     }
 
-    if (!trs.asset.attributeValidationRequest[0].validator) {
+    if (!trs.asset.validation[0].validator) {
         return cb('Attribute validator is undefined');
     }
 
@@ -87,14 +87,14 @@ AttributeValidationRequest.prototype.process = function (trs, sender, cb) {
 
 //
 AttributeValidationRequest.prototype.getBytes = function (trs) {
-    if (!trs.asset.attributeValidationRequest) {
+    if (!trs.asset.validation) {
         return null;
     }
 
     var buf;
 
     try {
-        buf = new Buffer(trs.asset.attributeValidationRequest, 'utf8');
+        buf = new Buffer(trs.asset.validation, 'utf8');
     } catch (e) {
         throw e;
     }
@@ -142,7 +142,7 @@ AttributeValidationRequest.prototype.undoUnconfirmed = function (trs, sender, cb
 };
 
 AttributeValidationRequest.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.attributeValidationRequest[0], AttributeValidationRequest.prototype.schema);
+    var report = library.schema.validate(trs.asset.validation[0], AttributeValidationRequest.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate attribute validation schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -160,12 +160,14 @@ AttributeValidationRequest.prototype.schema = {
     properties: {
         owner: {
             type: 'string',
+            format: 'address'
         },
         type: {
             type: 'string',
         },
         validator: {
             type: 'string',
+            format: 'address'
         }
     },
     required: ['owner', 'type', 'validator']
@@ -176,7 +178,7 @@ AttributeValidationRequest.prototype.schema = {
 
 //
 AttributeValidationRequest.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.attributeValidationRequest[0], AttributeValidationRequest.prototype.schema);
+    var report = library.schema.validate(trs.asset.validation[0], AttributeValidationRequest.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate attribute validation request schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -214,9 +216,9 @@ AttributeValidationRequest.prototype.dbSave = function (trs) {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            owner: trs.asset.attributeValidationRequest[0].owner,
-            type: trs.asset.attributeValidationRequest[0].type,
-            validator: trs.asset.attributeValidationRequest[0].validator,
+            owner: trs.asset.validation[0].owner,
+            type: trs.asset.validation[0].type,
+            validator: trs.asset.validation[0].validator,
             timestamp: 1, // TODO temporary
             completed: 0
         }
@@ -228,14 +230,7 @@ AttributeValidationRequest.prototype.dbSave = function (trs) {
 
 //
 AttributeValidationRequest.prototype.ready = function (trs, sender) {
-    if (Array.isArray(sender.multisignatures) && sender.multisignatures.length) {
-        if (!Array.isArray(trs.signatures)) {
-            return false;
-        }
-        return trs.signatures.length >= sender.multimin;
-    } else {
-        return true;
-    }
+    return true;
 };
 
 // Export

@@ -167,6 +167,7 @@ Attribute.prototype.schema = {
     properties: {
         owner: {
             type: 'string',
+            format : 'address'
         },
         type: {
             type: 'string',
@@ -235,14 +236,7 @@ Attribute.prototype.dbSave = function (trs) {
 
 //
 Attribute.prototype.ready = function (trs, sender) {
-    if (Array.isArray(sender.multisignatures) && sender.multisignatures.length) {
-        if (!Array.isArray(trs.signatures)) {
-            return false;
-        }
-        return trs.signatures.length >= sender.multimin;
-    } else {
-        return true;
-    }
+   return true;
 };
 
 // Export
