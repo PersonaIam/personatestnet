@@ -519,7 +519,15 @@ shared.requestAttributeValidation = function (req, cb) {
             }
         }
 
-        __private.getAttributesByFilter(req.body, function (err, data) {
+        let reqGetAttributeType = req;
+        reqGetAttributeType.body.name = req.body.asset.validation[0].type;
+        __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
+            if (err || !data.attribute_type) {
+                return cb('Attribute type does not exist');
+            }
+            let reqGetAttributesByFilter = req;
+            reqGetAttributesByFilter.body.type = data.attribute_type.name;
+        __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
             if (err || !data.attributes) {
                 return cb('Attribute does not exist. Cannot create validation request');
             }
@@ -590,7 +598,7 @@ shared.requestAttributeValidation = function (req, cb) {
 
 
             });
-
+            });
         });
 };
 
