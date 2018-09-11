@@ -6,7 +6,7 @@ var constants = require('../helpers/constants.js');
 var modules, library;
 
 // Constructor
-function AttributeValidationRequest() {
+function AttributeValidation() {
 }
 
 // Public methods
@@ -14,7 +14,7 @@ function AttributeValidationRequest() {
 //__API__ `bind`
 
 //
-AttributeValidationRequest.prototype.bind = function (scope) {
+AttributeValidation.prototype.bind = function (scope) {
     modules = scope.modules;
     library = scope.library;
 };
@@ -23,14 +23,14 @@ AttributeValidationRequest.prototype.bind = function (scope) {
 //__API__ `create`
 
 //
-AttributeValidationRequest.prototype.create = function (data, trs) {
+AttributeValidation.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
     trs.asset.validation = {
-        type: data.type,
-        owner: data.owner,
-        publicKey: data.sender.publicKey,
-        validator : data.validator
+        attribute_validation_request_id: data.attributeValidationRequestId,
+        chunk: data.chunk,
+        timestamp: data.timestamp,
+        expireTimestamp : data.expireTimestamp
     };
 
     return trs;
@@ -40,22 +40,22 @@ AttributeValidationRequest.prototype.create = function (data, trs) {
 //__API__ `calculateFee`
 
 //
-AttributeValidationRequest.prototype.calculateFee = function (trs) {
-    return constants.fees.attributevalidationrequest;
+AttributeValidation.prototype.calculateFee = function (trs) {
+    return constants.fees.attributevalidation;
 };
 
 //
 //__API__ `verify`
 
 //
-AttributeValidationRequest.prototype.verify = function (trs, sender, cb) {
+AttributeValidation.prototype.verify = function (trs, sender, cb) {
 
     if (trs.amount !== 0) {
         return cb('Invalid transaction amount');
     }
 
     if (!trs.asset || !trs.asset.validation) {
-        return cb('Invalid transaction asset. attributeValidationRequest is missing');
+        return cb('Invalid transaction asset. validation is missing');
     }
 
     if (!trs.asset.validation[0].owner) {
@@ -78,7 +78,7 @@ AttributeValidationRequest.prototype.verify = function (trs, sender, cb) {
 //__API__ `process`
 
 //
-AttributeValidationRequest.prototype.process = function (trs, sender, cb) {
+AttributeValidation.prototype.process = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
@@ -86,7 +86,7 @@ AttributeValidationRequest.prototype.process = function (trs, sender, cb) {
 //__API__ `getBytes`
 
 //
-AttributeValidationRequest.prototype.getBytes = function (trs) {
+AttributeValidation.prototype.getBytes = function (trs) {
     if (!trs.asset.validation) {
         return null;
     }
@@ -106,7 +106,7 @@ AttributeValidationRequest.prototype.getBytes = function (trs) {
 //__API__ `apply`
 
 
-AttributeValidationRequest.prototype.apply = function (trs, block, sender, cb) {
+AttributeValidation.prototype.apply = function (trs, block, sender, cb) {
 
     modules.accounts.mergeAccountAndGet({
         address: trs.recipientId,
@@ -118,31 +118,30 @@ AttributeValidationRequest.prototype.apply = function (trs, block, sender, cb) {
 };
 
 //
-//__API__ `undo`
-
+//__API__ `applyUnconfirmed`
 //
-AttributeValidationRequest.prototype.undo = function (trs, block, sender, cb) {
 
+AttributeValidation.prototype.applyUnconfirmed = function (trs, sender, cb) {
+    return cb(null, trs);
 };
 
 //
-//__API__ `applyUnconfirmed`
+//__API__ `undo`
 
 //
-AttributeValidationRequest.prototype.applyUnconfirmed = function (trs, sender, cb) {
-    return cb(null, trs);
+AttributeValidation.prototype.undo = function (trs, block, sender, cb) {
 };
 
 //
 //__API__ `undoUnconfirmed`
 
 //
-AttributeValidationRequest.prototype.undoUnconfirmed = function (trs, sender, cb) {
+AttributeValidation.prototype.undoUnconfirmed = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
-AttributeValidationRequest.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.validation[0], AttributeValidationRequest.prototype.schema);
+AttributeValidation.prototype.objectNormalize = function (trs) {
+    var report = library.schema.validate(trs.asset.validation[0], AttributeValidation.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate attribute validation schema: ' + this.scope.schema.getLastErrors().map(function (err) {
@@ -154,8 +153,8 @@ AttributeValidationRequest.prototype.objectNormalize = function (trs) {
 };
 
 
-AttributeValidationRequest.prototype.schema = {
-    id: 'AttributeValidationRequest',
+AttributeValidation.prototype.schema = {
+    id: 'AttributeValidation',
     type: 'object',
     properties: {
         owner: {
@@ -177,11 +176,11 @@ AttributeValidationRequest.prototype.schema = {
 //__API__ `objectNormalize`
 
 //
-AttributeValidationRequest.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.validation[0], AttributeValidationRequest.prototype.schema);
+AttributeValidation.prototype.objectNormalize = function (trs) {
+    var report = library.schema.validate(trs.asset.validation[0], AttributeValidation.prototype.schema);
 
     if (!report) {
-        throw 'Failed to validate attribute validation request schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate attribute schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -193,30 +192,33 @@ AttributeValidationRequest.prototype.objectNormalize = function (trs) {
 //__API__ `dbRead`
 
 //
-AttributeValidationRequest.prototype.dbRead = function (raw) {
+AttributeValidation.prototype.dbRead = function (raw) {
     return {};
 };
 
-AttributeValidationRequest.prototype.dbTable = 'attribute_validation_requests';
+AttributeValidation.prototype.dbTable = 'attribute_validations';
 
-AttributeValidationRequest.prototype.dbFields = [
-    'attribute_id',
-    'validator',
-    'timestamp'
+AttributeValidation.prototype.dbFields = [
+    'attribute_validation_request_id',
+    'chunk',
+    'timestamp',
+    'expireTimestamp'
 ];
 
 //
 //__API__ `dbSave`
 
 //
-AttributeValidationRequest.prototype.dbSave = function (trs) {
+AttributeValidation.prototype.dbSave = function (trs) {
     return {
         table: this.dbTable,
         fields: this.dbFields,
+
         values: {
-            attribute_id: trs.asset.validation[0].attribute_id,
-            validator: trs.asset.validation[0].validator,
-            timestamp: trs.timestamp
+            attribute_validation_request_id: trs.asset.attributeValidationRequestId,
+            chunk: 7,
+            timestamp: trs.timestamp,
+            expireTimestamp: trs.timestamp + 10000
         }
     };
 };
@@ -225,9 +227,9 @@ AttributeValidationRequest.prototype.dbSave = function (trs) {
 //__API__ `ready`
 
 //
-AttributeValidationRequest.prototype.ready = function (trs, sender) {
+AttributeValidation.prototype.ready = function (trs, sender) {
     return true;
 };
 
 // Export
-module.exports = AttributeValidationRequest;
+module.exports = AttributeValidation;

@@ -8,8 +8,8 @@
     "pubKeyHash": 55,
     "wif": 80,
     "client": {
-      "token": "PERSONA",
-      "symbol": "PERSONA",
+      "token": "PRSN",
+      "symbol": "PRSN",
       "explorer": ""
     }
   },
@@ -22,8 +22,8 @@
     "pubKeyHash": 66,
     "wif": 186,
     "client": {
-      "token": "TPERSONA",
-      "symbol": "TPERSONA",
+      "token": "TPRSN",
+      "symbol": "TPRSN",
       "explorer": ""
     }
   },
@@ -36,8 +36,8 @@
     "pubKeyHash": 48,
     "wif": 187,
     "client": {
-      "token": "LPERSONA",
-      "symbol": "LPERSONA",
+      "token": "LPRSN",
+      "symbol": "LPRSN",
       "explorer": ""
     }
   }

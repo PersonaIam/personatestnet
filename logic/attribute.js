@@ -225,7 +225,7 @@ Attribute.prototype.dbSave = function (trs) {
             owner: trs.asset.attribute[0].owner,
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
-            timestamp: 1, // TODO temporary
+            timestamp: trs.timestamp,
             active: 0
         }
     };

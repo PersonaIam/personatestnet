@@ -130,6 +130,7 @@ module.exports = {
         },
         required: ['owner','type','value']
     },
+
     requestAttributeValidation: {
         id: 'attributes.requestAttributeValidation',
         type: 'object',
@@ -154,5 +155,90 @@ module.exports = {
             }
         },
         required: ['asset','secret','publicKey']
+    },
+
+    validateAttribute: {
+        id: 'attributes.validateAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+    getRequestAttributeValidation: {
+        id: 'attributes.getRequestAttributeValidation',
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+                minimum: 0
+            },
+            validator: {
+                type: 'string',
+                minLength: 1
+            },
+            attribute_id: {
+                type: 'integer',
+                minimum: 0
+            }
+        }
+    },
+    getIncompleteAttributeValidationRequestsForValidator: {
+        id: 'attributes.getIncompleteAttributeValidationRequestsForValidator',
+        type: 'object',
+        properties: {
+            validator: {
+                type: 'string',
+                minLength: 1
+            }
+        },
+        required: ['validator']
+    },
+    getCompletedAttributeValidationRequestsForValidator: {
+        id: 'attributes.getCompletedAttributeValidationRequestsForValidator',
+        type: 'object',
+        properties: {
+            validator: {
+                type: 'string',
+                minLength: 1
+            }
+        },
+        required: ['validator']
+    },
+
+    getAttributeValidations: {
+        id: 'attributes.getAttributeValidations',
+        type: 'object',
+        properties: {
+            requestId: {
+                type: 'integer'
+            },
+            type: {
+                minLength: 1
+            },
+            owner: {
+                type: 'string'
+            },
+            validator: {
+                type: 'string'
+            }
+        }
     },
 };
