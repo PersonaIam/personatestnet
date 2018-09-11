@@ -115,38 +115,10 @@ CREATE TABLE IF NOT EXISTS "verifications"(
   FOREIGN KEY("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS "attribute_types"(
-  "id" SERIAL NOT NULL PRIMARY KEY,
-  "name" VARCHAR(36) NOT NULL,
-  "data_type" VARCHAR(36) NOT NULL,
-  "validation" TEXT,
-  "options" TEXT
-);
-
-CREATE TABLE IF NOT EXISTS "attributes"(
-  "id" SERIAL NOT NULL PRIMARY KEY,
-  "type" VARCHAR(36) NOT NULL,
-  "value" TEXT,
-  "owner" VARCHAR(36) NOT NULL,
-  "timestamp" INT NOT NULL,
-  "active" SMALLINT
-);
-
-CREATE TABLE IF NOT EXISTS "attribute_validations"(
-  "id" SERIAL NOT NULL PRIMARY KEY,
-  "attribute_id" SERIAL NOT NULL,
-  "validator" VARCHAR(36) NOT NULL,
-  "chunk" SMALLINT NOT NULL,
-  "timestamp" INT NOT NULL,
-  FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
-);
-
 /* Unique Indexes */
 CREATE UNIQUE INDEX IF NOT EXISTS "blocks_height" ON "blocks"("height");
 CREATE UNIQUE INDEX IF NOT EXISTS "blocks_previousBlock" ON "blocks"("previousBlock");
 CREATE UNIQUE INDEX IF NOT EXISTS "peers_unique" ON "peers"("ip", "port");
-CREATE UNIQUE INDEX IF NOT EXISTS "attributes_unique" ON "attributes"("type", "owner");
-CREATE UNIQUE INDEX IF NOT EXISTS "attribute_types_unique" ON "attribute_types"("name");
 
 /* Indexes */
 CREATE INDEX IF NOT EXISTS "blocks_rowId" ON "blocks"("rowId");
@@ -167,7 +139,5 @@ CREATE INDEX IF NOT EXISTS "signatures_transactions_id" ON "signatures"("transac
 CREATE INDEX IF NOT EXISTS "votes_transactions_id" ON "votes"("transactionId");
 CREATE INDEX IF NOT EXISTS "delegates_transactions_id" ON "delegates"("transactionId");
 CREATE INDEX IF NOT EXISTS "multisignatures_transactions_id" ON "multisignatures"("transactionId");
-CREATE INDEX IF NOT EXISTS "attribute_validation_id" ON "attribute_validations"("id");
-CREATE INDEX IF NOT EXISTS "attribute_type_id" ON "attribute_types"("id");
 
 COMMIT;

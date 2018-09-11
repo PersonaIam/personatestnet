@@ -5,6 +5,7 @@ let OrderBy = require('../helpers/orderBy.js');
 let schema = require('../schema/attributes.js');
 let slots = require('../helpers/slots.js');
 let sql = require('../sql/attributes.js');
+let attributedHelper = require('../helpers/attributes.js');
 let transactionTypes = require('../helpers/transactionTypes.js');
 var async = require('async');
 
@@ -48,7 +49,7 @@ Attributes.prototype.onBind = function (scope) {
 
 Attributes.prototype.verify = function (req, cb) {
     // dummy verification
-    return cb(null,'');
+    return cb(null, '');
 };
 
 
@@ -272,6 +273,46 @@ __private.updateAttribute = function (filter, cb) {
     })
 };
 
+/**
+ * Add attribute data to IPFS
+ *
+ * In order to keep IPFS documents alive, only seeded peers will upload to IPFS. Uploading a file on the IPFS network,
+ * creates a local copy of the file on the machine that initiates the upload request.
+ *
+ * Our upload mechanism is defined as:
+ * 1. Find a random seed that is able to upload to IPFS
+ * 2. Send the file associated with the attribute to this random seed
+ *
+ * */
+__private.addAttributeToIpfs = function (files, cb) {
+    modules.peers.getRandomSeed(function (error, res) {
+        if (error) return cb('Error occured while getting random seed');
+
+        const {peer} = res;
+
+        modules.transport.requestFromPeer(
+            peer,
+            {
+                url: '/api/ipfs',
+                method: 'POST',
+                data: { files }
+            },
+            function(error, response) {
+                if (error) return cb(error);
+
+                if (response.body && response.body.success) {
+                    const { hash, path } = response.body;
+
+                    return cb(null, { hash, path });
+                }
+                else {
+                    return cb('Failed to upload to IPFS');
+                }
+            },
+        );
+    });
+};
+
 // Public methods
 //
 //__API__ `listAttributes`
@@ -389,6 +430,7 @@ shared.addAttribute = function (req, cb) {
         }
 
         let keypair;
+
         if (!req.body.signature) {
             keypair = library.crypto.makeKeypair(req.body.secret);
         }
@@ -399,19 +441,29 @@ shared.addAttribute = function (req, cb) {
         }
 
         let reqGetAttributeType = req;
+
+        const publicKey = req.body.publicKey;
+
         reqGetAttributeType.body.name = req.body.asset.attribute[0].type;
         __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
             if (err || !data.attribute_type) {
                 return cb('attribute type does not exist');
             }
+            const attributeDataType = data.attribute_type.data_type;
+            const attributeDataName = data.attribute_type.name;
+            const owner = req.body.asset.attribute[0].owner;
+
             let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.type = data.attribute_type.name;
+
+            reqGetAttributesByFilter.body.type = attributeDataName;
+            reqGetAttributesByFilter.body.owner = owner;
+
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
                 if (err || data.attributes) {
                     return cb('attribute already exists');
                 }
 
-                modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
+                modules.accounts.getAccount({publicKey}, function (err, requester) {
                     if (err) {
                         return cb(err);
                     }
@@ -423,7 +475,7 @@ shared.addAttribute = function (req, cb) {
                     if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
                         // TBD
                     } else {
-                        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+                        modules.accounts.setAccountAndGet({publicKey}, function (err, account) {
                             if (err) {
                                 return cb(err);
                             }
@@ -442,42 +494,78 @@ shared.addAttribute = function (req, cb) {
                                 secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
                             }
 
-                            var transaction;
+                            /**
+                             * Check if the desired attribute needs to be uploaded to IPFS; if so, add it to the
+                             * IPFS network, and on the IPFS pin queue. Once the newly created transaction is forged,
+                             * we'll need to remove the associated element from the IPFS pin queue
+                             * */
+                            async.auto({
+                                isIPFSUploadRequired: function (callback) {
+                                    const result = attributedHelper.isIPFSUploadRequired(attributeDataType);
 
-                            try {
-                                transaction = library.logic.transaction.create({
-                                    type: transactionTypes.CREATE_ATTRIBUTE,
-                                    amount: 0,
-                                    requester: requester,
-                                    sender: account,
-                                    asset : req.body.asset,
-                                    keypair: keypair,
-                                    secondKeypair: secondKeypair,
-                                    signature: req.body.signature
-                                });
-                                transaction.id = library.logic.transaction.getId(transaction);
-                                if (req.body.asset) {
-                                    transaction.asset = req.body.asset;
-                                }
+                                    callback(null, result);
+                                },
+                                uploadToIpfs: ['isIPFSUploadRequired', function (results, callback) {
+                                    const isIPFSUploadRequired = results.isIPFSUploadRequired;
 
-                            } catch (e) {
-                                return cb(e.toString());
-                            }
+                                    if (isIPFSUploadRequired) {
+                                        const files = {
+                                            path: `${attributeDataName}-${publicKey}`,
+                                            content: req.body.asset.attribute[0].value,
+                                        };
 
-                            library.bus.message("transactionsReceived", [transaction], "api", function (err, transactions) {
+                                        __private.addAttributeToIpfs(files, function(err, res) {
+                                            if (err) return callback(error, null);
+
+                                            const { hash } = res;
+
+                                            // Adjust the transaction asset body to contain the IPFS hash
+                                            req.body.asset.attribute[0].value = hash;
+                                            req.body.asset.attribute[0].owner = account.address;
+                                            req.body.asset.attribute[0].attributeDataType = attributeDataType;
+
+                                            return callback(null, {hash});
+                                        });
+                                    }
+                                    else {
+                                        callback(null, 'No Upload Required');
+                                    }
+                                }],
+                            }, function (err) {
                                 if (err) {
-                                    return cb(err, transaction);
+                                    return cb(err)
                                 }
-                                return cb(null, {transactionId: transactions[0].id});
-                            });
 
+                                let transaction;
+
+                                try {
+                                    transaction = library.logic.transaction.create({
+                                        type: transactionTypes.CREATE_ATTRIBUTE,
+                                        amount: 0,
+                                        requester: requester,
+                                        sender: account,
+                                        asset: req.body.asset,
+                                        keypair: keypair,
+                                        secondKeypair: secondKeypair,
+                                        signature: req.body.signature
+                                    });
+
+                                    transaction.id = library.logic.transaction.getId(transaction);
+                                } catch (e) {
+                                    return cb(e.toString());
+                                }
+
+                                library.bus.message("transactionsReceived", [transaction], "api", function (err, transactions) {
+                                    if (err) {
+                                        return cb(err, transaction);
+                                    }
+                                    return cb(null, {transactionId: transactions[0].id});
+                                });
+                            });
                         });
                     }
                 });
-
-
             });
-
         });
     });
 };
@@ -508,7 +596,6 @@ shared.updateAttribute = function (req, cb) {
         });
     });
 };
-
 
 // Export
 module.exports = Attributes;

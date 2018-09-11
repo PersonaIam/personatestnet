@@ -45,32 +45,35 @@ NodeManager.prototype.onBind = function (scope) {
 //
 NodeManager.prototype.startApp = function(){
 	library.logger.info("Starting Node Manager");
-  library.bus.message('loadDatabase');
-}
-
-//
-//__EVENT__ `onDatabaseLoaded`
-
-//
-NodeManager.prototype.onDatabaseLoaded = function(lastBlock) {
-	library.bus.message('startTransactionPool');
-	library.bus.message('startBlockchain');
-
-	// Mount the network API
-	library.logger.info("Mounting Network API");
-	library.bus.message('attachNetworkApi');
-
-	// If configured, mount the public API (not recommanded for forging node on long term).
-	// Ideally we should only mount it when node is synced with network
-	if(library.config.api.mount){
-		library.logger.info("Mounting Public API");
-		library.bus.message('attachPublicApi');
-	}
-
-	library.logger.info("# Started as a relay node");
-	library.bus.message('loadDelegates');
+    library.bus.message('startIPFS');
 };
 
+//
+//__EVENT__ `onIpfsStarted`
+NodeManager.prototype.onIpfsStarted = function() {
+    library.bus.message('loadDatabase');
+};
+
+// //
+// //__EVENT__ `onDatabaseLoaded`
+NodeManager.prototype.onDatabaseLoaded = function(lastBlock) {
+    library.bus.message('startTransactionPool');
+    library.bus.message('startBlockchain');
+
+    // Mount the network API
+    library.logger.info("Mounting Network API");
+    library.bus.message('attachNetworkApi');
+
+    // If configured, mount the public API (not recommanded for forging node on long term).
+    // Ideally we should only mount it when node is synced with network
+    if(library.config.api.mount){
+        library.logger.info("Mounting Public API");
+        library.bus.message('attachPublicApi');
+    }
+
+    library.logger.info("# Started as a relay node");
+    library.bus.message('loadDelegates');
+};
 //
 //__EVENT__ `onBlockchainReady`
 

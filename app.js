@@ -97,7 +97,8 @@ var config = {
 		transactionPool: './modules/transactionPool.js',
 		blockchain: './modules/blockchain.js',
 		nodeManager: './modules/nodeManager.js',
-		identity: './modules/identity.js'
+		identity: './modules/identity.js',
+		ipfs: './modules/ipfs.js',
 	}
 };
 

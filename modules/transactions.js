@@ -10,6 +10,7 @@ var OrderBy = require('../helpers/orderBy.js');
 var Router = require('../helpers/router.js');
 var schema = require('../schema/transactions.js');
 var slots = require('../helpers/slots.js');
+var attributesHelper = require('../helpers/attributes');
 var sql = require('../sql/transactions.js');
 var Transfer = require('../logic/transfer.js');
 var transactionTypes = require('../helpers/transactionTypes.js');
@@ -234,8 +235,40 @@ Transactions.prototype.apply = function (transaction, block, cb) {
 		modules.accounts.getAccount({publicKey: transaction.senderPublicKey}, function (err, sender) {
 			if (err) {
 				return sequenceCb(err);
-			}
-			library.logic.transaction.apply(transaction, block, sender, sequenceCb);
+			};
+
+			/**
+			 * When a transaction is being forged, perform the fallowing:
+			 * 1. Check if this transaction has an IPFS file attached to it.
+			 * 2. If 1, try to pin this file, so that it doesn't get garbage collected by IPFS
+			 * */
+            async.auto({
+                isIPFSPinRequired: function(callback) {
+                    const result = attributesHelper.isIPFSTransaction(transaction);
+
+                    callback(null, result);
+                },
+                pinToIpfs: ['isIPFSPinRequired', function(results, callback) {
+                    const isIPFSUploadRequired = results.isIPFSPinRequired;
+
+                    if (isIPFSUploadRequired) {
+                        const fileHash = transaction.asset.attribute[0].value;
+
+                        modules.ipfs.apply(fileHash, function(error, success) {
+                        	if (error) return callback(error, null);
+
+                            return callback(null, {success});
+						});
+                    }
+                    else {
+                        callback(null, 'No Upload Required');
+                    }
+                }],
+            }, function(err) {
+                if (err) { return cb(err) }
+
+                library.logic.transaction.apply(transaction, block, sender, sequenceCb);
+            });
 		});
 	}, cb);
 };
