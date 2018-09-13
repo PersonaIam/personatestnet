@@ -3,9 +3,11 @@
 
 let node = require('./../node.js');
 let sleep = require('sleep');
+var constants = require('../../helpers/constants.js');
 
-const validator = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
-
+const VALIDATOR = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
+const DEFAULT_CHUNK = 7;
+const CHUNK = 8;
 
 describe('GET Attribute type', function () {
 
@@ -35,17 +37,26 @@ describe('GET Non existing attribute type', function () {
 describe('POST Create new attribute ( name )', function () {
 
     it('Create new attribute ( name )', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let request = createAttributeRequest();
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
             done();
         });
     });
 });
-
 
 describe('GET Existing attribute (name)', function () {
 
@@ -62,7 +73,6 @@ describe('GET Existing attribute (name)', function () {
     });
 });
 
-
 describe('GET Non existing attribute (address)', function () {
 
     it('Non existing attribute (address)', function (done) {
@@ -78,6 +88,11 @@ describe('POST Create attribute (name) for different owner', function () {
 
     it('Create attribute (name) for different owner', function (done) {
 
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let param = {};
         param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
         param.value = 'QUEEN';
@@ -88,11 +103,14 @@ describe('POST Create attribute (name) for different owner', function () {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
             done();
         });
     });
 });
-
 
 describe('GET All existing attributes for owner', function () {
 
@@ -112,6 +130,11 @@ describe('POST Create a different attribute ( address )', function () {
 
     it('Create a different attribute ( address )', function (done) {
 
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let param = {};
         param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
         param.value = 'Denver';
@@ -122,6 +145,10 @@ describe('POST Create a different attribute ( address )', function () {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
             done();
         });
     });
@@ -159,7 +186,6 @@ describe('GET Existing attribute (address)', function () {
         });
     });
 });
-
 
 describe('GET All existing attributes for owner', function () {
 
@@ -210,20 +236,55 @@ describe('GET List of attributes', function () {
     });
 });
 
-
 describe('POST Create an attribute validation request', function () {
 
     it('Create an attribute validation request', function (done) {
 
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let param = {};
         param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-        param.validator = validator;
+        param.validator = VALIDATOR;
         param.type = 'name';
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+});
+
+describe('POST Create another attribute validation request', function () {
+
+    it('Create another attribute validation request', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
+        param.validator = VALIDATOR;
+        param.type = 'address';
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
             done();
         });
     });
@@ -236,7 +297,7 @@ describe('POST Create same attribute validation request', function () {
         let param = {};
         param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 
-        param.validator = validator;
+        param.validator = VALIDATOR;
         param.type = 'name';
 
         let request = createAttributeValidationRequest(param);
@@ -252,7 +313,7 @@ describe('GET Attribute validation request', function () {
     it('Attribute validation request', function (done) {
 
         let param = {};
-        param.validator = validator;
+        param.validator = VALIDATOR;
 
         getAttributeValidationRequest(param, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
@@ -273,7 +334,7 @@ describe('POST Create attribute validation request for non existing attribute', 
         let param = {};
         param.owner = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
         param.type = 'address';
-        param.validator = validator;
+        param.validator = VALIDATOR;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -306,29 +367,55 @@ describe('POST Create an attribute validation', function () {
 
     it('Create an attribute validation ', function (done) {
 
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let param = {};
         param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
         param.type = 'name';
-        param.validator = validator;
+        param.validator = VALIDATOR;
+        param.chunk = CHUNK;
 
         let request = createAttributeValidation(param);
         postAttributeValidation(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             sleep.msleep(10000);
+            getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidation);
+            });
+            done();
+        });
+    });
+
+    it('Create an attribute validation - missing chunk ', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance('LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w', function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let request = createAttributeValidation({});
+        request.asset.validation[0].chunk = null;
+
+        postAttributeValidation(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('Attribute validation chunk is undefined');
             done();
         });
     });
 });
-
 
 describe('POST Create an attribute validation for non existing attribute validation request', function () {
 
     it('Create an attribute validation for non existing attribute validation request ', function (done) {
 
         let param = {};
-        param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-        param.validator = validator;
-        param.type = 'address';
+        param.owner = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
+        param.validator = VALIDATOR;
+        param.type = 'name';
 
         let request = createAttributeValidation(param);
         postAttributeValidation(request, function (err, res) {
@@ -345,8 +432,7 @@ describe('GET Attribute validations for validator ', function () {
     it('Attribute validation - validator', function (done) {
 
         let param = {};
-        param.validator = validator;
-
+        param.validator = VALIDATOR;
         getAttributeValidation(param, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('attribute_validations');
@@ -358,7 +444,6 @@ describe('GET Attribute validations for validator ', function () {
         });
     });
 });
-
 
 describe('GET Attribute validations for attribute ', function () {
 
@@ -375,6 +460,112 @@ describe('GET Attribute validations for attribute ', function () {
             node.expect(res.body.attribute_validations[0]).to.have.property('attribute_validation_request_id').to.be.at.least(1);
             node.expect(res.body.attribute_validations[0]).to.have.property('chunk');
             node.expect(res.body.attribute_validations[0]).to.have.property('timestamp');
+            done();
+        });
+    });
+});
+
+describe('GET Attribute validations for attribute without any validation requests', function () {
+
+    it('Attribute validation - attribute without validation requests', function (done) {
+
+        let param = {};
+        param.type = "name";
+        param.owner = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
+
+        getAttributeValidation(param, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('No attribute validations or requests exist for the given parameters');
+            done();
+        });
+    });
+});
+
+describe('GET Attribute validations for attribute with validation requests but without any validations', function () {
+
+    it('Attribute validation - attribute with validation requests but without validations', function (done) {
+
+        let param = {};
+        param.type = "address";
+        param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
+
+        getAttributeValidation(param, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('No attribute validations were found for the given parameters');
+            done();
+        });
+    });
+});
+
+describe('GET Attribute validations for non existing attribute', function () {
+
+    it('Attribute validation - non existing attribute', function (done) {
+
+        let param = {};
+        param.type = "identity_card";
+        param.owner = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
+
+        getAttributeValidation(param, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('No attribute validations or requests exist for the given parameters - validator was not provided or attribute does not exist');
+            done();
+        });
+    });
+});
+
+describe('GET Attribute validation requests', function () {
+
+    it('Attribute validation requests - completed given validator', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttributeValidationRequestsForValidator(param, 'completed' , function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('chunk').to.eq(8);
+            done();
+        });
+    });
+
+    it('Attribute validation requests - incomplete given validator', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttributeValidationRequestsForValidator(param, 'incomplete',  function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq('LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv');
+            done();
+        });
+    });
+
+    it('Attribute validation requests - completed given attribute', function (done) {
+
+        let param = {};
+        param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w'
+        param.type = 'name'
+
+        getAttributeValidationRequestsForValidator(param, 'completed' , function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq('LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq('LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv');
+            done();
+        });
+    });
+
+    it('Attribute validation requests - incomplete given attribute', function (done) {
+
+        let param = {};
+        param.owner = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w'
+        param.type = 'address'
+
+        getAttributeValidationRequestsForValidator(param, 'incomplete',  function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq('LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv');
             done();
         });
     });
@@ -414,7 +605,7 @@ function createAttributeValidationRequest(param) {
     request.asset.validation[0] = {};
     request.asset.validation[0].type = param.type ? param.type : "name";
     request.asset.validation[0].owner = param.owner ? param.owner : "LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w";
-    request.asset.validation[0].validator = param.validator ? param.validator : validator;
+    request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
     return request;
 }
 
@@ -424,6 +615,7 @@ function createAttributeValidation(param) {
     if (!param) {
         param = {}
     }
+
     request.secret = param.secret ? param.secret : "blade early broken display angry wine diary alley panda left spy woman";
     request.publicKey = param.publicKey ? param.publicKey : "025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6";
     request.asset = {};
@@ -431,7 +623,8 @@ function createAttributeValidation(param) {
     request.asset.validation[0] = {};
     request.asset.validation[0].type = param.type ? param.type : "name";
     request.asset.validation[0].owner = param.owner ? param.owner : "LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w";
-    request.asset.validation[0].validator = param.validator ? param.validator : validator;
+    request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
+    request.asset.validation[0].chunk = param.chunk ? param.chunk : DEFAULT_CHUNK;
     return request;
 }
 
@@ -446,10 +639,10 @@ function postAttribute(params, done) {
 function postAttributeValidationRequest(params, done) {
     node.post('/api/attributes/validationrequest', params, done);
 }
+
 function postAttributeValidation(params, done) {
     node.post('/api/attributes/validation', params, done);
 }
-
 
 function getAttribute(owner, typeName, done) {
     getAttributeTypeByName(typeName, function (err, res) {
@@ -502,5 +695,28 @@ function getAttributeValidation(params, done) {
     }
     node.get(url, done);
 
+}
+
+function getAttributeValidationRequestsForValidator(params, completeSuffix, done) {
+
+    let url = '/api/attributes/validationrequest/' + completeSuffix;
+    if (params.validator || params.type || params.owner) {
+        url += '?';
+    }
+    if (params.validator) {
+        url += '&validator=' + '' + params.validator;
+    }
+    if (params.type) {
+        url += '&type=' + '' + params.type;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    node.get(url, done);
+
+}
+
+function getBalance(address, done) {
+    node.get('/api/accounts/getBalance?address=' + address, done);
 }
 

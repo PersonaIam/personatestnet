@@ -87,8 +87,8 @@ __private.attachApi = function () {
         'get /types': 'getAttributeType',
         'get /': 'getAttribute',
         'get /validationrequest': 'getRequestAttributeValidation',
-        'get /validationrequest/completed': 'getCompletedAttributeValidationRequestsForValidator',
-        'get /validationrequest/incomplete': 'getIncompleteAttributeValidationRequestsForValidator',
+        'get /validationrequest/completed': 'getCompletedAttributeValidationRequests',
+        'get /validationrequest/incomplete': 'getIncompleteAttributeValidationRequests',
         'get /validation': 'getAttributeValidations',
         'post /': 'addAttribute',
         'post /validationrequest': 'requestAttributeValidation',
@@ -282,39 +282,63 @@ __private.getAttributeValidationRequests = function (filter, cb) {
     })
 };
 
-__private.getCompletedAttributeValidationRequestsForValidator = function (filter, cb) {
+__private.getCompletedAttributeValidationRequests = function (filter, cb) {
 
-    library.db.query(sql.AttributeValidationRequestsSql.getCompletedAttributeValidationRequestsForValidator,
-        {validator: filter.validator}).then(function (rows) {
+    let param = {validator: '', type : '', owner: ''};
+    if (filter.validator) {
+        param.validator = filter.validator;
+    } else {
+        param.type = filter.type;
+        param.owner = filter.owner;
+    }
 
-        let data = {};
-        if (rows.length > 0) {
-            data = rows;
-            return cb(null, data);
+    library.db.query(sql.AttributeValidationRequestsSql.getCompletedAttributeValidationRequests,
+        param).then(function (rows) {
+        let attributeValidationRequests = [];
+        for (let i = 0; i < rows.length; i++) {
+            attributeValidationRequests.push(rows[i]);
         }
+        let count = rows.length ? rows.length : 0;
+        let data = {};
+        if (count > 0) {
+            data.attributeValidationRequests = attributeValidationRequests;
+        }
+        data.count = count;
+        return cb(null, data);
 
-        return cb(null, null);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
         return cb('Attribute validation request# error');
     })
 };
 
-__private.getIncompleteAttributeValidationRequestsForValidator = function (filter, cb) {
+__private.getIncompleteAttributeValidationRequests = function (filter, cb) {
 
-    library.db.query(sql.AttributeValidationRequestsSql.getIncompleteAttributeValidationRequestsForValidator,
-        {validator: filter.validator}).then(function (rows) {
+    let param = {validator: '', type : '', owner: ''};
+    if (filter.validator) {
+        param.validator = filter.validator;
+    } else {
+        param.type = filter.type;
+        param.owner = filter.owner;
+    }
 
-        let data = {};
-        if (rows.length > 0) {
-            data = rows;
-            return cb(null, data);
+    library.db.query(sql.AttributeValidationRequestsSql.getIncompleteAttributeValidationRequests,
+        param).then(function (rows) {
+        let attributeValidationRequests = [];
+        for (let i = 0; i < rows.length; i++) {
+            attributeValidationRequests.push(rows[i]);
         }
+        let count = rows.length ? rows.length : 0;
+        let data = {};
+        if (count > 0) {
+            data.attributeValidationRequests = attributeValidationRequests;
+        }
+        data.count = count;
+        return cb(null, data);
 
-        return cb(null, null);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
-        return cb('Attribute validation request# error');
+        return cb('Attribute validation request# error ' + err);
     })
 };
 
@@ -894,41 +918,51 @@ shared.getRequestAttributeValidation = function (req, cb) {
 };
 
 //
-//__API__ `getCompletedAttributeValidationRequestsForValidator`
+//__API__ `getCompletedAttributeValidationRequests`
 //
-shared.getCompletedAttributeValidationRequestsForValidator = function (req, cb) {
-    library.schema.validate(req.body, schema.getRequestAttributeValidation, function (err) {
+
+shared.getCompletedAttributeValidationRequests = function (req, cb) {
+    library.schema.validate(req.body, schema.getCompletedAttributeValidationRequests, function (err) {
         if (err) {
             return cb(err[0].message);
         }
 
-        __private.getCompletedAttributeValidationRequestsForValidator(req.body, function (err, res) {
-            if (err) {
-                return cb('Failed to get attribute validation requests : ' + err);
-            }
+        if (!(req.body.validator || (req.body.type && req.body.owner))) {
+            return cb('Either the validator or the attribute (type and owner information) must be provided : ' + err);
+        }
 
-            if (res.count === 0) {
-                return cb('No attribute validation requests were found for the given parameters');
-            }
+            __private.getCompletedAttributeValidationRequests(req.body, function (err, res) {
+                if (err) {
+                    return cb('Failed to get attribute validation requests : ' + err);
+                }
 
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests};
+                if (res.count === 0) {
+                    return cb('No attribute validation requests were found for the given parameters');
+                }
 
-            return cb(null, resultData);
-        });
+                let resultData = {attribute_validation_requests: res.attributeValidationRequests};
+
+                return cb(null, resultData);
+            });
+
     });
 };
 
 
 //
-//__API__ `getIncompleteAttributeValidationRequestsForValidator`
+//__API__ `getIncompleteAttributeValidationRequests`
 //
-shared.getIncompleteAttributeValidationRequestsForValidator = function (req, cb) {
-    library.schema.validate(req.body, schema.getIncompleteAttributeValidationRequestsForValidator, function (err) {
+shared.getIncompleteAttributeValidationRequests = function (req, cb) {
+    library.schema.validate(req.body, schema.getIncompleteAttributeValidationRequests, function (err) {
         if (err) {
             return cb(err[0].message);
         }
 
-        __private.getIncompleteAttributeValidationRequestsForValidator(req.body, function (err, res) {
+        if (!(req.body.validator || (req.body.type && req.body.owner))) {
+            return cb('Either the validator or the attribute (type and owner information) must be provided : ' + err);
+        }
+
+        __private.getIncompleteAttributeValidationRequests(req.body, function (err, res) {
             if (err) {
                 return cb('Failed to get attribute validation requests : ' + err);
             }
@@ -956,18 +990,26 @@ shared.getAttributeValidations = function (req, cb) {
 
         __private.getAttributesByFilter(req.body, function (err, res1) {
 
-            if (res1 && res1.attribute) {
-                req.body.attribute_id = res1.attribute.id;
+            if (res1 && res1.attributes && req.body.type && req.body.owner) {
+                req.body.attribute_id = res1.attributes[0].id;
+            }
+
+            if (!req.body.attribute_id && !req.body.validator) {
+                return cb('No attribute validations or requests exist for the given parameters - validator was not provided or attribute does not exist');
             }
 
             __private.getAttributeValidationRequestsByFilter(req.body, function (err, res) {
+
+                if (!res.attributeValidationRequests || res.attributeValidationRequests.length === 0) {
+                    return cb('No attribute validations or requests exist for the given parameters');
+                }
 
                 let ids = [];
                 res.attributeValidationRequests.forEach(i => ids.push(i.id));
                 req.body.requestIds = ids;
 
                 __private.getAttributeValidationsForRequests(req.body, function (err, res) {
-                    if (res.count === 0) {
+                    if (!res) {
                         return cb('No attribute validations were found for the given parameters');
                     }
 

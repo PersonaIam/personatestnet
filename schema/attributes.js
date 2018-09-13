@@ -200,36 +200,47 @@ module.exports = {
             }
         }
     },
-    getIncompleteAttributeValidationRequestsForValidator: {
-        id: 'attributes.getIncompleteAttributeValidationRequestsForValidator',
+    getIncompleteAttributeValidationRequests: {
+        id: 'attributes.getIncompleteAttributeValidationRequests',
         type: 'object',
         properties: {
             validator: {
                 type: 'string',
                 minLength: 1
-            }
-        },
-        required: ['validator']
+            },
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                minLength: 1
+            },
+        }
     },
-    getCompletedAttributeValidationRequestsForValidator: {
-        id: 'attributes.getCompletedAttributeValidationRequestsForValidator',
+    getCompletedAttributeValidationRequests: {
+        id: 'attributes.getCompletedAttributeValidationRequests',
         type: 'object',
         properties: {
             validator: {
                 type: 'string',
                 minLength: 1
-            }
-        },
-        required: ['validator']
+            },
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                minLength: 1
+            },
+        }
     },
 
     getAttributeValidations: {
         id: 'attributes.getAttributeValidations',
         type: 'object',
         properties: {
-            requestId: {
-                type: 'integer'
-            },
             type: {
                 minLength: 1
             },

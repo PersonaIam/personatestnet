@@ -81,11 +81,19 @@ var AttributeValidationRequestsSql = {
     getAttributeValidationsRequestsForAttributeAndValidator :
         'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator}',
 
-    getCompletedAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests avr ' +
-    'RIGHT OUTER JOIN attribute_validations av ON "avr.id"="av.attribute_validation_request_id" WHERE "avr.validator" = ${validator}',
+    getCompletedAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
+    'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id ' +
+    'WHERE avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})',
 
-    getIncompleteAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests ' +
-    'WHERE "avr.validator" = ${validator} and "id" NOT IN (SELECT "attribute_validation_request_id" from attribute_validations)',
+    getIncompleteAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
+    'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ' +
+    'AND id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
+
+    // getCompletedAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
+    // 'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id WHERE avr.attribute_id = ${attribute_id}',
+    //
+    // getIncompleteAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
+    // 'WHERE avr.attribute_id = ${attribute_id} and id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
 
     deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
 

@@ -70,6 +70,10 @@ AttributeValidation.prototype.verify = function (trs, sender, cb) {
         return cb('Attribute validator is undefined');
     }
 
+    if (!trs.asset.validation[0].chunk) {
+        return cb('Attribute validation chunk is undefined');
+    }
+
     return cb(null, trs);
 
 };
@@ -167,9 +171,13 @@ AttributeValidation.prototype.schema = {
         validator: {
             type: 'string',
             format: 'address'
+        },
+        chunk: {
+            type: 'integer',
+            minimum: 0
         }
     },
-    required: ['owner', 'type', 'validator']
+    required: ['owner', 'type', 'validator', 'chunk']
 };
 
 //
@@ -216,7 +224,7 @@ AttributeValidation.prototype.dbSave = function (trs) {
 
         values: {
             attribute_validation_request_id: trs.asset.attributeValidationRequestId,
-            chunk: 7,
+            chunk: trs.asset.validation[0].chunk,
             timestamp: trs.timestamp,
             expireTimestamp: trs.timestamp + 10000
         }
