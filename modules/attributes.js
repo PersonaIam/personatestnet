@@ -7,6 +7,7 @@ let slots = require('../helpers/slots.js');
 let sql = require('../sql/attributes.js');
 let attributedHelper = require('../helpers/attributes.js');
 let transactionTypes = require('../helpers/transactionTypes.js');
+let async = require('async');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
