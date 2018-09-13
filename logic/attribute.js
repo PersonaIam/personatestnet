@@ -167,6 +167,7 @@ Attribute.prototype.schema = {
     properties: {
         owner: {
             type: 'string',
+            format : 'address'
         },
         type: {
             type: 'string',
@@ -208,7 +209,8 @@ Attribute.prototype.dbFields = [
     'owner',
     'type',
     'value',
-    'timestamp'
+    'timestamp',
+    'active'
 ];
 
 //
@@ -223,7 +225,8 @@ Attribute.prototype.dbSave = function (trs) {
             owner: trs.asset.attribute[0].owner,
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
-            timestamp: 1, // TODO temporary
+            timestamp: trs.timestamp,
+            active: 0
         }
     };
 };
@@ -233,14 +236,7 @@ Attribute.prototype.dbSave = function (trs) {
 
 //
 Attribute.prototype.ready = function (trs, sender) {
-    if (Array.isArray(sender.multisignatures) && sender.multisignatures.length) {
-        if (!Array.isArray(trs.signatures)) {
-            return false;
-        }
-        return trs.signatures.length >= sender.multimin;
-    } else {
-        return true;
-    }
+   return true;
 };
 
 // Export

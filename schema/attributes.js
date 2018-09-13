@@ -129,5 +129,127 @@ module.exports = {
             }
         },
         required: ['owner','type','value']
-    }
+    },
+
+    requestAttributeValidation: {
+        id: 'attributes.requestAttributeValidation',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+
+    validateAttribute: {
+        id: 'attributes.validateAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+    getRequestAttributeValidation: {
+        id: 'attributes.getRequestAttributeValidation',
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+                minimum: 0
+            },
+            validator: {
+                type: 'string',
+                minLength: 1
+            },
+            attribute_id: {
+                type: 'integer',
+                minimum: 0
+            }
+        }
+    },
+    getIncompleteAttributeValidationRequests: {
+        id: 'attributes.getIncompleteAttributeValidationRequests',
+        type: 'object',
+        properties: {
+            validator: {
+                type: 'string',
+                minLength: 1
+            },
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                minLength: 1
+            },
+        }
+    },
+    getCompletedAttributeValidationRequests: {
+        id: 'attributes.getCompletedAttributeValidationRequests',
+        type: 'object',
+        properties: {
+            validator: {
+                type: 'string',
+                minLength: 1
+            },
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                minLength: 1
+            },
+        }
+    },
+
+    getAttributeValidations: {
+        id: 'attributes.getAttributeValidations',
+        type: 'object',
+        properties: {
+            type: {
+                minLength: 1
+            },
+            owner: {
+                type: 'string'
+            },
+            validator: {
+                type: 'string'
+            }
+        }
+    },
 };

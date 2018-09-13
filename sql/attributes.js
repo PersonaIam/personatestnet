@@ -64,25 +64,69 @@ var AttributeTypesSql = {
 
 };
 
-var AttributeValidationsSql = {
+var AttributeValidationRequestsSql = {
     sortFields: [
         'id',
         'attribute_id',
         'validator',
-        'chunk',
         'timestamp'
+    ],
+
+    getAttributeValidationRequest: 'SELECT * FROM attribute_validation_requests WHERE "id" = ${id}',
+
+    getAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id}',
+
+    getAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests WHERE "validator" = ${validator}',
+
+    getAttributeValidationsRequestsForAttributeAndValidator :
+        'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator}',
+
+    getCompletedAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
+    'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id ' +
+    'WHERE avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})',
+
+    getIncompleteAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
+    'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ' +
+    'AND id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
+
+    // getCompletedAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
+    // 'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id WHERE avr.attribute_id = ${attribute_id}',
+    //
+    // getIncompleteAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
+    // 'WHERE avr.attribute_id = ${attribute_id} and id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
+
+    deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
+
+    countByRowId: 'SELECT COUNT("id")::int FROM attribute_validation_requests',
+
+    getAttributeValidationRequestsFiltered: function (params) {
+        return [
+            'SELECT * FROM attribute_validation_requests ',
+            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
+            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
+        ].filter(Boolean).join(' ');
+    },
+};
+
+var AttributeValidationsSql = {
+    sortFields: [
+        'id',
+        'attribute_validation_request_id',
+        'chunk',
+        'timestamp',
+        'expireTimestamp'
     ],
 
     getAttributeValidation: 'SELECT * FROM attribute_validations WHERE "id" = ${id}',
 
-    getAttributeValidations: 'SELECT * FROM attribute_validations WHERE "attribute_id" = ${id}',
+    getAttributeValidationList: 'SELECT * FROM attribute_validations WHERE "id" IN ${attribute_ids}',
 
-    getAttributeValidationsMadeBy : 'SELECT * FROM attribute_validations WHERE "validator" = ${validator}',
+    getAttributeValidationForRequest: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" = ANY(${requestIds}::int[])',
 
-    deleteAttributeValidation: 'DELETE FROM attribute_validations WHERE "id" = ${id};',
+    deleteAttributeValidation: 'DELETE FROM attribute_validations WHERE "id" = ${id}',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_validations'
 
 };
 
-module.exports =  { AttributeValidationsSql, AttributeTypesSql, AttributesSql }  ;
+module.exports =  { AttributeValidationRequestsSql, AttributeTypesSql, AttributesSql, AttributeValidationsSql }  ;
