@@ -5,6 +5,7 @@ let node = require('./../node.js');
 let sleep = require('sleep');
 let constants = require('../../helpers/constants.js');
 
+const APPLICANT = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
 const VALIDATOR = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
 const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
@@ -12,6 +13,9 @@ const DEFAULT_CHUNK = 7;
 const CHUNK = 8;
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
+const SLEEP_TIME = 10001; // in milliseconds
+
+const ADDRESS_VALUE = 'Denver';
 
 let transactionList = [];
 let ipfsTransaction = {};
@@ -83,7 +87,7 @@ describe('POST Create new attribute ( name )', function () {
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
@@ -113,7 +117,7 @@ describe('POST Create new attribute with value stored on ( name )', function () 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
 
             ipfsTransaction.transactionId = res.body.transactionId;
 
@@ -201,7 +205,7 @@ describe('POST Create attribute (name) for different owner', function () {
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
@@ -236,14 +240,14 @@ describe('POST Create a different attribute ( address )', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.value = 'Denver';
+        param.value = ADDRESS_VALUE;
         param.type = 'address';
 
         let request = createAttributeRequest(param);
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
@@ -277,7 +281,7 @@ describe('GET Existing attribute (address)', function () {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('Denver');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ADDRESS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
 
@@ -305,7 +309,7 @@ describe('GET All existing attributes for owner', function () {
             let values = [];
             values[0] = res.body.attributes[0].value;
             values[1] = res.body.attributes[1].value;
-            node.expect(values.indexOf('Denver') > -1);
+            node.expect(values.indexOf(ADDRESS_VALUE) > -1);
             node.expect(values.indexOf('QUEEN') > -1);
 
             let types = [];
@@ -352,7 +356,7 @@ describe('POST Create an attribute validation request', function () {
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
@@ -379,7 +383,7 @@ describe('POST Create another attribute validation request', function () {
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
@@ -480,7 +484,7 @@ describe('POST Create an attribute validation', function () {
         let request = createAttributeValidation(param);
         postAttributeValidation(request, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
-            sleep.msleep(10000);
+            sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidation);
@@ -669,6 +673,102 @@ describe('GET Attribute validation requests', function () {
     });
 });
 
+
+describe('POST Create an attribute share request', function () {
+
+    it('Create an attribute share request', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributesharerequest);
+            });
+            done();
+        });
+    });
+});
+
+describe('POST Create an attribute share request', function () {
+
+    it('Create an attribute share request - share request already exists', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('Applicant already has an active share request for the given attribute');
+            done();
+        });
+    });
+
+    it('Create an attribute share request - attribute does not exist', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'email';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('Attribute does not exist. Cannot create share request');
+            done();
+        });
+    });
+
+    it('Create an attribute share request - applicant is owner', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+        param.applicant = OWNER;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(false);
+            node.expect(res.body).to.have.property('error').to.be.eq('Owner cannot be the applicant of his own attribute');
+            done();
+        });
+    });
+});
+
+
+describe('GET Attribute share request', function () {
+
+    it('Attribute share request', function (done) {
+
+        let param = {};
+        param.applicant = APPLICANT;
+
+        getAttributeShareRequest(param, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('attribute_share_requests');
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
+            done();
+        });
+    });
+});
+
 /**
  * Utilities
  *
@@ -726,6 +826,23 @@ function createAttributeValidation(param) {
     return request;
 }
 
+function createAttributeShareRequest(param) {
+
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.share = [];
+    request.asset.share[0] = {};
+    request.asset.share[0].type = param.type ? param.type : "name";
+    request.asset.share[0].owner = param.owner ? param.owner : OWNER;
+    request.asset.share[0].applicant = param.applicant ? param.applicant : APPLICANT;
+    return request;
+}
+
 function getAttributeTypeByName(name, done) {
     node.get('/api/attributes/types?name=' + name, done);
 }
@@ -740,6 +857,10 @@ function postAttributeValidationRequest(params, done) {
 
 function postAttributeValidation(params, done) {
     node.post('/api/attributes/validation', params, done);
+}
+
+function postAttributeShareRequest(params, done) {
+    node.post('/api/attributes/sharerequest', params, done);
 }
 
 function getAttribute(owner, typeName, done) {
@@ -777,7 +898,22 @@ function getAttributeValidationRequest(params, done) {
 
 }
 
-function getAttributeValidation(params, done) {
+function getAttributeShareRequest(params, done) {
+    let url = '/api/attributes/sharerequest';
+    if (params.applicant || params.attribute_id) {
+        url += '?';
+    }
+    if (params.applicant) {
+        url += '&applicant=' + '' + params.applicant;
+    }
+    if (params.attribute_id) {
+        url += '&attribute_id=' + '' + params.attribute_id;
+    }
+    node.get(url, done);
+}
+
+
+    function getAttributeValidation(params, done) {
     let url = '/api/attributes/validation';
     if (params.validator || params.type || params.owner) {
         url += '?';

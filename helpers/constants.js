@@ -16,6 +16,7 @@ module.exports = {
 		register: 10000000,
 		verify: 10000000,
 		createattribute: 3,
+        attributesharerequest: 2,
 		attributevalidationrequest: 2,
 		attributevalidation: 1
 	},

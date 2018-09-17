@@ -34,6 +34,11 @@ function Attributes(cb, scope) {
         transactionTypes.ATTRIBUTE_VALIDATION, new AttributeValidation()
     );
 
+    let AttributeShareRequest = require('../logic/attributeShareRequest.js');
+    __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_SHARE] = library.logic.transaction.attachAssetType(
+        transactionTypes.REQUEST_ATTRIBUTE_SHARE, new AttributeShareRequest()
+    );
+
     return cb(null, self);
 }
 
@@ -64,6 +69,10 @@ Attributes.prototype.onBind = function (scope) {
     __private.assetTypes[transactionTypes.ATTRIBUTE_VALIDATION].bind({
         modules: modules, library: library
     });
+
+    __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_SHARE].bind({
+        modules: modules, library: library
+    });
 };
 
 Attributes.prototype.verify = function (req, cb) {
@@ -91,9 +100,11 @@ __private.attachApi = function () {
         'get /validationrequest': 'getRequestAttributeValidation',
         'get /validationrequest/completed': 'getCompletedAttributeValidationRequests',
         'get /validationrequest/incomplete': 'getIncompleteAttributeValidationRequests',
+        'get /sharerequest': 'getRequestAttributeShare',
         'get /validation': 'getAttributeValidations',
         'post /': 'addAttribute',
         'post /validationrequest': 'requestAttributeValidation',
+        'post /sharerequest': 'requestAttributeShare',
         'post /validation': 'validateAttribute',
     });
 
@@ -226,6 +237,63 @@ __private.getAttributeValidationRequestsByFilter = function (filter, cb) {
     });
 };
 
+__private.getAttributeShareRequestsByFilter = function (filter, cb) {
+    let params = {}, where = [];
+
+    if (filter.id >= 0) {
+        where.push('"id" = ${id}');
+        params.id = filter.id;
+    }
+
+    if (filter.applicant) {
+        where.push('"applicant" = ${applicant}');
+        params.applicant = filter.applicant;
+    }
+
+    if (filter.attribute_id) {
+        where.push('"attribute_id" = ${attribute_id}');
+        params.attribute_id = filter.attribute_id;
+    }
+
+    let orderBy = OrderBy(
+        filter.orderBy, {
+            sortFields: sql.AttributeShareRequestsSql.sortFields,
+            fieldPrefix: function (sortField) {
+                if (['id','attribute_id', 'applicant'].indexOf(sortField) > -1) {
+                    return sortField;
+                } else {
+                    return sortField;
+                }
+            }
+        }
+    );
+
+    if (orderBy.error) {
+        return cb(orderBy.error);
+    }
+
+
+    library.db.query(sql.AttributeShareRequestsSql.getAttributeShareRequestsFiltered({
+        where: where,
+    }), params).then(function (rows) {
+        let attributeShareRequests = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            attributeShareRequests.push(rows[i]);
+        }
+        let count = rows.length ? rows.length : 0;
+        let data = {};
+        if (count > 0) {
+            data.attributeShareRequests = attributeShareRequests;
+        }
+        data.count = count;
+        return cb(null, data);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb('attributeShareRequests#list error');
+    });
+};
+
 __private.listAttributeTypes = function (filter, cb) {
 
     library.db.query(sql.AttributeTypesSql.getAttributeTypesList({}), {}).then(function (rows) {
@@ -281,6 +349,24 @@ __private.getAttributeValidationRequests = function (filter, cb) {
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
         return cb('Attribute validation request# error');
+    })
+};
+
+__private.getAttributeShareRequests = function (filter, cb) {
+
+    library.db.query(sql.AttributeShareRequestsSql.getAttributeShareRequestsForAttributeAndApplicant,
+        {attribute_id: filter.attribute_id, applicant: filter.applicant}).then(function (rows) {
+
+        let data = {};
+        if (rows.length > 0) {
+            data = rows;
+            return cb(null, data);
+        }
+
+        return cb(null, null);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb('Attribute share request# error');
     })
 };
 
@@ -862,6 +948,127 @@ shared.requestAttributeValidation = function (req, cb) {
 };
 
 //
+//__API__ `requestAttributeShare`
+//
+
+shared.requestAttributeShare = function (req, cb) {
+    library.schema.validate(req.body, schema.requestAttributeShare, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.share) {
+            return cb('Share information is not provided. Nothing to do');
+        }
+
+        if (req.body.asset.share[0].owner === req.body.asset.share[0].applicant ) {
+            return cb('Owner cannot be the applicant of his own attribute');
+        }
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb('Invalid passphrase');
+            }
+        }
+
+        let reqGetAttributeType = req;
+        reqGetAttributeType.body.name = req.body.asset.share[0].type;
+        __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
+            if (err || !data.attribute_type) {
+                return cb('Attribute type does not exist');
+            }
+            let reqGetAttributesByFilter = req;
+            reqGetAttributesByFilter.body.owner = req.body.asset.share[0].owner;
+            reqGetAttributesByFilter.body.type = data.attribute_type.name;
+
+            __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
+                if (err || !data.attributes) {
+                    return cb('Attribute does not exist. Cannot create share request');
+                }
+                req.body.asset.share[0].attribute_id = data.attributes[0].id;
+                req.body.applicant = req.body.asset.share[0].applicant;
+                req.body.attribute_id = data.attributes[0].id;
+
+                __private.getAttributeShareRequests(req.body, function (err, attributeShareRequests) {
+
+                    if (err || attributeShareRequests) {
+                        return cb('Applicant already has an active share request for the given attribute');
+                    }
+
+                    modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        if (!requester) {
+                            return cb('Requester not found');
+                        }
+
+                        if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
+                            // TODO
+                        } else {
+                            modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+                                if (err) {
+                                    return cb(err);
+                                }
+
+                                if (!account || !account.publicKey) {
+                                    return cb('Account not found');
+                                }
+
+                                if (account.secondSignature && !req.body.secondSecret) {
+                                    return cb('Missing second passphrase');
+                                }
+
+                                var secondKeypair = null;
+
+                                if (account.secondSignature) {
+                                    secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
+                                }
+
+                                var transaction;
+
+                                try {
+                                    transaction = library.logic.transaction.create({
+                                        type: transactionTypes.REQUEST_ATTRIBUTE_SHARE,
+                                        amount: 0,
+                                        requester: requester,
+                                        sender: account,
+                                        asset : req.body.asset,
+                                        keypair: keypair,
+                                        secondKeypair: secondKeypair,
+                                        signature: req.body.signature
+                                    });
+                                    transaction.id = library.logic.transaction.getId(transaction);
+                                    if (req.body.asset) {
+                                        transaction.asset = req.body.asset;
+                                    }
+                                } catch (e) {
+                                    return cb(e.toString());
+                                }
+
+                                library.bus.message("transactionsReceived", [transaction], "api", function (err, transactions) {
+                                    if (err) {
+                                        return cb(err, transaction);
+                                    }
+                                    return cb(null, {transactionId: transactions[0].id});
+                                });
+
+                            });
+                        }
+                    });
+
+                });
+            });
+        });
+    });
+};
+
+//
 //__API__ `validateAttribute`
 //
 
@@ -1004,6 +1211,32 @@ shared.getRequestAttributeValidation = function (req, cb) {
     });
 };
 
+
+//
+//__API__ `getRequestAttributeValidation`
+//
+shared.getRequestAttributeShare = function (req, cb) {
+    library.schema.validate(req.body, schema.getRequestAttributeShare, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        __private.getAttributeShareRequestsByFilter(req.body, function (err, res) {
+            if (err) {
+                return cb('Failed to get attribute share requests : ' + err);
+            }
+
+            if (res.count === 0) {
+                return cb('No attribute share requests were found for the given parameters');
+            }
+
+            let resultData = {attribute_share_requests: res.attributeShareRequests};
+
+            return cb(null, resultData);
+        });
+    });
+};
+
 //
 //__API__ `getCompletedAttributeValidationRequests`
 //
@@ -1034,7 +1267,6 @@ shared.getCompletedAttributeValidationRequests = function (req, cb) {
 
     });
 };
-
 
 //
 //__API__ `getIncompleteAttributeValidationRequests`

@@ -252,4 +252,49 @@ module.exports = {
             }
         }
     },
+
+    requestAttributeShare: {
+        id: 'attributes.requestAttributeShare',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+
+    getRequestAttributeShare: {
+        id: 'attributes.getRequestAttributeShare',
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+                minimum: 0
+            },
+            applicant: {
+                type: 'string',
+                minLength: 1
+            },
+            attribute_id: {
+                type: 'integer',
+                minimum: 0
+            }
+        }
+    },
 };

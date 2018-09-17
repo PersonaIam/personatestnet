@@ -1,6 +1,6 @@
 'use strict';
 
-var AttributesSql = {
+let AttributesSql = {
     sortFields: [
         'id',
         'type',
@@ -29,10 +29,9 @@ var AttributesSql = {
             (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
         ].filter(Boolean).join(' ');
     },
-
 };
 
-var AttributeTypesSql = {
+let AttributeTypesSql = {
     sortFields: [
         'id',
         'name',
@@ -61,10 +60,9 @@ var AttributeTypesSql = {
             'SELECT id, name, data_type, validation, options FROM attribute_types'
         ].filter(Boolean).join(' ');
     },
-
 };
 
-var AttributeValidationRequestsSql = {
+let AttributeValidationRequestsSql = {
     sortFields: [
         'id',
         'attribute_id',
@@ -78,7 +76,7 @@ var AttributeValidationRequestsSql = {
 
     getAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests WHERE "validator" = ${validator}',
 
-    getAttributeValidationsRequestsForAttributeAndValidator :
+    getAttributeValidationsRequestsForAttributeAndValidator:
         'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator}',
 
     getCompletedAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
@@ -88,12 +86,6 @@ var AttributeValidationRequestsSql = {
     getIncompleteAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
     'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ' +
     'AND id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
-
-    // getCompletedAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
-    // 'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id WHERE avr.attribute_id = ${attribute_id}',
-    //
-    // getIncompleteAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests avr ' +
-    // 'WHERE avr.attribute_id = ${attribute_id} and id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
 
     deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
 
@@ -108,7 +100,7 @@ var AttributeValidationRequestsSql = {
     },
 };
 
-var AttributeValidationsSql = {
+let AttributeValidationsSql = {
     sortFields: [
         'id',
         'attribute_validation_request_id',
@@ -129,4 +121,37 @@ var AttributeValidationsSql = {
 
 };
 
-module.exports =  { AttributeValidationRequestsSql, AttributeTypesSql, AttributesSql, AttributeValidationsSql }  ;
+let AttributeShareRequestsSql = {
+
+    sortFields: [
+        'id',
+        'attribute_id',
+        'applicant',
+        'timestamp'
+    ],
+
+    getAttributeShareRequest: 'SELECT * FROM attribute_share_requests WHERE "id" = ${id}',
+
+    getAttributeShareRequestsForAttribute: 'SELECT * FROM attribute_share_requests WHERE "attribute_id" = ${attribute_id}',
+
+    getAttributeShareRequestsForApplicant: 'SELECT * FROM attribute_share_requests WHERE "applicant" = ${applicant}',
+
+    getAttributeShareRequestsForAttributeAndApplicant:
+        'SELECT * FROM attribute_share_requests WHERE "attribute_id" = ${attribute_id} AND "applicant" = ${applicant}',
+
+    deleteAttributeShareRequest: 'DELETE FROM attribute_share_requests WHERE "id" = ${id}',
+
+    countByRowId: 'SELECT COUNT("id")::int FROM attribute_share_requests',
+
+    getAttributeShareRequestsFiltered: function (params) {
+        return [
+            'SELECT * FROM attribute_share_requests ',
+            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
+            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
+        ].filter(Boolean).join(' ');
+    }
+};
+
+module.exports = {
+    AttributeValidationRequestsSql, AttributeTypesSql, AttributesSql, AttributeValidationsSql, AttributeShareRequestsSql
+};
