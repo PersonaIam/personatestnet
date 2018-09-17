@@ -6,8 +6,7 @@ module.exports = {
         type: 'object',
         properties: {
             files: {
-                type: 'string',
-                minLength: 1
+                type: 'object'
             },
         },
         required: ['files'],

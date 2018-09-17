@@ -54,7 +54,7 @@ __private.attachApi = function () {
     });
 };
 
-__private.addFilesToIpfs = function (files, cb) {
+__private.addFilesOnIpfs = function (files, cb) {
     try {
         const {path, content} = files;
 
@@ -156,8 +156,8 @@ shared.addFilesToIpfs = function (req, cb) {
     library.schema.validate(req.body, schema.addFilesToIpfs, function (err) {
         if (err) return cb(err[0].message);
 
-        __private.addFilesToIpfs(req.body.files, function (error, data) {
-            if (error) return (cb(error.message, null));
+        __private.addFilesOnIpfs(req.body.files, function (error, data) {
+            if (error) return (cb(error, null));
 
             return cb(null, data);
         });

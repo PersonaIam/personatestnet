@@ -14,6 +14,7 @@ const SECRET = "blade early broken display angry wine diary alley panda left spy
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
 
 let transactionList = [];
+let ipfsTransaction = {};
 
 
 describe('PUT /api/transactions', function () {
@@ -91,6 +92,70 @@ describe('POST Create new attribute ( name )', function () {
         });
     });
 });
+
+describe('POST Create new attribute with value stored on ( name )', function () {
+
+    it('Create new attribute with value stored on IPFS ( name )', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let params = {};
+        params.type = 'identity_card';
+        params.value = 'some_random_file_content';
+
+        let request = createAttributeRequest(params);
+
+        ipfsTransaction.req = request; // keep the original requested data
+
+        postAttribute(request, function (err, res) {
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(10000);
+
+            ipfsTransaction.transactionId = res.body.transactionId;
+
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+
+            done();
+        });
+    });
+});
+
+describe('GET transaction and check if it contains IPFS hash ( name )', function () {
+
+    it('Should have the IPFS hash as the attribute value ( name )', function (done) {
+        node.expect(ipfsTransaction).to.have.property('transactionId').to.be.a('string');
+
+        let transactionId = ipfsTransaction.transactionId;
+
+        getTransaction({ id: transactionId }, function (err, res) {
+            node.expect(res).to.have.property('body');
+            node.expect(res.body).to.have.property('success').to.be.eq(true);
+            node.expect(res.body).to.have.property('transaction');
+            node.expect(res.body.transaction).to.have.property('asset').to.be.a('object');
+            node.expect(res.body.transaction.asset).to.have.property('attribute').to.be.a('array');
+            node.expect(res.body.transaction.asset.attribute).to.have.length(1);
+            node.expect(res.body.transaction.asset.attribute[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.transaction.asset.attribute[0]).to.have.property('type').to.be.a('string');
+
+            let transaction = res.body.transaction;
+            let originalTransaction = ipfsTransaction.req;
+
+            node.expect(transaction.asset.attribute[0].value !== originalTransaction.asset.attribute[0].value);
+
+            ipfsTransaction.forged = res.body.transaction;
+
+            done();
+        });
+    });
+});
+
 
 describe('GET Existing attribute (name)', function () {
 
@@ -226,7 +291,7 @@ describe('GET All existing attributes for owner', function () {
     it('All existing attributes for owner', function (done) {
         getAttribute(OWNER, null, function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
-            node.expect(res.body.attributes).to.have.length(2);
+            node.expect(res.body.attributes).to.have.length(3);
 
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('owner').to.eq(OWNER);
@@ -264,7 +329,7 @@ describe('GET List of attributes', function () {
     it('List of attributes', function (done) {
         getAttributes(function (err, res) {
             node.expect(res.body).to.have.property('success').to.be.eq(true);
-            node.expect(res.body).to.have.property('count').to.be.eq(3);
+            node.expect(res.body).to.have.property('count').to.be.eq(4);
             done();
         });
     });
@@ -755,4 +820,8 @@ function getBalance(address, done) {
 
 function putTransaction (params, done) {
     node.put('/api/transactions', params, done);
+}
+
+function getTransaction (params, done) {
+    node.get(`/api/transactions/get?id=${params.id}`, done);
 }
