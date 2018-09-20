@@ -22,4 +22,18 @@ module.exports = {
         },
         required: ['hash'],
     },
+    getIpfsNodeInfo: {
+        id: 'ipfs.getIpfsNodeInfo',
+        type: 'object',
+    },
+    getIpfsNodeInfoResponse: {
+        id: 'ipfs.getIpfsNodeInfoResponse',
+        type: 'object',
+        properties: {
+            addresses: {
+                type: 'array',
+            },
+        },
+        required: ['addresses'],
+    },
 };

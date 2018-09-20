@@ -9,9 +9,9 @@
   "db": {
     "host": "localhost",
     "port": 5432,
-    "database": "pers_localnet",
-    "user": "vladtomsawork",
-    "password": "Qwerty123!@#",
+    "database": "persona_localnet",
+    "user": "postgres",
+    "password": "postgres",
     "poolSize": 20,
     "poolIdleTimeout": 30000,
     "reapIntervalMillis": 1000,

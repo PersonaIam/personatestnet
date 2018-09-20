@@ -119,6 +119,7 @@ __private.updatePeersList = function (cb) {
 						return eachCb();
 					} else {
 						self.accept(peer);
+                        modules.ipfs.accept(peer);
 						return eachCb();
 					}
 				});

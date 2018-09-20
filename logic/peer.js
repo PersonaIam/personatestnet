@@ -34,7 +34,7 @@ function Peer(ip, port, version, os){
 	this.os = os;
 	this.protocol = (port%1000)==443?"https":"http";
 	this.liteclient = port < 80;
-  this.websocketapi = false;
+	this.websocketapi = false;
 	this.status = "NEW";
 	this.publicapi = false;
 	this.blockheader;

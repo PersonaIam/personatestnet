@@ -1,13 +1,35 @@
 'use strict';
 
+const async = require('async');
 const schema = require('../schema/ipfs.js');
+const Router = require('../helpers/router.js');
 const slots = require('../helpers/slots.js');
 const sql = require('../sql/ipfs.js');
-const Router = require('../helpers/router.js');
+const {join} = require('path');
+const fs = require('fs-extra');
 const IPFS = require('ipfs');
+const IPFSApi = require('ipfs-api');
 const IPFSFactory = require('ipfsd-ctl');
+const differenceWith= require('lodash/differenceWith');
+
 const IPFS_FACTORY_OPTIONS = {
     type: 'js',
+    IpfsApi: IPFSApi,
+};
+
+const IPFS_PATH = join(process.env.PWD, '.ipfs-repo');
+
+const IPFS_DAEMON_CONFIG = {
+    init: false,
+    start: false,
+    disposable: false,
+    defaultAddrs: true,
+    repoPath: IPFS_PATH,
+};
+
+const IPFS_DAEMON_INITIALIZATION_CONFIG = {
+    directory: IPFS_PATH,
+    keysize: 4096,
 };
 
 // Private fields
@@ -36,6 +58,8 @@ __private.attachApi = function () {
     });
 
     router.map(shared, {
+        'get /': 'getIpfsNodeInfo',
+        'get /net': 'getIpfsNetwork',
         'get /fileByHash': 'getFileFromIpfs',
         'post /': 'addFilesToIpfs',
     });
@@ -51,6 +75,45 @@ __private.attachApi = function () {
         }
         library.logger.error('API error ' + req.url, err);
         res.status(500).send({success: false, error: 'API error: ' + err.message});
+    });
+};
+
+__private.cleanLocks = function (cb) {
+    // This fixes a bug on Windows, where the daemon seems
+    // not to be exiting correctly, hence the file is not
+    // removed.
+    const lockPath = join(IPFS_PATH, 'repo.lock');
+    const apiPath = join(IPFS_PATH, 'api');
+
+    if (fs.existsSync(lockPath)) {
+        try {
+            fs.unlinkSync(lockPath)
+        } catch (_) {
+            console.warn('Could not remove repo.lock. Daemon might be running')
+        }
+    }
+
+    if (fs.existsSync(apiPath)) {
+        try {
+            fs.unlinkSync(apiPath)
+        } catch (_) {
+            console.warn('Could not remove api. Daemon might be running')
+        }
+    }
+
+    cb();
+};
+
+__private.startIpfsDaemon = function () {
+    self.ipfsDaemon.start(function (err) {
+        if (err) {
+            return err;
+        }
+        else {
+            library.logger.info("# IPFS daemon started");
+            library.bus.message('IpfsStarted');
+            self.ipfsDaemon.api.bootstrap.rm({all: true});
+        }
     });
 };
 
@@ -150,6 +213,78 @@ __private.getFile = function (hash, cb) {
     });
 };
 
+__private.getPeerIpfsAddresses = function (peer, cb) {
+    modules.transport.requestFromPeer(
+        peer,
+        {
+            url: '/api/ipfs',
+            method: 'GET',
+            schema: schema.getIpfsNodeInfoResponse,
+        },
+        function (err, res) {
+            if (err) return cb(err);
+
+            return cb(null, res);
+        }
+    );
+};
+
+__private.bootstrapAddress = function (address, cb) {
+    try {
+        self.ipfsDaemon.api.bootstrap.add(address, (err) => {
+            if (err) return cb(err);
+
+            library.logger.info('# ' + address + ' bootstrap success');
+
+            self.ipfsDaemon.api.swarm.connect(address, (err) => {
+                if (err) {
+                    library.logger.info('# ' + err.message + ' connected success');
+                    self.ipfsDaemon.api.bootstrap.rm(address, (err, res) => library.logger.info('# ' + address + ' remove from bootstrap success'));
+                    return cb(err);
+                }
+
+                library.logger.info('# ' + address + ' connected success');
+
+                cb(null, address);
+            });
+        });
+    }
+    catch (e) {
+        cb(e);
+    }
+};
+
+__private.connectToAddresses = function (addresses, cb) {
+    self.ipfsDaemon.api.bootstrap.list((err, bootstrappedAddresses) => {
+        try {
+            if (err) return cb(err);
+
+            const { Peers } = bootstrappedAddresses;
+
+            // Filter existing addresses, add only new ones to ipfs bootstrap
+            const newAddresses = differenceWith(addresses, Peers, (address, peer) => address === peer);
+
+
+            if (newAddresses.length) {
+                const bootstrapTasks = newAddresses
+                    .map(address => (callback) => __private.bootstrapAddress(address, callback ));
+
+                async.parallel(
+                    bootstrapTasks,
+                    (err, results) => {
+                        if (err) return cb(err);
+
+                        cb(null, results);
+                    },
+                )
+            }
+        }
+        catch (e) {
+            cb(e);
+        }
+    });
+};
+
 //
 //__API__ `addFilesToIpfs`
 shared.addFilesToIpfs = function (req, cb) {
@@ -180,18 +315,57 @@ shared.getFileFromIpfs = function (req, cb) {
     });
 };
 
+shared.getIpfsNodeInfo = function (req, cb) {
+    library.schema.validate(req.body, schema.getIpfsNodeInfo, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        self.ipfsDaemon.api.id(function (err, data) {
+            if (err) return (cb(err.message, null));
+
+            return cb(null, data);
+        });
+    });
+};
+
+shared.getIpfsNetwork = function (req, cb) {
+    self.ipfsDaemon.api.swarm.peers((err, peers) => {
+        if (err) return cb(err);
+
+        cb(null, peers);
+    })
+};
+
 //
 //__EVENT__ `onStartIpfs`
 IPFSModule.prototype.onStartIpfs = function () {
     // Spawn an IPFS daemon
-    self.ipfsFactory.spawn((error, ipfsDaemon) => {
-        if (error) console.log(error);
+    __private.cleanLocks(function () {
+        self.ipfsFactory.spawn(IPFS_DAEMON_CONFIG, (error, ipfsDaemon) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
 
-        self.ipfsDaemon = ipfsDaemon;
+            self.ipfsDaemon = ipfsDaemon;
 
-        library.logger.info("# IPFS daemon started");
-        library.bus.message('IpfsStarted');
+            if (!self.ipfsDaemon.initialized) {
+                self.ipfsDaemon.init(IPFS_DAEMON_INITIALIZATION_CONFIG, function (err) {
+                    if (err) {
+                        console.log(err);
+                        return err;
+                    }
+
+                    __private.startIpfsDaemon();
+                })
+            }
+            else {
+                __private.startIpfsDaemon();
+            }
+        });
     });
+
 };
 
 //
@@ -210,7 +384,9 @@ IPFSModule.prototype.onAttachPublicApi = function () {
 IPFSModule.prototype.cleanup = function (cb) {
     if (self.ipfsDaemon) {
         library.logger.info('# Stopping IPFS daemon');
-        self.ipfsDaemon.stop();
+        __private.cleanLocks(function () {
+            self.ipfsDaemon.stop();
+        });
     }
 
     return cb();
@@ -231,6 +407,26 @@ IPFSModule.prototype.apply = function (queuedHash, cb) {
                 cb(null, res);
             });
         });
+    });
+};
+
+IPFSModule.prototype.accept = function (peer) {
+    __private.getPeerIpfsAddresses(peer, function (err, res) {
+        try {
+            if (err) {
+                library.logger.error(err.message);
+                return;
+            }
+
+            const {body: {addresses}} = res;
+
+            __private.connectToAddresses(addresses, function (err) {
+                library.logger.error(err.message);
+            });
+        }
+        catch (e) {
+            library.logger.error(err.message);
+        }
     });
 };
 
