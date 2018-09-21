@@ -1,5 +1,6 @@
 'use strict';
 
+const appRoot = require('app-root-path');
 const async = require('async');
 const schema = require('../schema/ipfs.js');
 const Router = require('../helpers/router.js');
@@ -17,7 +18,7 @@ const IPFS_FACTORY_OPTIONS = {
     IpfsApi: IPFSApi,
 };
 
-const IPFS_PATH = join(process.env.PWD, '.ipfs-repo');
+const IPFS_PATH = join(appRoot.path, '.ipfs-repo');
 
 const IPFS_DAEMON_CONFIG = {
     init: false,
