@@ -239,7 +239,7 @@ __private.bootstrapAddress = function (address, cb) {
 
             self.ipfsDaemon.api.swarm.connect(address, (err) => {
                 if (err) {
-                    library.logger.info('# ' + err.message + ' connected success');
+                    library.logger.info('# ' + err.message);
                     self.ipfsDaemon.api.bootstrap.rm(address, (err, res) => library.logger.info('# ' + address + ' remove from bootstrap success'));
                     return cb(err);
                 }
