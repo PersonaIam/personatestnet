@@ -182,8 +182,84 @@ module.exports = {
         },
         required: ['asset','secret','publicKey']
     },
-    getRequestAttributeValidation: {
-        id: 'attributes.getRequestAttributeValidation',
+    shareAttribute: {
+        id: 'attributes.shareAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+    approveShareAttribute: {
+        id: 'attributes.approveShareAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+    consumeAttribute: {
+        id: 'attributes.consumeAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
+            }
+        },
+        required: ['asset','secret','publicKey']
+    },
+
+    getAttributeValidationRequests: {
+        id: 'attributes.getAttributeValidationRequests',
         type: 'object',
         properties: {
             id: {
@@ -194,7 +270,12 @@ module.exports = {
                 type: 'string',
                 minLength: 1
             },
-            attribute_id: {
+            owner: {
+                type: 'string',
+                minLength: 1,
+                format: 'address'
+            },
+            type: {
                 type: 'integer',
                 minimum: 0
             }
@@ -252,7 +333,6 @@ module.exports = {
             }
         }
     },
-
     requestAttributeShare: {
         id: 'attributes.requestAttributeShare',
         type: 'object',
@@ -296,5 +376,53 @@ module.exports = {
                 minimum: 0
             }
         }
+    },
+
+    getAttributeShare: {
+        id: 'attributes.getAttributeShare',
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+                minimum: 0
+            },
+            attribute_id: {
+                type: 'integer',
+                minimum: 0
+            }
+        }
+    },
+
+    getAttributeConsumption: {
+        id: 'attributes.getAttributeConsumption',
+        type: 'object',
+        properties: {
+            id: {
+                type: 'integer',
+                minimum: 0
+            },
+            attribute_id: {
+                type: 'integer',
+                minimum: 0
+            },
+            type: {
+                type: 'string',
+                minLength: 1,
+            },
+            owner: {
+                type: 'string',
+                minLength: 1,
+                format: 'address'
+            },
+            before: {
+                type: 'integer',
+                minimum: 0
+            },
+            after: {
+                type: 'integer',
+                minimum: 0
+            }
+        },
+        required: ['type', 'owner']
     },
 };

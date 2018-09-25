@@ -76,6 +76,9 @@ let AttributeValidationRequestsSql = {
 
     getAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests WHERE "validator" = ${validator}',
 
+    getAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
+    'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ',
+
     getAttributeValidationsRequestsForAttributeAndValidator:
         'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator}',
 
@@ -127,8 +130,11 @@ let AttributeShareRequestsSql = {
         'id',
         'attribute_id',
         'applicant',
+        'status',
         'timestamp'
     ],
+
+    updateShareRequest: 'UPDATE attribute_share_requests SET status = ${status} WHERE id = ${id}',
 
     getAttributeShareRequest: 'SELECT * FROM attribute_share_requests WHERE "id" = ${id}',
 
@@ -152,6 +158,59 @@ let AttributeShareRequestsSql = {
     }
 };
 
+
+let AttributeSharesSql = {
+
+    sortFields: [
+        'id',
+        'attribute_id',
+        'applicant',
+        'timestamp'
+    ],
+
+    getAttributeShare: 'SELECT * FROM attribute_shares WHERE "id" = ${id}',
+
+    getAttributeShareNoValue: 'SELECT id,attribute_id,applicant,timestamp FROM attribute_shares WHERE "id" = ${id}',
+
+    countByRowId: 'SELECT COUNT("id")::int FROM attribute_shares',
+
+    getAttributeSharesFiltered: function (params) {
+        return [
+            'SELECT id, attribute_id, applicant, timestamp FROM attribute_shares ',
+            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
+            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
+        ].filter(Boolean).join(' ');
+    }
+};
+
+
+let AttributeConsumptionsSql = {
+
+    sortFields: [
+        'id',
+        'attribute_id',
+        'timestamp'
+    ],
+
+    getAttributeConsumptions : 'SELECT * FROM attribute_consumptions WHERE "id" = ${id}',
+
+    countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
+
+    getAttributeConsumptionsFiltered: function (params) {
+        return [
+            'SELECT * FROM attribute_consumptions ',
+            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
+            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
+        ].filter(Boolean).join(' ');
+    }
+};
+
 module.exports = {
-    AttributeValidationRequestsSql, AttributeTypesSql, AttributesSql, AttributeValidationsSql, AttributeShareRequestsSql
+    AttributeValidationRequestsSql,
+    AttributeTypesSql,
+    AttributesSql,
+    AttributeValidationsSql,
+    AttributeShareRequestsSql,
+    AttributeSharesSql,
+    AttributeConsumptionsSql
 };
