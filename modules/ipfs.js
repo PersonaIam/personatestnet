@@ -8,14 +8,15 @@ const slots = require('../helpers/slots.js');
 const sql = require('../sql/ipfs.js');
 const {join} = require('path');
 const fs = require('fs-extra');
-const IPFS = require('ipfs');
+const IPFS = require('go-ipfs-dep');
 const IPFSApi = require('ipfs-api');
 const IPFSFactory = require('ipfsd-ctl');
 const differenceWith= require('lodash/differenceWith');
 
 const IPFS_FACTORY_OPTIONS = {
-    type: 'js',
+    type: 'go',
     IpfsApi: IPFSApi,
+    Bootstrap: [],
 };
 
 const IPFS_PATH = join(appRoot.path, '.ipfs-repo');
@@ -26,6 +27,7 @@ const IPFS_DAEMON_CONFIG = {
     disposable: false,
     defaultAddrs: true,
     repoPath: IPFS_PATH,
+    Bootstrap: [],
 };
 
 const IPFS_DAEMON_INITIALIZATION_CONFIG = {
@@ -358,6 +360,7 @@ IPFSModule.prototype.onStartIpfs = function () {
                         return err;
                     }
 
+                    fs.copySync(`${appRoot.path}/swarm.key`, `${IPFS_PATH}/swarm.key`);
                     __private.startIpfsDaemon();
                 })
             }
