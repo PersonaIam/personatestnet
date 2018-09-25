@@ -18,7 +18,10 @@ module.exports = {
 		createattribute: 3,
         attributesharerequest: 2,
 		attributevalidationrequest: 2,
-		attributevalidation: 1
+		attributevalidation: 1,
+		attributeshare: 1,
+		attributeshareapproval: 1,
+		attributeconsume: 1
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,
@@ -46,6 +49,11 @@ module.exports = {
 		distance: 7889400, // Distance between each milestone - 7889400 = 2 years
 	},
 	signatureLength: 196,
+	shareStatus : {
+		UNAPPROVED : 0,
+		APPROVED : 1,
+		COMPLETED : 2
+	},
 	totalAmount: 6677610400000000,
 	unconfirmedTransactionTimeOut: 10800 // 1080 blocks
 };
