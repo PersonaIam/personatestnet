@@ -426,7 +426,7 @@ IPFSModule.prototype.accept = function (peer) {
             });
         }
         catch (e) {
-            library.logger.error(err.message);
+            library.logger.error(err.message ? err.message : err);
         }
     });
 };
