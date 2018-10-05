@@ -11,6 +11,8 @@ let AttributesSql = {
 
     deleteAttribute: 'DELETE FROM attributes WHERE "id" = ${id};',
 
+    activateAttribute: 'UPDATE attributes SET active = 1 WHERE "id" = ${id};',
+
     countByRowId: 'SELECT COUNT("id")::int FROM attributes',
 
     insert: 'INSERT INTO attributes ' +
@@ -114,7 +116,13 @@ let AttributeValidationsSql = {
 
     getAttributeValidation: 'SELECT * FROM attribute_validations WHERE "id" = ${id}',
 
+    getAttributeValidationBetween: 'SELECT * FROM attribute_validations av JOIN attribute_validation_requests avr ' +
+    'ON avr.id=av.attribute_validation_request_id WHERE av.timestamp BETWEEN ${after} and ${before}',
+
     getAttributeValidationList: 'SELECT * FROM attribute_validations WHERE "id" IN ${attribute_ids}',
+
+    getAttributeValidationsForAttribute: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" IN ' +
+    ' (SELECT id from attribute_validation_requests WHERE "attribute_id" = ${attribute_id})',
 
     getAttributeValidationForRequest: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" = ANY(${requestIds}::int[])',
 
@@ -189,10 +197,18 @@ let AttributeConsumptionsSql = {
     sortFields: [
         'id',
         'attribute_id',
-        'timestamp'
+        'timestamp',
+        'amount'
     ],
 
     getAttributeConsumptions : 'SELECT * FROM attribute_consumptions WHERE "id" = ${id}',
+
+    getLastReward : 'SELECT * FROM transactions WHERE "type" = ${type} order by timestamp DESC limit 1',
+
+    getAttributeConsumptionsForRewardsMadeBetween : 'SELECT ac.id,ac.attribute_id,ac.amount,avr.validator,av.chunk FROM attribute_consumptions ac ' +
+    'RIGHT OUTER JOIN attribute_validation_requests avr ON ac.attribute_id = avr.attribute_id ' +
+    'RIGHT OUTER JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id ' +
+    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ${before} AND av.timestamp >= ${after}',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
 
@@ -205,6 +221,28 @@ let AttributeConsumptionsSql = {
     }
 };
 
+
+let AttributeRewardsSql = {
+
+    sortFields: [
+        'id',
+        'timestamp',
+        'status'
+    ],
+
+    getLastRewardRound : 'SELECT * FROM reward_rounds order by "timestamp" DESC limit 1',
+
+    getLastRewardRoundByStatus : 'SELECT * FROM reward_rounds WHERE "status" = ${status} order by "timestamp" DESC limit 1',
+
+    countByRowId: 'SELECT COUNT("id")::int FROM reward_rounds',
+
+    getConsumptionsBetween : 'SELECT "attribute_id","amount" from attribute_consumptions where "timestamp" BETWEEN ${after} AND ${before}',
+
+    getRewardsBetween : 'SELECT * from transactions where "type" = ${type} AND "timestamp" BETWEEN ${after} AND ${before}',
+
+};
+
+
 module.exports = {
     AttributeValidationRequestsSql,
     AttributeTypesSql,
@@ -212,5 +250,6 @@ module.exports = {
     AttributeValidationsSql,
     AttributeShareRequestsSql,
     AttributeSharesSql,
-    AttributeConsumptionsSql
+    AttributeConsumptionsSql,
+    AttributeRewardsSql
 };

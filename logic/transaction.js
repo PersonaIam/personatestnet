@@ -49,14 +49,14 @@ Transaction.prototype.create = function (data) {
 
 	var trs = {
 		type: data.type,
-		amount: 0,
+		amount: data.amount ? data.amount : 0,
+		recipientId: data.recipientId,
 		senderPublicKey: data.sender.publicKey,
 		requesterPublicKey: data.requester ? data.requester.publicKey.toString('hex') : null,
-		timestamp: slots.getTime(),
+		timestamp: data.timestamp ? data.timestamp : slots.getTime(),
 		vendorField: data.vendorField,
 		asset: data.asset
 	};
-
     trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
     trs.signature = this.sign(data.keypair, trs);
     if (data.sender.secondSignature && data.secondKeypair) {

@@ -7,10 +7,11 @@ module.exports = {
 		properties: {
 			owner: {
 				type: 'string',
-				minLength: 1
+				minLength: 1,
+                format: 'address'
 			},
             type: {
-                type: 'integer',
+                type: 'string',
                 minimum: 1
             },
             value: {
@@ -66,11 +67,13 @@ module.exports = {
         type: 'object',
         properties: {
             owner: {
+
                 type: 'string',
                 minLength: 1,
                 format: 'address'
             },
             type: {
+                type: 'string',
                 minLength: 1
             },
             timestamp: {
@@ -253,6 +256,36 @@ module.exports = {
             asset:{
                 type: 'object',
                 minLength: 1
+            },
+            amount: {
+                type: 'integer',
+                minimum: 1
+            },
+        },
+        required: ['asset','secret','publicKey','amount']
+    },
+
+    activateAttribute: {
+        id: 'attributes.activateAttribute',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset:{
+                type: 'object',
+                minLength: 1
             }
         },
         required: ['asset','secret','publicKey']
@@ -268,7 +301,8 @@ module.exports = {
             },
             validator: {
                 type: 'string',
-                minLength: 1
+                minLength: 1,
+                format: 'address'
             },
             owner: {
                 type: 'string',
@@ -276,8 +310,8 @@ module.exports = {
                 format: 'address'
             },
             type: {
-                type: 'integer',
-                minimum: 0
+                type: 'string',
+                minLength: 1,
             }
         }
     },
@@ -287,7 +321,8 @@ module.exports = {
         properties: {
             validator: {
                 type: 'string',
-                minLength: 1
+                minLength: 1,
+                format: 'address'
             },
             type: {
                 type: 'string',
@@ -295,7 +330,8 @@ module.exports = {
             },
             owner: {
                 type: 'string',
-                minLength: 1
+                minLength: 1,
+                format: 'address'
             },
         }
     },
@@ -305,7 +341,8 @@ module.exports = {
         properties: {
             validator: {
                 type: 'string',
-                minLength: 1
+                minLength: 1,
+                format: 'address'
             },
             type: {
                 type: 'string',
@@ -313,7 +350,8 @@ module.exports = {
             },
             owner: {
                 type: 'string',
-                minLength: 1
+                minLength: 1,
+                format: 'address'
             },
         }
     },
@@ -323,15 +361,33 @@ module.exports = {
         type: 'object',
         properties: {
             type: {
+                type: 'string',
                 minLength: 1
             },
             owner: {
-                type: 'string'
+                type: 'string',
+                format: 'address'
             },
             validator: {
-                type: 'string'
+                type: 'string',
+                format: 'address'
             }
         }
+    },
+    getAttributeValidationScore: {
+        id: 'attributes.getAttributeValidationScore',
+        type: 'object',
+        properties: {
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                format: 'address'
+            }
+        },
+        required: ['type','owner']
     },
     requestAttributeShare: {
         id: 'attributes.requestAttributeShare',
@@ -369,12 +425,17 @@ module.exports = {
             },
             applicant: {
                 type: 'string',
+                minLength: 1,
+                format: 'address'
+            },
+            type: {
+                type: 'string',
                 minLength: 1
             },
-            attribute_id: {
-                type: 'integer',
-                minimum: 0
-            }
+            owner: {
+                type: 'string',
+                format: 'address'
+            },
         }
     },
 
@@ -386,10 +447,18 @@ module.exports = {
                 type: 'integer',
                 minimum: 0
             },
-            attribute_id: {
-                type: 'integer',
-                minimum: 0
-            }
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                format: 'address'
+            },
+            applicant: {
+                type: 'string',
+                format: 'address'
+            },
         }
     },
 
@@ -398,10 +467,6 @@ module.exports = {
         type: 'object',
         properties: {
             id: {
-                type: 'integer',
-                minimum: 0
-            },
-            attribute_id: {
                 type: 'integer',
                 minimum: 0
             },
@@ -425,4 +490,70 @@ module.exports = {
         },
         required: ['type', 'owner']
     },
+
+    runRewardRound: {
+        id: 'attributes.runRewardRound',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            }
+        },
+        required: ['secret','publicKey']
+    },
+
+    updateRewardRound: {
+        id: 'attributes.updateRewardRound',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            }
+        },
+        required: ['secret','publicKey']
+    },
+
+    getLastRewardRound: {
+        id: 'attributes.getLastRewardRound',
+        type: 'object',
+        properties: {
+            secret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            }
+        },
+        required: ['secret','publicKey']
+    }
 };

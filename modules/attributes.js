@@ -3,14 +3,14 @@
 let Router = require('../helpers/router.js');
 let OrderBy = require('../helpers/orderBy.js');
 let schema = require('../schema/attributes.js');
-// let slots = require('../helpers/slots.js');
+let slots = require('../helpers/slots.js');
 let sql = require('../sql/attributes.js');
 let attributedHelper = require('../helpers/attributes.js');
 let transactionTypes = require('../helpers/transactionTypes.js');
 let messages = require('../helpers/messages.js');
 let async = require('async');
 let constants = require('../helpers/constants.js');
-let persona = require('personajs');
+let _ = require('lodash')
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -56,6 +56,27 @@ function Attributes(cb, scope) {
     __private.assetTypes[transactionTypes.CONSUME_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.CONSUME_ATTRIBUTE, new AttributeConsume()
     );
+
+    let AttributeActivate = require('../logic/attributeActivation.js');
+    __private.assetTypes[transactionTypes.ATTRIBUTE_ACTIVATION] = library.logic.transaction.attachAssetType(
+        transactionTypes.ATTRIBUTE_ACTIVATION, new AttributeActivate()
+    );
+
+    let RewardRound = require('../logic/rewardRound.js');
+    __private.assetTypes[transactionTypes.RUN_REWARD_ROUND] = library.logic.transaction.attachAssetType(
+        transactionTypes.RUN_REWARD_ROUND, new RewardRound()
+    );
+
+    let Reward = require('../logic/reward.js');
+    __private.assetTypes[transactionTypes.REWARD] = library.logic.transaction.attachAssetType(
+        transactionTypes.REWARD, new Reward()
+    );
+
+    let UpdateRewardRound = require('../logic/updateRewardRound.js');
+    __private.assetTypes[transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE] = library.logic.transaction.attachAssetType(
+        transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE, new UpdateRewardRound()
+    );
+
 
     return cb(null, self);
 }
@@ -104,6 +125,22 @@ Attributes.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
+    __private.assetTypes[transactionTypes.RUN_REWARD_ROUND].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.REWARD].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.ATTRIBUTE_ACTIVATION].bind({
+        modules: modules, library: library
+    });
+
 };
 
 Attributes.prototype.verify = function (req, cb) {
@@ -147,7 +184,13 @@ __private.attachApi = function () {
         'post /share': 'shareAttribute',
 
         'post /consume': 'consumeAttribute',
-        'get /consume': 'getAttributeConsumptions'
+        'get /consume': 'getAttributeConsumptions',
+
+        'post /runrewardround': 'runRewardRound',
+        'post /updaterewardround': 'updateRewardRound',
+
+        'get /validationscore': 'getAttributeValidationScore',
+        'post /activate': 'activateAttribute'
     });
 
     router.use(function (req, res, next) {
@@ -211,9 +254,7 @@ __private.getAttributesByFilter = function (filter, cb) {
         }
         let count = rows.length ? rows.length : 0;
         let data = {};
-        if (count > 0) {
-            data.attributes = attributes;
-        }
+        data.attributes = attributes;
         data.count = count;
         return cb(null, data);
     }).catch(function (err) {
@@ -398,7 +439,6 @@ __private.getAttributeConsumptionsByFilter = function (filter, cb) {
     });
 };
 
-
 __private.getAttributeSharesByFilter = function (filter, cb) {
     let params = {}, where = [];
 
@@ -513,6 +553,27 @@ __private.getAttributeValidationRequests = function (filter, cb) {
     })
 };
 
+__private.getAttributeValidationScore = function (filter, cb) {
+
+    library.db.query(sql.AttributeValidationsSql.getAttributeValidationsForAttribute,
+        {attribute_id: filter.attribute_id}).then(function (rows) {
+
+        let attributeValidationScore = {};
+        let score = 0;
+        if (rows.length > 0) {
+            for (let i = 0; i < rows.length; i++) {
+                score += rows[i].chunk;
+            }
+
+        }
+        attributeValidationScore.score = score;
+        return cb(null, attributeValidationScore);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
 __private.getAttributeShareRequests = function (filter, cb) {
 
     library.db.query(sql.AttributeShareRequestsSql.getAttributeShareRequestsForAttributeAndApplicant,
@@ -568,7 +629,8 @@ __private.getAttributeValidationsForRequests = function (filter, cb) {
 
         let data = {};
         if (rows.length > 0) {
-            data = rows;
+            data.count = rows.length;
+            data.attribute_validations = rows;
             return cb(null, data);
         }
 
@@ -577,6 +639,107 @@ __private.getAttributeValidationsForRequests = function (filter, cb) {
         library.logger.error("stack", err.stack);
         return cb(err.message);
     })
+};
+
+
+__private.getLastRewardRound = function (filter, cb) {
+
+    library.db.query(sql.AttributeRewardsSql.getLastRewardRound,
+        {}).then(function (rows) {
+
+        let data = {};
+        if (rows.length > 0) {
+            data.rewardRound = rows[0];
+        }
+
+        return cb(null, data);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
+__private.getLastCompletedRewardRound = function (filter, cb) {
+
+    library.db.query(sql.AttributeRewardsSql.getLastRewardRoundByStatus,
+        {status: 'COMPLETE'}).then(function (rows) {
+
+        let data = {};
+        if (rows.length > 0) {
+            data.rewardRound = rows[0];
+        }
+
+        return cb(null, data);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
+__private.getUnrewardedConsumptionCalculation = function (filter, cb) {
+
+    let unrewardedAttributeConsumptions = [];
+    const lastRewardRoundTimestamp = filter.lastRewardRoundTimestamp;
+    const timestamp = filter.timestamp;
+
+    library.db.query(sql.AttributeConsumptionsSql.getAttributeConsumptionsForRewardsMadeBetween,
+        {before: timestamp, after: lastRewardRoundTimestamp})
+        .then(function (attributeConsumptionsForRewards) {
+
+            library.db.query(sql.AttributeRewardsSql.getRewardsBetween,
+                {
+                    before: timestamp,
+                    after: lastRewardRoundTimestamp,
+                    type: transactionTypes.REWARD
+                }).then(function (rewardTransactions) {
+                let rewards = rewardTransactions.map(tr => {
+                    return tr.asset.reward;
+                });
+                attributeConsumptionsForRewards.forEach(i => {
+                    let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.validator_id === i.validator);
+                    if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
+                        let validationsForConsumption = attributeConsumptionsForRewards.filter(k => k.id === i.id);
+                        let sumOfChunksForConsumption = validationsForConsumption.reduce(function (a, b) {
+                            return a + b.chunk;
+                        }, 0);
+                        unrewardedAttributeConsumptions.push({
+                            recipient: i.validator,
+                            amount: (i.amount * i.chunk / sumOfChunksForConsumption)
+                        });
+                    }
+                })
+                return cb(null, {unrewardedAttributeConsumptions: unrewardedAttributeConsumptions});
+            });
+
+        }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
+__private.distributeRewards = function (req, keypair, cb) {
+
+    __private.getUnrewardedConsumptionCalculation(req, function (err, res) {
+
+        res.unrewardedAttributeConsumptions.forEach(reward => {
+                req.body.asset = {recipient: reward.recipient, amount: reward.amount};
+                req.body.amount = reward.amount;
+                req.body.recipientId = reward.recipient;
+                __private.buildTransaction({
+                        req: req,
+                        keypair: keypair,
+                        transactionType: transactionTypes.REWARD
+                    },
+                    function (err, resultData) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                    });
+            }
+        );
+        return cb(null, {});
+    });
 };
 
 __private.createAttributeType = function (filter, cb) {
@@ -596,32 +759,6 @@ __private.createAttributeType = function (filter, cb) {
         }
 
         return cb(null, data);
-    }).catch(function (err) {
-        library.logger.error("stack", err.stack);
-        return cb(err.message);
-    })
-};
-
-__private.addAttribute = function (filter, cb) {
-
-    let params = {};
-    params.type = filter.type;
-    params.owner = filter.owner;
-    params.timestamp = filter.timestamp;
-    params.value = filter.value;
-    if (filter.active) {
-        params.active = filter.active;
-    } else {
-        params.active = 0;
-    }
-
-    library.db.query(sql.AttributesSql.insert, params).then(function (rows, err) {
-
-        if (err) {
-            return cb(err);
-        }
-
-        return cb(null, {attribute: rows[0]});
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
         return cb(err.message);
@@ -681,7 +818,7 @@ __private.buildTransaction = function (params, cb) {
         }
 
         if (!requester) {
-            return cb('Requester not found');
+            return cb('Requester zzz not found');
         }
 
         if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
@@ -705,24 +842,25 @@ __private.buildTransaction = function (params, cb) {
                 if (account.secondSignature) {
                     secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
                 }
-
                 let transaction;
-
                 try {
                     transaction = library.logic.transaction.create({
                         type: transactionType,
-                        amount: 0,
+                        amount: req.body.amount,
+                        recipientId: req.body.recipientId,
                         requester: requester,
                         sender: account,
                         asset: req.body.asset,
                         keypair: keypair,
                         secondKeypair: secondKeypair,
-                        signature: req.body.signature
+                        signature: req.body.signature,
+                        timestamp: req.body.timestamp
                     });
                     transaction.id = library.logic.transaction.getId(transaction);
                     if (req.body.asset) {
                         transaction.asset = req.body.asset;
                     }
+
                 } catch (e) {
                     return cb(e.toString());
                 }
@@ -806,9 +944,6 @@ shared.getAttributeType = function (req, cb) {
     });
 };
 
-//
-//__API__ `getAttribute`
-
 shared.getAttribute = function (req, cb) {
     library.schema.validate(req.body, schema.getAttribute, function (err) {
         if (err) {
@@ -824,7 +959,7 @@ shared.getAttribute = function (req, cb) {
             }
 
             let resultData = {attributes: data.attributes};
-            if (data.count > 1) {
+            if (data.count > 0) {
                 resultData.count = data.count;
             }
             return cb(null, resultData);
@@ -875,7 +1010,11 @@ shared.addAttribute = function (req, cb) {
             reqGetAttributesByFilter.body.owner = owner;
 
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || data.attributes) {
+                if (err) {
+                    return cb(err);
+                }
+
+                if (data.attributes && data.attributes.length > 0) {
                     return cb(messages.ATTRIBUTE_ALREADY_EXISTS);
                 }
 
@@ -1030,7 +1169,11 @@ shared.requestAttributeValidation = function (req, cb) {
             reqGetAttributesByFilter.body.type = data.attribute_type.name;
 
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
+                if (err) {
+                    return cb(err);
+                }
+
+                if (!data.attributes || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
                 req.body.asset.validation[0].attribute_id = data.attributes[0].id;
@@ -1039,10 +1182,13 @@ shared.requestAttributeValidation = function (req, cb) {
 
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
 
-                    if (err || attributeValidationRequests) {
-                        return cb('Validator already has an active Validation Request for the given attribute');
+                    if (err) {
+                        return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
                     }
 
+                    if (attributeValidationRequests) {
+                        return cb(messages.VALIDATOR_ALREADY_HAS_VALIDATION_REQUEST);
+                    }
                     __private.buildTransaction({
                             req: req,
                             keypair: keypair,
@@ -1104,8 +1250,11 @@ shared.requestAttributeShare = function (req, cb) {
             reqGetAttributesByFilter.body.type = data.attribute_type.name;
 
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND_FOR_SHARE_REQUEST);
+                if (err) {
+                    return cb(err);
+                }
+                if (!data.attributes || data.attributes.length === 0) {
+                    return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
                 req.body.asset.share[0].attribute_id = data.attributes[0].id;
                 req.body.applicant = req.body.asset.share[0].applicant;
@@ -1207,7 +1356,6 @@ shared.validateAttribute = function (req, cb) {
                                 }
                                 return cb(null, resultData);
                             });
-
                     });
                 });
             });
@@ -1379,7 +1527,6 @@ shared.shareAttribute = function (req, cb) {
     });
 };
 
-
 shared.consumeAttribute = function (req, cb) {
     library.schema.validate(req.body, schema.consumeAttribute, function (err) {
         if (err) {
@@ -1415,10 +1562,15 @@ shared.consumeAttribute = function (req, cb) {
             reqGetAttributesByFilter.body.type = req.body.asset.attribute[0].type;
 
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
+                if (err) {
+                    return cb(err);
+                }
+                if (!data.attributes || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
+
                 req.body.asset.attribute_id = data.attributes[0].id;
+                req.body.recipientId = constants.REWARD_FAUCET;
 
                 __private.buildTransaction({
                         req: req,
@@ -1437,21 +1589,106 @@ shared.consumeAttribute = function (req, cb) {
     });
 };
 
+
+shared.activateAttribute = function (req, cb) {
+    library.schema.validate(req.body, schema.activateAttribute, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.attribute) {
+            return cb('Attribute to be activated is not provided');
+        }
+
+        if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
+            return cb('Owner address is incorrect');
+        }
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        let reqGetAttributeType = req;
+        reqGetAttributeType.body.name = req.body.asset.attribute[0].type;
+        __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
+            if (err || !data.attribute_type) {
+                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+            }
+            let reqGetAttributesByFilter = req;
+            reqGetAttributesByFilter.body.owner = req.body.asset.attribute[0].owner;
+            reqGetAttributesByFilter.body.type = req.body.asset.attribute[0].type;
+
+            __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
+                if (err) {
+                    return cb(err);
+                }
+                if (!data.attributes || data.attributes.length === 0) {
+                    return cb(messages.ATTRIBUTE_NOT_FOUND);
+                }
+                req.body.asset.attribute_id = data.attributes[0].id;
+
+                __private.getAttributeValidationScore({
+                        attribute_id: data.attributes[0].id
+                    },
+                    function (err, res) {
+
+                        if (res.score < constants.VALIDATIONS_REQUIRED) {
+                            return cb(messages.VALIDATION_SCORE_IS_TOO_LOW);
+                        }
+
+                        __private.buildTransaction({
+                                req: req,
+                                keypair: keypair,
+                                transactionType: transactionTypes.ATTRIBUTE_ACTIVATION
+                            },
+                            function (err, resultData) {
+                                if (err) {
+                                    return cb(err);
+                                }
+                                return cb(null, resultData);
+                            });
+                    });
+            });
+        });
+    });
+};
+
 shared.getRequestAttributeShare = function (req, cb) {
     library.schema.validate(req.body, schema.getRequestAttributeShare, function (err) {
         if (err) {
             return cb(err[0].message);
         }
 
-        __private.getAttributeShareRequestsByFilter(req.body, function (err, res) {
+        if (!(req.body.applicant || (req.body.type && req.body.owner))) {
+            return cb(messages.INCORRECT_SHARE_PARAMETERS);
+        }
 
-            if (err || res.count === 0) {
-                return cb(messages.ATTRIBUTE_SHARE_REQUESTS_NOT_FOUND);
+        __private.getAttributesByFilter(req.body, function (err, res1) {
+
+            if (res1 && res1.attributes && req.body.type && req.body.owner) {
+                req.body.attribute_id = res1.attributes[0].id;
             }
 
-            let resultData = {attribute_share_requests: res.attributeShareRequests};
+            if (res1 && !res1.attributes && req.body.type && req.body.owner) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND)
+            }
 
-            return cb(null, resultData);
+            __private.getAttributeShareRequestsByFilter(req.body, function (err, res) {
+
+                if (err || res.count === 0) {
+                    return cb(messages.ATTRIBUTE_SHARE_REQUESTS_NOT_FOUND);
+                }
+
+                let resultData = {attribute_share_requests: res.attributeShareRequests, count: res.count};
+
+                return cb(null, resultData);
+            });
         });
     });
 };
@@ -1462,14 +1699,29 @@ shared.getShareAttribute = function (req, cb) {
             return cb(err[0].message);
         }
 
-        __private.getAttributeSharesByFilter(req.body, function (err, res) {
-            if (err || res.count === 0) {
-                return cb(messages.ATTRIBUTE_SHARES_NOT_FOUND);
+        if (!(req.body.applicant || (req.body.type && req.body.owner))) {
+            return cb(messages.INCORRECT_SHARE_PARAMETERS);
+        }
+
+        __private.getAttributesByFilter(req.body, function (err, res1) {
+
+            if (res1 && res1.attributes && req.body.type && req.body.owner) {
+                req.body.attribute_id = res1.attributes[0].id;
             }
 
-            let resultData = {attribute_shares: res.attributeShares};
+            if (res1 && !res1.attributes && req.body.type && req.body.owner) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND)
+            }
 
-            return cb(null, resultData);
+            __private.getAttributeSharesByFilter(req.body, function (err, res) {
+                if (err || res.count === 0) {
+                    return cb(messages.ATTRIBUTE_SHARES_NOT_FOUND);
+                }
+
+                let resultData = {attribute_shares: res.attributeShares, count: res.count};
+
+                return cb(null, resultData);
+            });
         });
     });
 };
@@ -1481,21 +1733,21 @@ shared.getCompletedAttributeValidationRequests = function (req, cb) {
         }
 
         if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb('Either the validator or the attribute (type and owner information) must be provided');
+            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
         }
 
         req.body.query = sql.AttributeValidationRequestsSql.getCompletedAttributeValidationRequests;
 
         __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
             if (err) {
-                return cb('Failed to get attribute validation requests');
+                return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
             }
 
             if (res.count === 0) {
                 return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
             }
 
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests};
+            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
 
             return cb(null, resultData);
         });
@@ -1510,27 +1762,26 @@ shared.getIncompleteAttributeValidationRequests = function (req, cb) {
         }
 
         if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb('Either the validator or the attribute (type and owner information) must be provided : ');
+            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
         }
 
         req.body.query = sql.AttributeValidationRequestsSql.getIncompleteAttributeValidationRequests;
 
         __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
             if (err) {
-                return cb('Failed to get attribute validation requests');
+                return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
             }
 
             if (res.count === 0) {
                 return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
             }
 
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests};
+            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
 
             return cb(null, resultData);
         });
     });
 };
-
 
 shared.getAttributeValidationRequests = function (req, cb) {
     library.schema.validate(req.body, schema.getAttributeValidationRequests, function (err) {
@@ -1539,21 +1790,21 @@ shared.getAttributeValidationRequests = function (req, cb) {
         }
 
         if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb('Either the validator or the attribute (type and owner information) must be provided : ');
+            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
         }
 
         req.body.query = sql.AttributeValidationRequestsSql.getAttributeValidationRequests;
 
         __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
             if (err) {
-                return cb('Failed to get attribute validation requests');
+                return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
             }
 
             if (res.count === 0) {
                 return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
             }
 
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests};
+            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
 
             return cb(null, resultData);
         });
@@ -1566,14 +1817,18 @@ shared.getAttributeValidations = function (req, cb) {
             return cb(err[0].message);
         }
 
+        if (!(req.body.validator || (req.body.type && req.body.owner))) {
+            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
+        }
+
         __private.getAttributesByFilter(req.body, function (err, res1) {
 
-            if (res1 && res1.attributes && req.body.type && req.body.owner) {
-                req.body.attribute_id = res1.attributes[0].id;
+            if (res1 && (!res1.attributes || res1.attributes.length === 0)) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND)
             }
 
-            if (!req.body.attribute_id && !req.body.validator) {
-                return cb(messages.NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS_EXT);
+            if (res1 && res1.attributes && req.body.type && req.body.owner) {
+                req.body.attribute_id = res1.attributes[0].id; // here
             }
 
             __private.getAttributeValidationRequestsByFilter(req.body, function (err, res) {
@@ -1591,7 +1846,7 @@ shared.getAttributeValidations = function (req, cb) {
                         return cb(messages.NO_ATTRIBUTE_VALIDATIONS);
                     }
 
-                    let resultData = {attribute_validations: res};
+                    let resultData = {attribute_validations: res.attribute_validations, count: res.count};
 
                     return cb(null, resultData);
                 });
@@ -1601,10 +1856,39 @@ shared.getAttributeValidations = function (req, cb) {
 };
 
 
+shared.getAttributeValidationScore = function (req, cb) {
+    library.schema.validate(req.body, schema.getAttributeValidationScore, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        __private.getAttributesByFilter(req.body, function (err, result) {
+
+            if (!result || result.attributes.length === 0) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND);
+            }
+
+            req.body.attribute_id = result.attributes[0].id;
+
+            __private.getAttributeValidationScore(req.body, function (err, res) {
+                if (!res) {
+                    return cb(messages.NO_ATTRIBUTE_VALIDATIONS)
+                }
+
+                return cb(null, {attribute_validation_score: res.score});
+            });
+        });
+    });
+};
+
 shared.getAttributeConsumptions = function (req, cb) {
     library.schema.validate(req.body, schema.getAttributeConsumption, function (err) {
         if (err) {
             return cb(err[0].message);
+        }
+
+        if (!(req.body.type && req.body.owner)) {
+            return cb('The attribute (type and owner information) must be provided');
         }
 
         __private.getAttributesByFilter(req.body, function (err, res1) {
@@ -1619,14 +1903,192 @@ shared.getAttributeConsumptions = function (req, cb) {
 
             __private.getAttributeConsumptionsByFilter(req.body, function (err, res) {
 
-                    if (err) {
-                        return cb(err);
+                if (err) {
+                    return cb(err);
+                }
+                let attributeConsumptions = res.attributeConsumptions ? res.attributeConsumptions : [];
+                return cb(null, {attributeConsumptions: attributeConsumptions, count: res.count});
+            });
+        });
+    });
+};
+
+shared.getLastRewardRound = function (req, cb) {
+    library.schema.validate(req.body, schema.getLastRewardRound, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        __private.getLastRewardRound(req.body, function (err, res) {
+
+            if (err) {
+                return cb(err);
+            }
+
+            return cb(null, {reward: res.reward});
+        });
+
+    });
+};
+
+shared.runRewardRound = function (req, cb) {
+    library.schema.validate(req.body, schema.runRewardRound, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        let transactions = modules.transactionPool.getUnconfirmedTransactionList(true);
+        transactions.forEach(i => {
+            if (i.type === transactionTypes.RUN_REWARD_ROUND) {
+                return cb('A Reward Round is already in progress');
+            }
+            if (i.type === transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE) {
+                return cb('An Update Reward Round is in progress. Try again later.');
+            }
+        });
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        let currentTimestamp = slots.getTime();
+
+        __private.getLastRewardRound({}, function (err, res) {
+            if (res && res.rewardRound && currentTimestamp - res.rewardRound.timestamp < constants.REWARD_ROUND_INTERVAL) {
+                return cb(messages.REWARD_ROUND_TOO_SOON);
+            }
+
+            __private.getLastCompletedRewardRound({}, function (err, rescompleted) {
+
+                let startTimestamp = rescompleted && rescompleted.rewardRound && rescompleted.rewardRound.timestamp ? rescompleted.rewardRound.timestamp : 0;
+
+                __private.getAttributeConsumptionsByFilter({
+                    before: currentTimestamp,
+                    after: startTimestamp
+                }, function (err, result) {
+                    if (!result.attributeConsumptions) {
+                        return cb(messages.NO_CONSUMPTIONS_FOR_REWARD_ROUND);
                     }
-                    let attributeConsumptions = res.attributeConsumptions ? res.attributeConsumptions : [];
-                    return cb(null, {attributeConsumptions: attributeConsumptions});
+                    req.timestamp = currentTimestamp;
+                    req.lastRewardRoundTimestamp = startTimestamp;
+
+                    let reqForDistribute = _.cloneDeep(req);
+
+                    let keypair;
+                    if (!req.body.signature) {
+                        keypair = library.crypto.makeKeypair(req.body.secret);
+                    }
+                    if (keypair && req.body.publicKey) {
+                        if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                            return cb(messages.INVALID_PASSPHRASE);
+                        }
+                    }
+
+                    __private.distributeRewards(reqForDistribute, keypair,  function (err, res) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        __private.buildTransaction({
+                                req: req,
+                                keypair: keypair,
+                                timestamp: currentTimestamp,
+                                transactionType: transactionTypes.RUN_REWARD_ROUND
+                            },
+                            function (err, resultData) {
+                                if (err) {
+                                    return cb(err);
+                                }
+                                return cb(null, resultData);
+                            });
+                    });
                 });
             });
         });
+    });
+};
+
+
+shared.updateRewardRound = function (req, cb) {
+    library.schema.validate(req.body, schema.updateRewardRound, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        let transactions = modules.transactionPool.getUnconfirmedTransactionList(true);
+        transactions.forEach(i => {
+            if (i.type === transactionTypes.RUN_REWARD_ROUND) {
+                return cb('Reward Round already in progress');
+            }
+            if (i.type === transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE) {
+                return cb('Update Reward Round already in progress');
+            }
+        });
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        let currentTimestamp = slots.getTime();
+
+        __private.getLastRewardRound({}, function (err, res) {
+            if (res && res.rewardRound && currentTimestamp - res.rewardRound.timestamp < constants.REWARD_ROUND_INTERVAL) {
+                return cb(messages.REWARD_ROUND_TOO_SOON);
+            }
+
+            if (res && res.rewardRound && res.rewardRound.status === 'COMPLETED') {
+                return cb(null, 'Nothing to update, last reward round was completed');
+            }
+
+            let endTimestamp = res.rewardRound.timestamp;
+
+            __private.getLastCompletedRewardRound({}, function (err, res) {
+
+                let startTimestamp = res && res.rewardRound && res.rewardRound.timestamp ? res.rewardRound.timestamp : 0;
+
+                __private.getUnrewardedConsumptionCalculation({
+                    before: endTimestamp,
+                    after: startTimestamp
+                }, function (err, result) {
+                    if (!result.attributeConsumptions) {
+                        __private.buildTransaction({
+                                req: req,
+                                keypair: keypair,
+                                timestamp: currentTimestamp,
+                                transactionType: transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE
+                            },
+                            function (err, result) {
+                                if (err) {
+                                    return cb(err);
+                                }
+                                return cb(null, result);
+                            });
+                    }
+
+                });
+            });
+        });
+    });
+};
+
+
+//
+//__API__ `checkConfirmedDelegates`
+
+//
+Attributes.prototype.getAttributeValidationScore = function (filter, cb) {
+    return __private.getAttributeValidationScore(filter, cb);
 };
 
 // Export

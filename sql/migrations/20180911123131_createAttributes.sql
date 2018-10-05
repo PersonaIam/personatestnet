@@ -68,7 +68,28 @@ CREATE TABLE IF NOT EXISTS "attribute_consumptions"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_id" INT,
   "timestamp" INT NOT NULL,
+  "amount" INT NOT NULL,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "attribute_activations"(
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "attribute_id" INT,
+  "timestamp" INT NOT NULL,
+  FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "rewards"(
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "recipient" VARCHAR(36) NOT NULL,
+  "amount" INT NOT NULL,
+  "timestamp" INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "reward_rounds"(
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "timestamp" INT NOT NULL,
+  "status" VARCHAR(36) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "ipfs_pin_queue"(

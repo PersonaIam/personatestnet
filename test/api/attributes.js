@@ -15,10 +15,17 @@ const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
 const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
 const DEFAULT_CHUNK = 7;
+const DEFAULT_AMOUNT = 0;
 const CHUNK = 8;
+const AMOUNT_1 = 1;
+const AMOUNT_2 = 11;
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
 const ADDRESS_VALUE = 'Denver';
+const NAME_VALUE = "JOE";
+const SECOND_NAME_VALUE = "QUEEN";
+
+const INCORRECT_ADDRESS = 'ABC';
 
 // TEST UTILS
 
@@ -54,6 +61,19 @@ describe('PUT /api/transactions', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
+            done();
+        });
+    });
+});
+
+describe('GET List of attributes - empty list', function () {
+
+    it('List of attributes', function (done) {
+        getAttributes(function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(0);
+            node.expect(res.body).to.have.property('attributes');
             done();
         });
     });
@@ -109,6 +129,21 @@ describe('POST Create new attribute ( name )', function () {
             done();
         });
     });
+
+    it('Create new attribute ( incorrect owner address )', function (done) {
+
+        let params = {};
+        params.owner = INCORRECT_ADDRESS;
+
+        let request = createAttributeRequest(params);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.eq('Owner address is incorrect');
+            done();
+        });
+    });
 });
 
 describe('POST Create new attribute with value stored on IPFS ( identity_card )', function () {
@@ -129,7 +164,6 @@ describe('POST Create new attribute with value stored on IPFS ( identity_card )'
         ipfsTransaction.req = request; // keep the original requested data
 
         postAttribute(request, function (err, res) {
-            console.log(err);
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('transactionId');
@@ -178,7 +212,7 @@ describe('GET transaction and check if it contains IPFS hash ( identity_card )',
 });
 
 
-describe('GET Existing attribute (name)', function () {
+describe('GET Attribute (name)', function () {
 
     it('Existing attribute (name)', function (done) {
         getAttribute(OTHER_OWNER, 'name', function (err, res) {
@@ -186,15 +220,12 @@ describe('GET Existing attribute (name)', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('JOE');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq('name');
             done();
         });
     });
-});
-
-describe('GET Non existing attribute (address)', function () {
 
     it('Non existing attribute (address)', function (done) {
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
@@ -217,7 +248,7 @@ describe('POST Create attribute (name) for different owner', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.value = 'QUEEN';
+        param.value = SECOND_NAME_VALUE;
 
         let request = createAttributeRequest(param);
 
@@ -235,16 +266,17 @@ describe('POST Create attribute (name) for different owner', function () {
     });
 });
 
-describe('GET All existing attributes for owner', function () {
+describe('GET All existing attributes for owner 1 result', function () {
 
     it('All existing attributes for owner', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(1);
             node.expect(res.body.attributes).to.have.length(1);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('JOE');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
             done();
         });
     });
@@ -274,6 +306,36 @@ describe('POST Create a different attribute ( address )', function () {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
+            done();
+        });
+    });
+});
+
+
+describe('GET All existing attributes ', function () {
+
+    it('All existing attributes for other owner', function (done) {
+        getAttributesForOwner(OTHER_OWNER, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(1);
+            node.expect(res.body.attributes).to.have.length(1);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
+            done();
+        });
+    });
+
+    it('All existing attributes for owner - 3 results', function (done) {
+        getAttributesForOwner(OWNER, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(3);
+            node.expect(res.body.attributes).to.have.length(3);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[1]).to.have.property('value').to.eq(SECOND_NAME_VALUE);
             done();
         });
     });
@@ -321,6 +383,7 @@ describe('GET All existing attributes for owner', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes).to.have.length(3);
+            node.expect(res.body).to.have.property('count').to.be.eq(3);
 
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('owner').to.eq(OWNER);
@@ -335,7 +398,7 @@ describe('GET All existing attributes for owner', function () {
             values[0] = res.body.attributes[0].value;
             values[1] = res.body.attributes[1].value;
             node.expect(values.indexOf(ADDRESS_VALUE) > -1);
-            node.expect(values.indexOf('QUEEN') > -1);
+            node.expect(values.indexOf(SECOND_NAME_VALUE) > -1);
 
             let types = [];
             types[0] = res.body.attributes[0].type;
@@ -384,6 +447,40 @@ describe('POST Create an attribute validation request', function () {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
             });
+            done();
+        });
+    });
+
+    it('Create new attribute validation request( incorrect owner address )', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.type = 'name';
+        params.owner = INCORRECT_ADDRESS;
+
+        let request = createAttributeValidationRequest(params);
+
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Create new attribute validation request( incorrect validator address )', function (done) {
+
+        let params = {};
+        params.validator = INCORRECT_ADDRESS;
+        params.type = 'name';
+        params.owner = OWNER;
+
+        let request = createAttributeValidationRequest(params);
+
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.eq('Validator address is incorrect');
             done();
         });
     });
@@ -439,7 +536,26 @@ describe('POST Create same attribute validation request', function () {
 
 describe('GET Attribute validation request', function () {
 
-    it('Attribute validation request', function (done) {
+    it('Get attribute validation request - using all parameters', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+        param.owner = OWNER;
+        param.type = "name";
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
+            done();
+        });
+    });
+
+    it('Get attribute validation request - by validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -448,6 +564,25 @@ describe('GET Attribute validation request', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
+            done();
+        });
+    });
+
+    it('Get attribute validation requests - by type and owner', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = "name";
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -464,6 +599,32 @@ describe('GET Attribute validation request', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
+            done();
+        });
+    });
+
+    it('Attribute validation request - incorrect parameters', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_VALIDATION_PARAMETERS);
+            done();
+        });
+    });
+
+    it('Attribute validation request - incorrect parameters', function (done) {
+
+        let param = {};
+        param.type = "name";
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_VALIDATION_PARAMETERS);
             done();
         });
     });
@@ -507,6 +668,42 @@ describe('POST Create attribute validation request for existing attribute with o
     });
 });
 
+
+describe('GET Attribute validation score for attribute with no validations', function () {
+    it('Get Attribute validation score for attribute', function (done) {
+
+        let param = {};
+        param.type = "address";
+        param.owner = OWNER;
+
+        getAttributeValidationScore(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_score').to.be.eq(0)
+            done();
+        });
+    });
+});
+
+describe('POST Activate Attribute attribute with no validations', function () {
+    it('Activate Attribute attribute with no validations', function (done) {
+
+        let param = {};
+        param.type = "address";
+        param.owner = OWNER;
+
+        let request = createAttributeActivation(param);
+        postAttributeActivation(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_SCORE_IS_TOO_LOW)
+            done();
+        });
+    });
+});
+
+// create a second validation, and be able to activate the attribute
+
 describe('POST Create an attribute validation', function () {
 
     it('Create an attribute validation ', function (done) {
@@ -531,6 +728,42 @@ describe('POST Create an attribute validation', function () {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidation);
             });
+            done();
+        });
+    });
+
+    it('Create an attribute validation - incorrect address for owner', function (done) {
+
+
+        let param = {};
+        param.owner = INCORRECT_ADDRESS;
+        param.type = 'name';
+        param.validator = VALIDATOR;
+        param.chunk = CHUNK;
+
+        let request = createAttributeValidation(param);
+        postAttributeValidation(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Create an attribute validation - incorrect address for validator', function (done) {
+
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+        param.validator = INCORRECT_ADDRESS;
+        param.chunk = CHUNK;
+
+        let request = createAttributeValidation(param);
+        postAttributeValidation(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Validator address is incorrect');
             done();
         });
     });
@@ -575,14 +808,18 @@ describe('POST Create an attribute validation for non existing attribute validat
 
 describe('GET Attribute validations for validator ', function () {
 
-    it('Attribute validation - validator', function (done) {
+    it('Get Attribute validation - using all parameters', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
+        param.type = "name";
+        param.owner = OWNER;
+
         getAttributeValidation(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validations');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validations[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validations[0]).to.have.property('attribute_validation_request_id').to.be.at.least(1);
             node.expect(res.body.attribute_validations[0]).to.have.property('chunk');
@@ -590,11 +827,26 @@ describe('GET Attribute validations for validator ', function () {
             done();
         });
     });
-});
 
-describe('GET Attribute validations for attribute ', function () {
 
-    it('Attribute validation - attribute', function (done) {
+    it('Get Attribute validation - by validator', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+        getAttributeValidation(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validations');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_validations[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_validations[0]).to.have.property('attribute_validation_request_id').to.be.at.least(1);
+            node.expect(res.body.attribute_validations[0]).to.have.property('chunk');
+            node.expect(res.body.attribute_validations[0]).to.have.property('timestamp');
+            done();
+        });
+    });
+
+    it('Get Attribute validation - by attribute', function (done) {
 
         let param = {};
         param.type = "name";
@@ -604,10 +856,41 @@ describe('GET Attribute validations for attribute ', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validations');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validations[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validations[0]).to.have.property('attribute_validation_request_id').to.be.at.least(1);
             node.expect(res.body.attribute_validations[0]).to.have.property('chunk');
             node.expect(res.body.attribute_validations[0]).to.have.property('timestamp');
+            done();
+        });
+    });
+});
+
+describe('GET Attribute validation score for attribute', function () {
+    it('Get Attribute validation score for attribute', function (done) {
+
+        let param = {};
+        param.type = "name";
+        param.owner = OWNER;
+
+        getAttributeValidationScore(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_score').to.be.eq(CHUNK);
+            done();
+        });
+    });
+
+    it('Get Attribute validation score for attribute with no validations', function (done) {
+
+        let param = {};
+        param.type = "address";
+        param.owner = OWNER;
+
+        getAttributeValidationScore(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_score').to.be.eq(0);
             done();
         });
     });
@@ -658,7 +941,7 @@ describe('GET Attribute validations for non existing attribute', function () {
         getAttributeValidation(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS_EXT);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
             done();
         });
     });
@@ -675,6 +958,7 @@ describe('GET Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('chunk').to.eq(8);
             done();
         });
@@ -689,6 +973,7 @@ describe('GET Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
             done();
         });
@@ -704,6 +989,7 @@ describe('GET Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
             done();
         });
@@ -719,6 +1005,7 @@ describe('GET Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
             done();
         });
@@ -767,6 +1054,38 @@ describe('POST Create an attribute share request', function () {
             done();
         });
     });
+
+    it('Create an attribute share request - Incorrect owner address', function (done) {
+
+        let param = {};
+        param.owner = INCORRECT_ADDRESS;
+        param.type = 'name';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Create an attribute share request - Incorrect owner address', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+        param.applicant = INCORRECT_ADDRESS;
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Applicant address is incorrect');
+            done();
+        });
+    });
 });
 
 describe('POST Create an attribute share request', function () {
@@ -798,7 +1117,7 @@ describe('POST Create an attribute share request', function () {
         postAttributeShareRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND_FOR_SHARE_REQUEST);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
             done();
         });
     });
@@ -823,7 +1142,40 @@ describe('POST Create an attribute share request', function () {
 
 describe('GET Attribute share request', function () {
 
-    it('Attribute share request', function (done) {
+    it('Attribute share request - no query params', function (done) {
+
+        let param = {};
+
+        getAttributeShareRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_SHARE_PARAMETERS);
+            done();
+        });
+    });
+
+
+    it('Attribute share request - type, owner and applicant', function (done) {
+
+        let param = {};
+        param.applicant = APPLICANT;
+        param.owner = OWNER;
+        param.type = "name";
+
+        getAttributeShareRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_share_requests');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('status').to.be.eq(constants.shareStatus.UNAPPROVED);
+            done();
+        });
+    });
+
+    it('Attribute share request - only applicant', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -832,6 +1184,26 @@ describe('GET Attribute share request', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_share_requests');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
+            node.expect(res.body.attribute_share_requests[0]).to.have.property('status').to.be.eq(constants.shareStatus.UNAPPROVED);
+            done();
+        });
+    });
+
+    it('Attribute share request - only owner and type', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = "name";
+
+        getAttributeShareRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_share_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -921,6 +1293,8 @@ describe('POST Approve attribute share request', function () {
 
         let param = {};
         param.applicant = APPLICANT;
+        param.owner = OWNER;
+        param.type = "name";
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -947,6 +1321,40 @@ describe('POST Approve attribute share request', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_APPROVED);
+            done();
+        });
+    });
+
+    it('Approve attribute share request - incorrect owner address', function (done) {
+
+        let params = {};
+        params.applicant = APPLICANT;
+        params.owner = INCORRECT_ADDRESS;
+        params.type = 'name';
+        params.action = true;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Approve attribute share request - incorrect applicant address', function (done) {
+
+        let params = {};
+        params.applicant = INCORRECT_ADDRESS;
+        params.owner = OWNER;
+        params.type = 'name';
+        params.action = true;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Applicant address is incorrect');
             done();
         });
     });
@@ -1016,26 +1424,104 @@ describe('POST Create an attribute share - with existing approved share request'
             done();
         });
     });
+
+    it('Create an attribute share - incorrect owner address', function (done) {
+
+        let param = {};
+        param.owner = INCORRECT_ADDRESS;
+        param.value = 'KLMN';
+        param.type = 'name';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShare(param);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Create an attribute share - incorrect applicant address', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.value = 'KLMN';
+        param.type = 'name';
+        param.applicant = INCORRECT_ADDRESS;
+
+        let request = createAttributeShare(param);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Applicant address is incorrect');
+            done();
+        });
+    });
 });
 
 
 describe('GET Attribute shares - share exists', function () {
 
-    it('Attribute share - share exists', function (done) {
+    it('Attribute share - share exists, applicant parameter', function (done) {
 
         let param = {};
-        param.owner = OWNER;
-        param.type = 'name';
         param.applicant = APPLICANT;
 
         getAttributeShare(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_shares');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_shares).to.have.length(1);
             node.expect(res.body.attribute_shares[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_shares[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_shares[0]).to.have.property('applicant').to.be.eq(APPLICANT);
+            done();
+        });
+    });
+
+    it('Attribute share - share exists, owner and type parameters', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = 'name';
+
+        getAttributeShare(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_shares');
+            node.expect(res.body).to.have.property('count');
+            node.expect(res.body.attribute_shares).to.have.length(1);
+            node.expect(res.body.attribute_shares[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attribute_shares[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attribute_shares[0]).to.have.property('applicant').to.be.eq(APPLICANT);
+            done();
+        });
+    });
+
+    it('Attribute share - share exists, owner with no type', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+
+        getAttributeShare(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_SHARE_PARAMETERS);
+            done();
+        });
+    });
+
+    it('Attribute share - share exists, type with no owner', function (done) {
+
+        let param = {};
+        param.type = "name";
+
+        getAttributeShare(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_SHARE_PARAMETERS);
             done();
         });
     });
@@ -1051,6 +1537,7 @@ describe('GET Attribute shares - share exists', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_share_requests');
+            node.expect(res.body).to.have.property('count');
             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -1162,6 +1649,56 @@ describe('POST Unapprove attribute share request', function () {
             done();
         });
     });
+
+    it('Unapprove attribute share request - incorrect owner address', function (done) {
+
+        let params = {};
+        params.applicant = APPLICANT;
+        params.owner = INCORRECT_ADDRESS;
+        params.type = 'name';
+        params.action = false;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
+            done();
+        });
+    });
+
+    it('Unapprove attribute share request - incorrect applicant address', function (done) {
+
+        let params = {};
+        params.applicant = INCORRECT_ADDRESS;
+        params.owner = OWNER;
+        params.type = 'name';
+        params.action = false;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Applicant address is incorrect');
+            done();
+        });
+    });
+});
+
+
+describe('POST Run reward round - no attribute consumptions', function () {
+
+    it('Run reward round - no attribute consumptions', function (done) {
+
+        let param = {};
+        let request = createRewardRound(param);
+        postRewardRound(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_CONSUMPTIONS_FOR_REWARD_ROUND);
+            done();
+        });
+    });
 });
 
 describe('POST Consume attribute', function () {
@@ -1173,9 +1710,15 @@ describe('POST Consume attribute', function () {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
 
+        let unconfirmedBalanceRecipient = 0;
+        getBalance(constants.REWARD_FAUCET, function (err, res) {
+            unconfirmedBalanceRecipient = parseInt(res.body.unconfirmedBalance);
+        });
+
         let params = {};
         params.owner = OWNER;
         params.type = 'name';
+        params.amount = 1;
 
         let request = createAttributeConsume(params);
         postConsumeAttribute(request, function (err, res) {
@@ -1186,15 +1729,50 @@ describe('POST Consume attribute', function () {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeconsume);
             });
+            getBalance(constants.REWARD_FAUCET, function (err, res) {
+                let unconfirmedBalanceAfterRecipient = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalanceAfterRecipient - unconfirmedBalanceRecipient === params.amount);
+            });
+            done();
+        });
+    });
+
+    it('Consume attribute - amount is 0', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = 'name';
+        params.amount = 0;
+
+        let request = createAttributeConsume(params);
+        postConsumeAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Value 0 is less than minimum 1');
+            done();
+        });
+    });
+
+    it('Consume attribute - owner address is incorrect', function (done) {
+
+        let params = {};
+        params.owner = INCORRECT_ADDRESS;
+        params.type = 'name';
+        params.amount = 1;
+
+        let request = createAttributeConsume(params);
+        postConsumeAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Owner address is incorrect');
             done();
         });
     });
 });
 
-
 describe('GET Attribute consumptions', function () {
 
-    let timestamp = 0;
+    let timestampConsume1 = 0;
 
     it('Attribute consumptions - with type & owner', function (done) {
 
@@ -1206,10 +1784,12 @@ describe('GET Attribute consumptions', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attributeConsumptions');
+            node.expect(res.body).to.have.property('count').to.be.eq(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
-            timestamp = res.body.attributeConsumptions[0].timestamp;
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('amount').to.be.eq(AMOUNT_1);
+            timestampConsume1 = res.body.attributeConsumptions[0].timestamp;
             done();
         });
     });
@@ -1226,12 +1806,38 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
+    it('Attribute consumptions - owner and no type', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+
+        getAttributeConsumptions(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Missing required property: type');
+            done();
+        });
+    });
+
+    it('Attribute consumptions - type and no owner', function (done) {
+
+        let param = {};
+        param.type = "name";
+
+        getAttributeConsumptions(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq('Missing required property: owner');
+            done();
+        });
+    });
+
     it('Attribute consumptions - with type & owner & before', function (done) {
 
         let param = {};
         param.type = "name";
         param.owner = OWNER;
-        param.before = timestamp+1;
+        param.before = timestampConsume1+1;
 
         getAttributeConsumptions(param, function (err, res) {
             console.log(res.body);
@@ -1239,7 +1845,8 @@ describe('GET Attribute consumptions', function () {
             node.expect(res.body).to.have.property('attributeConsumptions');
             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
-            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.eq(timestampConsume1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('amount').to.be.eq(AMOUNT_1);
             done();
         });
     });
@@ -1249,7 +1856,7 @@ describe('GET Attribute consumptions', function () {
         let param = {};
         param.type = "name";
         param.owner = OWNER;
-        param.after = timestamp-1;
+        param.after = timestampConsume1-1;
 
         getAttributeConsumptions(param, function (err, res) {
             console.log(res.body);
@@ -1257,7 +1864,8 @@ describe('GET Attribute consumptions', function () {
             node.expect(res.body).to.have.property('attributeConsumptions');
             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
-            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.eq(timestampConsume1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('amount').to.be.eq(AMOUNT_1);
             done();
         });
     });
@@ -1267,8 +1875,8 @@ describe('GET Attribute consumptions', function () {
         let param = {};
         param.type = "name";
         param.owner = OWNER;
-        param.before = timestamp+1;
-        param.after = timestamp-1;
+        param.before = timestampConsume1+1;
+        param.after = timestampConsume1-1;
 
         getAttributeConsumptions(param, function (err, res) {
             console.log(res.body);
@@ -1276,7 +1884,8 @@ describe('GET Attribute consumptions', function () {
             node.expect(res.body).to.have.property('attributeConsumptions');
             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
-            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.eq(timestampConsume1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('amount').to.be.eq(AMOUNT_1);
             done();
         });
     });
@@ -1286,8 +1895,8 @@ describe('GET Attribute consumptions', function () {
         let param = {};
         param.type = "name";
         param.owner = OWNER;
-        param.before = timestamp-1;
-        param.after = timestamp+1;
+        param.before = timestampConsume1-1;
+        param.after = timestampConsume1+1;
 
         getAttributeConsumptions(param, function (err, res) {
             console.log(res.body);
@@ -1302,16 +1911,22 @@ describe('GET Attribute consumptions', function () {
 
 describe('POST Consume attribute - second time', function () {
 
-    it('Consume attribute - second time', function (done) {
+    it('Consume attribute - again, different amount', function (done) {
 
         let unconfirmedBalance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
 
+        let unconfirmedBalanceRecipient = 0;
+        getBalance(constants.REWARD_FAUCET, function (err, res) {
+            unconfirmedBalanceRecipient = parseInt(res.body.unconfirmedBalance);
+        });
+
         let params = {};
         params.owner = OWNER;
         params.type = 'name';
+        params.amount = AMOUNT_2;
 
         let request = createAttributeConsume(params);
         postConsumeAttribute(request, function (err, res) {
@@ -1322,15 +1937,42 @@ describe('POST Consume attribute - second time', function () {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeconsume);
             });
+            getBalance(constants.REWARD_FAUCET, function (err, res) {
+                let unconfirmedBalanceAfterRecipient = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalanceAfterRecipient - unconfirmedBalanceRecipient === params.amount);
+            });
             done();
         });
     });
+
+    it('Get attribute consumptions - with type & owner', function (done) {
+
+        let param = {};
+        param.type = "name";
+        param.owner = OWNER;
+
+        getAttributeConsumptions(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attributeConsumptions');
+            node.expect(res.body).to.have.property('count').to.be.eq(2);
+            node.expect(res.body.attributeConsumptions).to.have.length(2);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attributeConsumptions[0]).to.have.property('amount').to.be.eq(AMOUNT_1);
+            node.expect(res.body.attributeConsumptions[1]).to.have.property('amount').to.be.eq(AMOUNT_2);
+            done();
+        });
+    });
+
 
     it('Consume attribute - attribute does not exist', function (done) {
 
         let params = {};
         params.owner = OWNER;
         params.type = 'ssn';
+        params.amount = 1;
 
         let request = createAttributeConsume(params);
         postConsumeAttribute(request, function (err, res) {
@@ -1340,6 +1982,36 @@ describe('POST Consume attribute - second time', function () {
             done();
         });
     });
+});
+
+
+describe('POST Run reward round - with attribute consumptions', function () {
+
+    it('Run reward round - with attribute consumptions', function (done) {
+
+        let param = {};
+        let request = createRewardRound(param);
+        postRewardRound(request, function (err, res) {
+            console.log(res.body);
+            sleep.msleep(SLEEP_TIME);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            done();
+        });
+    });
+
+    it('GET Last Run reward round', function (done) {
+
+        // let param = {};
+        // let request = createRewardRound(param);
+        // postRewardRound(request, function (err, res) {
+        //     console.log(res.body);
+        //     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+        //     node.expect(res.body).to.have.property('transactionId').to.be.greater.than(1);
+            done();
+        // });
+    });
+
 });
 
 
@@ -1360,7 +2032,7 @@ function createAttributeRequest(param) {
     request.asset.attribute[0] = {};
     request.asset.attribute[0].type = param.type ? param.type : "name";
     request.asset.attribute[0].owner = param.owner ? param.owner : OTHER_OWNER;
-    request.asset.attribute[0].value = param.value ? param.value : "JOE";
+    request.asset.attribute[0].value = param.value ? param.value : NAME_VALUE;
 
     console.log(request);
     return request;
@@ -1392,6 +2064,7 @@ function createAttributeConsume(param) {
         param = {}
     }
     request.secret = param.secret ? param.secret : SECRET;
+    request.amount = param.amount ? param.amount : DEFAULT_AMOUNT;
     request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
     request.asset = {};
     request.asset.attribute = [];
@@ -1464,6 +2137,41 @@ function createAttributeValidation(param) {
     return request;
 }
 
+
+function createAttributeActivation(param) {
+
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.attribute = [];
+    request.asset.attribute[0] = {};
+    request.asset.attribute[0].type = param.type ? param.type : "name";
+    request.asset.attribute[0].owner = param.owner ? param.owner : OWNER;
+
+    console.log('req = ' + request);
+    console.log('asset = ' + request.asset);
+    console.log('attribute = ' + request.asset.attribute[0]);
+    return request;
+}
+
+function createRewardRound(param) {
+
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+
+    return request;
+}
+
 function createAttributeShareRequest(param) {
 
     let request = {};
@@ -1499,6 +2207,10 @@ function postAttributeValidation(params, done) {
     node.post('/api/attributes/validation', params, done);
 }
 
+function postAttributeActivation(params, done) {
+    node.post('/api/attributes/activate', params, done);
+}
+
 function postAttributeShareRequest(params, done) {
     node.post('/api/attributes/sharerequest', params, done);
 }
@@ -1515,6 +2227,9 @@ function postConsumeAttribute(params, done) {
     node.post('/api/attributes/consume', params, done);
 }
 
+function postRewardRound(params, done) {
+    node.post('/api/attributes/runrewardround', params, done);
+}
 
 function getAttribute(owner, typeName, done) {
     getAttributeTypeByName(typeName, function (err, res) {
@@ -1538,14 +2253,17 @@ function getAttributesForOwner(owner, done) {
 
 function getAttributeValidationRequest(params, done) {
     let url = '/api/attributes/validationrequest';
-    if (params.validator || params.attribute_id) {
+    if (params.validator || params.owner || params.type) {
         url += '?';
     }
     if (params.validator) {
         url += '&validator=' + '' + params.validator;
     }
-    if (params.attribute_id) {
-        url += '&attribute_id=' + '' + params.attribute_id;
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    if (params.type) {
+        url += '&type=' + '' + params.type;
     }
     node.get(url, done);
 
@@ -1553,28 +2271,34 @@ function getAttributeValidationRequest(params, done) {
 
 function getAttributeShareRequest(params, done) {
     let url = '/api/attributes/sharerequest';
-    if (params.applicant || params.attribute_id) {
+    if (params.applicant || params.owner || params.type) {
         url += '?';
     }
     if (params.applicant) {
         url += '&applicant=' + '' + params.applicant;
     }
-    if (params.attribute_id) {
-        url += '&attribute_id=' + '' + params.attribute_id;
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    if (params.type) {
+        url += '&type=' + '' + params.type;
     }
     node.get(url, done);
 }
 
 function getAttributeShare(params, done) {
     let url = '/api/attributes/share';
-    if (params.applicant || params.attribute_id) {
+    if (params.applicant || params.owner || params.type) {
         url += '?';
     }
     if (params.applicant) {
         url += '&applicant=' + '' + params.applicant;
     }
-    if (params.attribute_id) {
-        url += '&attribute_id=' + '' + params.attribute_id;
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    if (params.type) {
+        url += '&type=' + '' + params.type;
     }
     node.get(url, done);
 }
@@ -1589,6 +2313,21 @@ function getAttributeValidation(params, done) {
     }
     if (params.type) {
         url += '&type=' + '' + params.type;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    node.get(url, done);
+
+}
+
+function getAttributeValidationScore(params, done) {
+    let url = '/api/attributes/validationscore';
+    if (params.type || params.owner) {
+        url += '?';
+    }
+    if (params.type) {
+        url += 'type=' + '' + params.type;
     }
     if (params.owner) {
         url += '&owner=' + '' + params.owner;
