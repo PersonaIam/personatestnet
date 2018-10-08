@@ -35,7 +35,7 @@ UpdateRewardRound.prototype.create = function (data, trs) {
 
 //
 UpdateRewardRound.prototype.calculateFee = function (trs) {
-    return constants.fees.updateRewardRound;
+    return constants.fees.updaterewardround;
 };
 
 //
@@ -125,7 +125,7 @@ UpdateRewardRound.prototype.undoUnconfirmed = function (trs, sender, cb) {
 };
 
 UpdateRewardRound.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs, Reward.prototype.schema);
+    var report = library.schema.validate(trs, UpdateRewardRound.prototype.schema);
 
     if (!report) {
         throw 'Failed to validate schema: ' + this.scope.schema.getLastErrors().map(function (err) {

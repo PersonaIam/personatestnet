@@ -24,7 +24,8 @@ module.exports = {
 		attributeshareapproval: 1,
 		attributeconsume: 1,
 		reward:1,
-		startrewardround:1
+		startrewardround:1,
+		updaterewardround:1
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,
@@ -62,5 +63,5 @@ module.exports = {
 	VALIDATIONS_REQUIRED : 15,
 	REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',
 	REWARD_FAUCET_KEY : '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6',
-    REWARD_ROUND_INTERVAL : 3600000 // 1 hour in milliseconds
+    REWARD_ROUND_INTERVAL : 1 // 1 hour in milliseconds
 };

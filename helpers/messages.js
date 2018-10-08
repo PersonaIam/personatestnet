@@ -44,6 +44,7 @@ module.exports = {
     OWNER_IS_VALIDATOR_ERROR : 'Owner cannot be the validator of his own attribute',
 
     NO_CONSUMPTIONS_FOR_REWARD_ROUND : 'The reward was round not generated because there were no attribute consumptions since the last completed reward round',
-    REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed'
+    REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
+    REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed'
 };
 

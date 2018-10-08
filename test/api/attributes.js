@@ -17,7 +17,7 @@ const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
 const DEFAULT_CHUNK = 7;
 const DEFAULT_AMOUNT = 0;
 const CHUNK = 8;
-const AMOUNT_1 = 1;
+const AMOUNT_1 = 2;
 const AMOUNT_2 = 11;
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
@@ -1718,7 +1718,7 @@ describe('POST Consume attribute', function () {
         let params = {};
         params.owner = OWNER;
         params.type = 'name';
-        params.amount = 1;
+        params.amount = AMOUNT_1;
 
         let request = createAttributeConsume(params);
         postConsumeAttribute(request, function (err, res) {
@@ -1989,27 +1989,60 @@ describe('POST Run reward round - with attribute consumptions', function () {
 
     it('Run reward round - with attribute consumptions', function (done) {
 
+        let unconfirmedBalance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
         let param = {};
         let request = createRewardRound(param);
         postRewardRound(request, function (err, res) {
             console.log(res.body);
             sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.rewardRound);
+            });
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('transactionId');
             done();
         });
     });
 
-    it('GET Last Run reward round', function (done) {
+    it('Update Last reward round', function (done) {
 
-        // let param = {};
-        // let request = createRewardRound(param);
-        // postRewardRound(request, function (err, res) {
-        //     console.log(res.body);
-        //     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-        //     node.expect(res.body).to.have.property('transactionId').to.be.greater.than(1);
+        let unconfirmedBalance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        let request = createUpdateRewardRound(param);
+
+        postUpdateRewardRound(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateRewardRound);
+            });
             done();
-        // });
+        });
+    });
+
+    it('Update Last reward round', function (done) {
+
+        let param = {};
+        let request = createUpdateRewardRound(param);
+
+        postUpdateRewardRound(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('message').to.be.eq(messages.REWARD_ROUND_WITH_NO_UPDATE);
+            done();
+        });
     });
 
 });
@@ -2172,6 +2205,21 @@ function createRewardRound(param) {
     return request;
 }
 
+
+function createUpdateRewardRound(param) {
+
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+
+    return request;
+}
+
+
 function createAttributeShareRequest(param) {
 
     let request = {};
@@ -2230,6 +2278,11 @@ function postConsumeAttribute(params, done) {
 function postRewardRound(params, done) {
     node.post('/api/attributes/runrewardround', params, done);
 }
+
+function postUpdateRewardRound(params, done) {
+    node.post('/api/attributes/updaterewardround', params, done);
+}
+
 
 function getAttribute(owner, typeName, done) {
     getAttributeTypeByName(typeName, function (err, res) {

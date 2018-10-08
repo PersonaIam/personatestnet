@@ -679,36 +679,42 @@ __private.getLastCompletedRewardRound = function (filter, cb) {
 __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
 
     let unrewardedAttributeConsumptions = [];
-    const lastRewardRoundTimestamp = filter.lastRewardRoundTimestamp;
-    const timestamp = filter.timestamp;
+    const after = filter.after;
+    const before = filter.before;
 
     library.db.query(sql.AttributeConsumptionsSql.getAttributeConsumptionsForRewardsMadeBetween,
-        {before: timestamp, after: lastRewardRoundTimestamp})
+        {before: before, after: after})
         .then(function (attributeConsumptionsForRewards) {
 
             library.db.query(sql.AttributeRewardsSql.getRewardsBetween,
                 {
-                    before: timestamp,
-                    after: lastRewardRoundTimestamp,
+                    before: before,
+                    after: after,
                     type: transactionTypes.REWARD
                 }).then(function (rewardTransactions) {
-                let rewards = rewardTransactions.map(tr => {
-                    return tr.asset.reward;
-                });
-                attributeConsumptionsForRewards.forEach(i => {
-                    let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.validator_id === i.validator);
-                    if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
-                        let validationsForConsumption = attributeConsumptionsForRewards.filter(k => k.id === i.id);
-                        let sumOfChunksForConsumption = validationsForConsumption.reduce(function (a, b) {
-                            return a + b.chunk;
-                        }, 0);
-                        unrewardedAttributeConsumptions.push({
-                            recipient: i.validator,
-                            amount: (i.amount * i.chunk / sumOfChunksForConsumption)
-                        });
-                    }
-                })
+
+                    let rewards = rewardTransactions.map(tr => {
+                        return tr.rawasset;
+                    });
+                    console.log('^^^ '+ JSON.stringify(rewardTransactions));
+                    console.log('^^^ '+ JSON.stringify(rewards));
+                    console.log('$$$'+ JSON.stringify(attributeConsumptionsForRewards));
+                    attributeConsumptionsForRewards.forEach(i => {
+                        let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.recipient === i.validator);
+                        if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
+                            let validationsForConsumption = attributeConsumptionsForRewards.filter(k => k.id === i.id);
+                            let sumOfChunksForConsumption = validationsForConsumption.reduce(function (a, b) {
+                                return a + b.chunk;
+                            }, 0);
+                            unrewardedAttributeConsumptions.push({
+                                recipient: i.validator,
+                                amount: (i.amount * i.chunk / sumOfChunksForConsumption),
+                                consumption_id: i.id
+                            });
+                        }
+                    })
                 return cb(null, {unrewardedAttributeConsumptions: unrewardedAttributeConsumptions});
+
             });
 
         }).catch(function (err) {
@@ -717,28 +723,40 @@ __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
     })
 };
 
-__private.distributeRewards = function (req, keypair, cb) {
+__private.distributeRewards = function (req, cb) {
 
     __private.getUnrewardedConsumptionCalculation(req, function (err, res) {
 
-        res.unrewardedAttributeConsumptions.forEach(reward => {
-                req.body.asset = {recipient: reward.recipient, amount: reward.amount};
-                req.body.amount = reward.amount;
-                req.body.recipientId = reward.recipient;
-                __private.buildTransaction({
-                        req: req,
-                        keypair: keypair,
-                        transactionType: transactionTypes.REWARD
-                    },
-                    function (err, resultData) {
-                        if (err) {
-                            return cb(err);
-                        }
-
-                    });
+        async.eachSeries(res.unrewardedAttributeConsumptions, function (reward, cb) {
+            // generate a keypair for each reward transaction
+            let keypair;
+            if (!req.body.signature) {
+                keypair = library.crypto.makeKeypair(req.body.secret);
             }
-        );
-        return cb(null, {});
+            if (keypair && req.body.publicKey) {
+                if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                    return cb(messages.INVALID_PASSPHRASE);
+                }
+            }
+
+            req.body.asset = {
+                recipient: reward.recipient,
+                amount: reward.amount,
+                consumption_id: reward.consumption_id
+            };
+            req.body.amount = reward.amount;
+            req.body.recipientId = reward.recipient;
+            req.body.timestamp = slots.getTime();
+            return __private.buildTransaction({
+                    req: req,
+                    keypair: keypair,
+                    transactionType: transactionTypes.REWARD
+                },
+                cb);
+        }, function (err) {
+            console.log(err);
+            return cb(err);
+        });
     });
 };
 
@@ -812,13 +830,14 @@ __private.buildTransaction = function (params, cb) {
     let keypair = params.keypair;
     let transactionType = params.transactionType;
 
+    console.log('23456765432 ' + JSON.stringify(req))
+
     modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
         if (err) {
             return cb(err);
         }
-
         if (!requester) {
-            return cb('Requester zzz not found');
+            return cb('Requester not found');
         }
 
         if (req.body.multisigAccountPublicKey && req.body.multisigAccountPublicKey !== keypair.publicKey.toString('hex')) {
@@ -832,13 +851,10 @@ __private.buildTransaction = function (params, cb) {
                 if (!account || !account.publicKey) {
                     return cb('Account not found');
                 }
-
                 if (account.secondSignature && !req.body.secondSecret) {
                     return cb('Missing second passphrase');
                 }
-
                 let secondKeypair = null;
-
                 if (account.secondSignature) {
                     secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
                 }
@@ -1975,8 +1991,8 @@ shared.runRewardRound = function (req, cb) {
                     if (!result.attributeConsumptions) {
                         return cb(messages.NO_CONSUMPTIONS_FOR_REWARD_ROUND);
                     }
-                    req.timestamp = currentTimestamp;
-                    req.lastRewardRoundTimestamp = startTimestamp;
+                    req.before = currentTimestamp;
+                    req.after = startTimestamp;
 
                     let reqForDistribute = _.cloneDeep(req);
 
@@ -1990,10 +2006,11 @@ shared.runRewardRound = function (req, cb) {
                         }
                     }
 
-                    __private.distributeRewards(reqForDistribute, keypair,  function (err, res) {
+                    __private.distributeRewards(reqForDistribute, function (err, res) {
                         if (err) {
                             return cb(err);
                         }
+                        console.log('HEEEERE')
                         __private.buildTransaction({
                                 req: req,
                                 keypair: keypair,
@@ -2012,7 +2029,6 @@ shared.runRewardRound = function (req, cb) {
         });
     });
 };
-
 
 shared.updateRewardRound = function (req, cb) {
     library.schema.validate(req.body, schema.updateRewardRound, function (err) {
@@ -2047,21 +2063,31 @@ shared.updateRewardRound = function (req, cb) {
                 return cb(messages.REWARD_ROUND_TOO_SOON);
             }
 
-            if (res && res.rewardRound && res.rewardRound.status === 'COMPLETED') {
-                return cb(null, 'Nothing to update, last reward round was completed');
+            if (res && res.rewardRound && res.rewardRound.status === 'COMPLETE') {
+                return cb(null, {message: messages.REWARD_ROUND_WITH_NO_UPDATE});
             }
-
-            let endTimestamp = res.rewardRound.timestamp;
 
             __private.getLastCompletedRewardRound({}, function (err, res) {
 
-                let startTimestamp = res && res.rewardRound && res.rewardRound.timestamp ? res.rewardRound.timestamp : 0;
+                let lastRewardRoundTimestamp = res && res.rewardRound && res.rewardRound.timestamp ? res.rewardRound.timestamp : 0;
 
                 __private.getUnrewardedConsumptionCalculation({
-                    before: endTimestamp,
-                    after: startTimestamp
+                    before: lastRewardRoundTimestamp,
+                    after: 0
                 }, function (err, result) {
-                    if (!result.attributeConsumptions) {
+                    console.log('update ' + JSON.stringify(result.unrewardedAttributeConsumptions));
+                    if (!result.unrewardedAttributeConsumptions || result.unrewardedAttributeConsumptions.length === 0) {
+
+                        let keypair;
+                        if (!req.body.signature) {
+                            keypair = library.crypto.makeKeypair(req.body.secret);
+                        }
+                        if (keypair && req.body.publicKey) {
+                            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                                return cb(messages.INVALID_PASSPHRASE);
+                            }
+
+
                         __private.buildTransaction({
                                 req: req,
                                 keypair: keypair,
@@ -2075,7 +2101,6 @@ shared.updateRewardRound = function (req, cb) {
                                 return cb(null, result);
                             });
                     }
-
                 });
             });
         });
@@ -2083,10 +2108,6 @@ shared.updateRewardRound = function (req, cb) {
 };
 
 
-//
-//__API__ `checkConfirmedDelegates`
-
-//
 Attributes.prototype.getAttributeValidationScore = function (filter, cb) {
     return __private.getAttributeValidationScore(filter, cb);
 };

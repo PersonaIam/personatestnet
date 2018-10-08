@@ -1,5 +1,5 @@
 {
-  "port": 4101,
+  "port": 4100,
   "address": "0.0.0.0",
   "version": "0.3.0",
   "fileLogLevel": "info",
@@ -9,7 +9,7 @@
   "db": {
     "host": "localhost",
     "port": 5432,
-    "database": "persona_test",
+    "database": "persona_localnet",
     "user": "postgres",
     "password": "postgres",
     "poolSize": 20,
