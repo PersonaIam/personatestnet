@@ -2087,7 +2087,7 @@ shared.updateRewardRound = function (req, cb) {
                                 return cb(messages.INVALID_PASSPHRASE);
                             }
 
-
+                        }
                         __private.buildTransaction({
                                 req: req,
                                 keypair: keypair,
