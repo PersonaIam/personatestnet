@@ -696,9 +696,6 @@ __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
                     let rewards = rewardTransactions.map(tr => {
                         return tr.rawasset;
                     });
-                    console.log('^^^ '+ JSON.stringify(rewardTransactions));
-                    console.log('^^^ '+ JSON.stringify(rewards));
-                    console.log('$$$'+ JSON.stringify(attributeConsumptionsForRewards));
                     attributeConsumptionsForRewards.forEach(i => {
                         let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.recipient === i.validator);
                         if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
@@ -829,8 +826,6 @@ __private.buildTransaction = function (params, cb) {
     let req = params.req;
     let keypair = params.keypair;
     let transactionType = params.transactionType;
-
-    console.log('23456765432 ' + JSON.stringify(req))
 
     modules.accounts.getAccount({publicKey: req.body.publicKey}, function (err, requester) {
         if (err) {
@@ -971,7 +966,7 @@ shared.getAttribute = function (req, cb) {
             }
 
             if (data.count === 0) {
-                return cb(messages.ATTRIBUTE_NOT_FOUND);
+                return cb(null, {attributes : [], count : 0});
             }
 
             let resultData = {attributes: data.attributes};
@@ -2010,7 +2005,6 @@ shared.runRewardRound = function (req, cb) {
                         if (err) {
                             return cb(err);
                         }
-                        console.log('HEEEERE')
                         __private.buildTransaction({
                                 req: req,
                                 keypair: keypair,
@@ -2075,7 +2069,6 @@ shared.updateRewardRound = function (req, cb) {
                     before: lastRewardRoundTimestamp,
                     after: 0
                 }, function (err, result) {
-                    console.log('update ' + JSON.stringify(result.unrewardedAttributeConsumptions));
                     if (!result.unrewardedAttributeConsumptions || result.unrewardedAttributeConsumptions.length === 0) {
 
                         let keypair;

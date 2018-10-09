@@ -44,12 +44,6 @@ Transaction.prototype.create = function (data) {
 	if (!data.keypair && !data.signature) {
 		throw 'Invalid keypair';
 	}
-	console.log('1 ' + data.type)
-	console.log('2 ' + data.recipientId)
-	console.log('3 ' + data.sender.publicKey)
-	console.log('4 ' + data.requester)
-	console.log('5 ' + data.timestamp)
-	console.log('6 ' + data.asset)
 	var trs = {
 		type: data.type,
 		amount: data.amount ? data.amount : 0,

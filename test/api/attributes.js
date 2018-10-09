@@ -230,8 +230,8 @@ describe('GET Attribute (name)', function () {
     it('Non existing attribute (address)', function (done) {
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
             console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.eq(messages.ATTRIBUTE_NOT_FOUND);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attributes');
             done();
         });
     });
