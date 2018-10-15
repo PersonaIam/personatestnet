@@ -29,6 +29,7 @@ Attribute.prototype.create = function (data, trs) {
     trs.asset.attribute = {
         type: data.type,
         value: data.value,
+        expire_timestamp: data.expire_timestamp,
         owner: data.owner,
         publicKey: data.sender.publicKey
     };
@@ -174,6 +175,9 @@ Attribute.prototype.schema = {
         },
         value: {
             type: 'string',
+        },
+        expire_timestamp: {
+            type: 'integer'
         }
     },
     required: ['owner', 'type', 'value']
@@ -210,7 +214,7 @@ Attribute.prototype.dbFields = [
     'type',
     'value',
     'timestamp',
-    'active'
+    'expire_timestamp'
 ];
 
 //
@@ -218,6 +222,7 @@ Attribute.prototype.dbFields = [
 
 //
 Attribute.prototype.dbSave = function (trs) {
+    console.log('YATZEE');
     return {
         table: this.dbTable,
         fields: this.dbFields,
@@ -226,7 +231,7 @@ Attribute.prototype.dbSave = function (trs) {
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
             timestamp: trs.timestamp,
-            active: 0
+            expire_timestamp: trs.asset.attribute[0].expire_timestamp
         }
     };
 };

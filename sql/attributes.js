@@ -11,18 +11,19 @@ let AttributesSql = {
 
     deleteAttribute: 'DELETE FROM attributes WHERE "id" = ${id};',
 
-    activateAttribute: 'UPDATE attributes SET active = 1 WHERE "id" = ${id};',
-
     countByRowId: 'SELECT COUNT("id")::int FROM attributes',
 
     insert: 'INSERT INTO attributes ' +
-    '("type", "value", "owner", "timestamp", "active") ' +
+    '("type", "value", "owner", "timestamp", "expire_timestamp") ' +
     'VALUES ' +
-    '(${type}, ${value}, ${owner}, ${timestamp}, ${active}) RETURNING id,type,value,owner,active',
+    '(${type}, ${value}, ${owner}, ${timestamp}, ${expire_timestamp}) RETURNING id,type,value,owner,expire_timestamp',
 
     update: 'UPDATE attributes ' +
-    'SET ("value", "timestamp", "active") = (${value}, ${timestamp}, ${active}) ' +
+    'SET ("value", "timestamp", "expire_timestamp") = (${value}, ${timestamp}, ${expire_timestamp}) ' +
     'WHERE "owner" = ${owner} AND "type" = ${type} RETURNING id, owner, type, value;',
+
+    getAttributeActiveState : 'SELECT av.id FROM attribute_validations av RIGHT OUTER JOIN attribute_validation_requests avr '
+    + ' ON avr.id = av.attribute_validation_request_id WHERE av.timestamp > ${before} AND avr.attribute_id = ${attribute_id}',
 
     getAttributesFiltered: function (params) {
         return [
@@ -111,7 +112,7 @@ let AttributeValidationsSql = {
         'attribute_validation_request_id',
         'chunk',
         'timestamp',
-        'expireTimestamp'
+        'expire_timestamp'
     ],
 
     getAttributeValidation: 'SELECT * FROM attribute_validations WHERE "id" = ${id}',
@@ -208,7 +209,7 @@ let AttributeConsumptionsSql = {
     getAttributeConsumptionsForRewardsMadeBetween : 'SELECT ac.id,ac.attribute_id,ac.amount,avr.validator,av.chunk FROM attribute_consumptions ac ' +
     'RIGHT OUTER JOIN attribute_validation_requests avr ON ac.attribute_id = avr.attribute_id ' +
     'RIGHT OUTER JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id ' +
-    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ${before} AND av.timestamp >= ${after}',
+    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp > ac.timestamp',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
 

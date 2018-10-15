@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "attributes"(
   "value" TEXT,
   "owner" VARCHAR(36) NOT NULL,
   "timestamp" INT NOT NULL,
-  "active" SMALLINT
+  "expire_timestamp" INT
 );
 
 CREATE TABLE IF NOT EXISTS "attribute_validation_requests"(
@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS "attribute_validations"(
   "attribute_validation_request_id" INT,
   "chunk" SMALLINT NOT NULL,
   "timestamp" INT NOT NULL,
-  "expireTimestamp" BIGINT,
   FOREIGN KEY("attribute_validation_request_id") REFERENCES "attribute_validation_requests"("id") ON DELETE CASCADE
 );
 
@@ -69,13 +68,6 @@ CREATE TABLE IF NOT EXISTS "attribute_consumptions"(
   "attribute_id" INT,
   "timestamp" INT NOT NULL,
   "amount" INT NOT NULL,
-  FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS "attribute_activations"(
-  "id" SERIAL NOT NULL PRIMARY KEY,
-  "attribute_id" INT,
-  "timestamp" INT NOT NULL,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
 );
 

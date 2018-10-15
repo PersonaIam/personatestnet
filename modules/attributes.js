@@ -57,11 +57,6 @@ function Attributes(cb, scope) {
         transactionTypes.CONSUME_ATTRIBUTE, new AttributeConsume()
     );
 
-    let AttributeActivate = require('../logic/attributeActivation.js');
-    __private.assetTypes[transactionTypes.ATTRIBUTE_ACTIVATION] = library.logic.transaction.attachAssetType(
-        transactionTypes.ATTRIBUTE_ACTIVATION, new AttributeActivate()
-    );
-
     let RewardRound = require('../logic/rewardRound.js');
     __private.assetTypes[transactionTypes.RUN_REWARD_ROUND] = library.logic.transaction.attachAssetType(
         transactionTypes.RUN_REWARD_ROUND, new RewardRound()
@@ -137,9 +132,6 @@ Attributes.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
-    __private.assetTypes[transactionTypes.ATTRIBUTE_ACTIVATION].bind({
-        modules: modules, library: library
-    });
 
 };
 
@@ -190,7 +182,7 @@ __private.attachApi = function () {
         'post /updaterewardround': 'updateRewardRound',
 
         'get /validationscore': 'getAttributeValidationScore',
-        'post /activate': 'activateAttribute'
+        'get /active': 'getAttributeActiveState',
     });
 
     router.use(function (req, res, next) {
@@ -207,6 +199,23 @@ __private.attachApi = function () {
     });
 };
 
+// __private.getInactiveAttributes = function (filter, cb) {
+//     return cb (null, '')
+// };
+
+__private.getAttributeActiveState = function (filter, cb) {
+
+    library.db.query(sql.AttributesSql.getAttributeActiveState,
+        {attribute_id: filter.attribute_id, before : slots.getTime() - constants.ONE_YEAR})
+        .then(function (rows) {
+        let data =  {
+            active: rows.length >= constants.VALIDATIONS_REQUIRED
+        }
+        return cb(null, data);
+    }).catch(function (err) {
+        return cb(err.message);
+    })
+};
 
 __private.getAttributesByFilter = function (filter, cb) {
     let params = {}, where = [];
@@ -242,7 +251,6 @@ __private.getAttributesByFilter = function (filter, cb) {
     if (orderBy.error) {
         return cb(orderBy.error);
     }
-
 
     library.db.query(sql.AttributesSql.getAttributesFiltered({
         where: where,
@@ -693,23 +701,23 @@ __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
                     type: transactionTypes.REWARD
                 }).then(function (rewardTransactions) {
 
-                    let rewards = rewardTransactions.map(tr => {
-                        return tr.rawasset;
-                    });
-                    attributeConsumptionsForRewards.forEach(i => {
-                        let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.recipient === i.validator);
-                        if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
-                            let validationsForConsumption = attributeConsumptionsForRewards.filter(k => k.id === i.id);
-                            let sumOfChunksForConsumption = validationsForConsumption.reduce(function (a, b) {
-                                return a + b.chunk;
-                            }, 0);
-                            unrewardedAttributeConsumptions.push({
-                                recipient: i.validator,
-                                amount: (i.amount * i.chunk / sumOfChunksForConsumption),
-                                consumption_id: i.id
-                            });
-                        }
-                    })
+                let rewards = rewardTransactions.map(tr => {
+                    return tr.rawasset;
+                });
+                attributeConsumptionsForRewards.forEach(i => {
+                    let rewardsForConsumption = rewards.filter(r => r.consumption_id === i.id && r.recipient === i.validator);
+                    if (!rewardsForConsumption || rewardsForConsumption.length === 0) {
+                        let validationsForConsumption = attributeConsumptionsForRewards.filter(k => k.id === i.id);
+                        let sumOfChunksForConsumption = validationsForConsumption.reduce(function (a, b) {
+                            return a + b.chunk;
+                        }, 0);
+                        unrewardedAttributeConsumptions.push({
+                            recipient: i.validator,
+                            amount: (i.amount * i.chunk / sumOfChunksForConsumption),
+                            consumption_id: i.id
+                        });
+                    }
+                })
                 return cb(null, {unrewardedAttributeConsumptions: unrewardedAttributeConsumptions});
 
             });
@@ -966,7 +974,7 @@ shared.getAttribute = function (req, cb) {
             }
 
             if (data.count === 0) {
-                return cb(null, {attributes : [], count : 0});
+                return cb(null, {attributes: [], count: 0});
             }
 
             let resultData = {attributes: data.attributes};
@@ -1267,6 +1275,11 @@ shared.requestAttributeShare = function (req, cb) {
                 if (!data.attributes || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
+
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
+
                 req.body.asset.share[0].attribute_id = data.attributes[0].id;
                 req.body.applicant = req.body.asset.share[0].applicant;
                 req.body.attribute_id = data.attributes[0].id;
@@ -1416,6 +1429,11 @@ shared.approveShareAttribute = function (req, cb) {
                 if (err || !data.attributes) {
                     return cb('Cannot approve share attribute request : ' + messages.ATTRIBUTE_NOT_FOUND);
                 }
+
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
+
                 req.body.attribute_id = data.attributes[0].id;
                 req.body.applicant = req.body.asset.share[0].applicant;
 
@@ -1497,41 +1515,54 @@ shared.shareAttribute = function (req, cb) {
 
             __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
                 if (err || !data.attributes) {
-                    return cb('Cannot share attribute : ' + messages.ATTRIBUTE_NOT_FOUND);
+                    return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
-                req.body.attribute_id = data.attributes[0].id;
-                req.body.applicant = req.body.asset.share[0].applicant;
 
-                req.body.asset.attribute_id = data.attributes[0].id;
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
 
-                __private.getAttributeShareRequests(req.body, function (err, attributeShareRequests) {
+                let reqAttributeActiveState = {};
+                reqAttributeActiveState.attribute_id = data.attributes[0].id;
 
-                    if (err || !attributeShareRequests) {
-                        return cb(messages.ATTRIBUTE_SHARE_WITH_NO_SHARE_REQUEST);
+                __private.getAttributeActiveState(reqAttributeActiveState, function (err, attributeActiveState) {
+                    if (!attributeActiveState.active) {
+                        return cb (messages.INACTIVE_ATTRIBUTE);
                     }
 
-                    if (attributeShareRequests[0].status === 0) {
-                        return cb(messages.ATTRIBUTE_SHARE_WITH_NO_APPROVED_SHARE_REQUEST);
-                    }
+                    req.body.attribute_id = data.attributes[0].id;
+                    req.body.applicant = req.body.asset.share[0].applicant;
+                    req.body.asset.attribute_id = data.attributes[0].id;
 
-                    if (attributeShareRequests[0].status === 2) {
-                        return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
-                    }
+                    __private.getAttributeShareRequests(req.body, function (err, attributeShareRequests) {
 
-                    req.body.asset.attributeShareRequestId = attributeShareRequests[0].id;
+                        if (err || !attributeShareRequests) {
+                            return cb(messages.ATTRIBUTE_SHARE_WITH_NO_SHARE_REQUEST);
+                        }
 
-                    __private.buildTransaction({
-                            req: req,
-                            keypair: keypair,
-                            transactionType: transactionTypes.SHARE_ATTRIBUTE
-                        },
-                        function (err, resultData) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            return cb(null, resultData);
-                        });
+                        if (attributeShareRequests[0].status === 0) {
+                            return cb(messages.ATTRIBUTE_SHARE_WITH_NO_APPROVED_SHARE_REQUEST);
+                        }
 
+                        if (attributeShareRequests[0].status === 2) {
+                            return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
+                        }
+
+                        req.body.asset.attributeShareRequestId = attributeShareRequests[0].id;
+
+                        __private.buildTransaction({
+                                req: req,
+                                keypair: keypair,
+                                transactionType: transactionTypes.SHARE_ATTRIBUTE
+                            },
+                            function (err, resultData) {
+                                if (err) {
+                                    return cb(err);
+                                }
+                                return cb(null, resultData);
+                            });
+
+                    });
                 });
             });
         });
@@ -1580,91 +1611,31 @@ shared.consumeAttribute = function (req, cb) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
 
-                req.body.asset.attribute_id = data.attributes[0].id;
-                req.body.recipientId = constants.REWARD_FAUCET;
-
-                __private.buildTransaction({
-                        req: req,
-                        keypair: keypair,
-                        transactionType: transactionTypes.CONSUME_ATTRIBUTE
-                    },
-                    function (err, resultData) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, resultData);
-                    });
-
-            });
-        });
-    });
-};
-
-
-shared.activateAttribute = function (req, cb) {
-    library.schema.validate(req.body, schema.activateAttribute, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!req.body.asset || !req.body.asset.attribute) {
-            return cb('Attribute to be activated is not provided');
-        }
-
-        if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
-            return cb('Owner address is incorrect');
-        }
-
-        let keypair;
-        if (!req.body.signature) {
-            keypair = library.crypto.makeKeypair(req.body.secret);
-        }
-        if (keypair && req.body.publicKey) {
-            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
-                return cb(messages.INVALID_PASSPHRASE);
-            }
-        }
-
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.attribute[0].type;
-        __private.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.attribute[0].owner;
-            reqGetAttributesByFilter.body.type = req.body.asset.attribute[0].type;
-
-            __private.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err) {
-                    return cb(err);
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
                 }
-                if (!data.attributes || data.attributes.length === 0) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND);
-                }
-                req.body.asset.attribute_id = data.attributes[0].id;
 
-                __private.getAttributeValidationScore({
-                        attribute_id: data.attributes[0].id
-                    },
-                    function (err, res) {
+                let reqAttributeActiveState = {};
+                reqAttributeActiveState.attribute_id = data.attributes[0].id;
+                __private.getAttributeActiveState(reqAttributeActiveState, function (err, attributeActiveState) {
+                    if (!attributeActiveState.active) {
+                        return cb(messages.INACTIVE_ATTRIBUTE);
+                    }
 
-                        if (res.score < constants.VALIDATIONS_REQUIRED) {
-                            return cb(messages.VALIDATION_SCORE_IS_TOO_LOW);
-                        }
-
-                        __private.buildTransaction({
-                                req: req,
-                                keypair: keypair,
-                                transactionType: transactionTypes.ATTRIBUTE_ACTIVATION
-                            },
-                            function (err, resultData) {
-                                if (err) {
-                                    return cb(err);
-                                }
-                                return cb(null, resultData);
-                            });
-                    });
+                    req.body.asset.attribute_id = data.attributes[0].id;
+                    req.body.recipientId = constants.REWARD_FAUCET;
+                    __private.buildTransaction({
+                            req: req,
+                            keypair: keypair,
+                            transactionType: transactionTypes.CONSUME_ATTRIBUTE
+                        },
+                        function (err, resultData) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            return cb(null, resultData);
+                        });
+                });
             });
         });
     });
@@ -1866,7 +1837,6 @@ shared.getAttributeValidations = function (req, cb) {
     });
 };
 
-
 shared.getAttributeValidationScore = function (req, cb) {
     library.schema.validate(req.body, schema.getAttributeValidationScore, function (err) {
         if (err) {
@@ -1887,6 +1857,29 @@ shared.getAttributeValidationScore = function (req, cb) {
                 }
 
                 return cb(null, {attribute_validation_score: res.score});
+            });
+        });
+    });
+};
+
+
+shared.getAttributeActiveState = function (req, cb) {
+    library.schema.validate(req.body, schema.getAttributeActiveState, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        __private.getAttributesByFilter(req.body, function (err, result) {
+
+            if (!result || result.attributes.length === 0) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND);
+            }
+
+            req.body.attribute_id = result.attributes[0].id;
+
+            __private.getAttributeActiveState(req.body, function (err, res) {
+
+                return cb(null, {active: res.active});
             });
         });
     });

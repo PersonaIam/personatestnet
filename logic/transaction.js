@@ -44,6 +44,7 @@ Transaction.prototype.create = function (data) {
 	if (!data.keypair && !data.signature) {
 		throw 'Invalid keypair';
 	}
+	console.log(JSON.stringify(data.asset));
 	var trs = {
 		type: data.type,
 		amount: data.amount ? data.amount : 0,
@@ -398,6 +399,8 @@ Transaction.prototype.verify = function (trs, sender, requester, cb) {
 
 	// Get transaction id
 	var txId;
+
+	console.log(JSON.stringify(trs))
 
 	try {
 		txId = this.getId(trs);

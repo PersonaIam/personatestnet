@@ -5,6 +5,7 @@ let node = require('./../node.js');
 let sleep = require('sleep');
 let messages = require('../../helpers/messages.js');
 let constants = require('../../helpers/constants.js');
+let slots = require('../../helpers/slots.js');
 
 // TEST DATA
 
@@ -24,6 +25,7 @@ const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
+const EMAIL = 'yeezy@gmail.com';
 
 const INCORRECT_ADDRESS = 'ABC';
 
@@ -37,6 +39,8 @@ const FALSE = false;
 
 let transactionList = [];
 let ipfsTransaction = {};
+
+let time = 0;
 
 
 describe('PUT /api/transactions', function () {
@@ -223,6 +227,7 @@ describe('GET Attribute (name)', function () {
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq('name');
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(null);
             done();
         });
     });
@@ -232,6 +237,7 @@ describe('GET Attribute (name)', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attributes');
+            node.expect(res.body).to.have.property('attributes').to.have.length(0);
             done();
         });
     });
@@ -277,6 +283,7 @@ describe('GET All existing attributes for owner 1 result', function () {
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
             done();
         });
     });
@@ -679,30 +686,47 @@ describe('GET Attribute validation score for attribute with no validations', fun
         getAttributeValidationScore(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('attribute_validation_score').to.be.eq(0)
+            node.expect(res.body).to.have.property('attribute_validation_score').to.be.eq(0);
             done();
         });
     });
 });
 
-describe('POST Activate Attribute attribute with no validations', function () {
-    it('Activate Attribute attribute with no validations', function (done) {
+describe('Get Attribute Active state', function () {
+    it('Get Attribute Active state - active', function (done) {
 
-        let param = {};
-        param.type = "address";
-        param.owner = OWNER;
+        let params = {};
+        params.owner = OWNER;
+        params.type = 'name';
 
-        let request = createAttributeActivation(param);
-        postAttributeActivation(request, function (err, res) {
+        getAttributeActiveState(params, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('active').to.be.eq(false);
+            done();
+        });
+    });
+});
+
+describe('Consume attribute with no validations', function () {
+
+    it('Consume attribute', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = 'name';
+        params.amount = AMOUNT_1;
+
+        let request = createAttributeConsume(params);
+        postConsumeAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_SCORE_IS_TOO_LOW)
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
+
             done();
         });
     });
 });
-
-// create a second validation, and be able to activate the attribute
 
 describe('POST Create an attribute validation', function () {
 
@@ -723,6 +747,7 @@ describe('POST Create an attribute validation', function () {
         postAttributeValidation(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -785,6 +810,24 @@ describe('POST Create an attribute validation', function () {
         });
     });
 });
+
+
+describe('Get Attribute Active state', function () {
+    it('Get Attribute Active state - inactive', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = 'name';
+
+        getAttributeActiveState(params, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('active').to.be.eq(true);
+            done();
+        });
+    });
+});
+
 
 describe('POST Create an attribute validation for non existing attribute validation request', function () {
 
@@ -1029,6 +1072,22 @@ describe('GET Attribute validation requests', function () {
 
 describe('POST Create an attribute share request', function () {
 
+    it('Attribute share with no share request', function (done) {
+
+        let params = {};
+        params.applicant = APPLICANT;
+        params.owner = OWNER;
+        params.type = 'name';
+
+        let request = createAttributeShare(params);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_SHARE_WITH_NO_SHARE_REQUEST);
+            done();
+        });
+    });
+
     it('Create an attribute share request', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1244,21 +1303,6 @@ describe('POST Attribute share with no approved request', function () {
         });
     });
 
-    it('Attribute share with no share request', function (done) {
-
-        let params = {};
-        params.applicant = APPLICANT;
-        params.owner = OWNER;
-        params.type = 'identity_card';
-
-        let request = createAttributeShare(params);
-        postShareAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_SHARE_WITH_NO_SHARE_REQUEST);
-            done();
-        });
-    });
 });
 
 describe('POST Approve attribute share request', function () {
@@ -2048,12 +2092,57 @@ describe('POST Run reward round - with attribute consumptions', function () {
 });
 
 
+describe('POST Create new attribute with expiry', function () {
+
+    it('Create new attribute with expiry', function (done) {
+
+        let unconfirmedBalance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        time = slots.getTime() + 20000;
+        param.expire_timestamp = time;
+        param.type = 'email';
+        param.value = EMAIL;
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('GET Existing attribute with expiry' , function (done) {
+        getAttribute(OTHER_OWNER, 'email', function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(EMAIL);
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('email');
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.be.eq(time);
+            done();
+        });
+    });
+});
+
 /**
  * Utilities
  *
  */
 
 function createAttributeRequest(param) {
+    console.log('44444' + JSON.stringify(param));
     let request = {};
     if (!param) {
         param = {}
@@ -2066,8 +2155,12 @@ function createAttributeRequest(param) {
     request.asset.attribute[0].type = param.type ? param.type : "name";
     request.asset.attribute[0].owner = param.owner ? param.owner : OTHER_OWNER;
     request.asset.attribute[0].value = param.value ? param.value : NAME_VALUE;
+    if (param.expire_timestamp) {
+        request.asset.attribute[0].expire_timestamp =  param.expire_timestamp;
+    }
 
-    console.log(request);
+
+    console.log(JSON.stringify(request));
     return request;
 }
 
@@ -2163,32 +2256,9 @@ function createAttributeValidation(param) {
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
     request.asset.validation[0].chunk = param.chunk ? param.chunk : DEFAULT_CHUNK;
-
-    console.log('req = ' + request);
-    console.log('asset = ' + request.asset);
-    console.log('validation = ' + request.asset.validation[0]);
-    return request;
-}
-
-
-function createAttributeActivation(param) {
-
-    let request = {};
-    if (!param) {
-        param = {}
+    if (param.expire_timestamp) {
+        request.asset.validation[0].expire_timestamp =  param.expire_timestamp;
     }
-
-    request.secret = param.secret ? param.secret : SECRET;
-    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
-    request.asset = {};
-    request.asset.attribute = [];
-    request.asset.attribute[0] = {};
-    request.asset.attribute[0].type = param.type ? param.type : "name";
-    request.asset.attribute[0].owner = param.owner ? param.owner : OWNER;
-
-    console.log('req = ' + request);
-    console.log('asset = ' + request.asset);
-    console.log('attribute = ' + request.asset.attribute[0]);
     return request;
 }
 
@@ -2253,10 +2323,6 @@ function postAttributeValidationRequest(params, done) {
 
 function postAttributeValidation(params, done) {
     node.post('/api/attributes/validation', params, done);
-}
-
-function postAttributeActivation(params, done) {
-    node.post('/api/attributes/activate', params, done);
 }
 
 function postAttributeShareRequest(params, done) {
@@ -2387,6 +2453,20 @@ function getAttributeValidationScore(params, done) {
     }
     node.get(url, done);
 
+}
+
+function getAttributeActiveState(params, done) {
+    let url = '/api/attributes/active';
+    if (params.type || params.owner) {
+        url += '?';
+    }
+    if (params.type) {
+        url += 'type=' + '' + params.type;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    node.get(url, done);
 }
 
 function getAttributeValidationRequestsForValidator(params, completeSuffix, done) {

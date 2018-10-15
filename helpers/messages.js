@@ -7,6 +7,8 @@ module.exports = {
     ATTRIBUTE_ALREADY_EXISTS : 'Attribute already exists',
     ACCOUNT_NOT_FOUND : 'Account not found',
     ATTRIBUTE_NOT_FOUND : 'Attribute not found',
+    EXPIRED_ATTRIBUTE : 'Attribute is expired',
+    INACTIVE_ATTRIBUTE : 'Attribute is inactive',
     ATTRIBUTE_TYPE_NOT_FOUND : 'Attribute type not found',
     ATTRIBUTE_VALIDATION_REQUESTS_NOT_FOUND : 'Attribute validation requests not found',
     ATTRIBUTE_SHARES_NOT_FOUND : 'Attribute shares not found',
@@ -17,7 +19,6 @@ module.exports = {
     NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS : 'No attribute validation requests exists for the given parameters',
     NO_ATTRIBUTE_VALIDATIONS : 'No attribute validations were found for the given parameters',
     NO_ATTRIBUTE_VALIDATION_REQUESTS : 'No attribute validation requests were found for the given parameters',
-    VALIDATION_SCORE_IS_TOO_LOW : 'Not enough validations for the attribute to be activated',
     ATTRIBUTE_VALIDATION_ALREADY_MADE : 'Attribute validation already made',
 
     INCORRECT_VALIDATION_PARAMETERS : 'Either the validator or the attribute (type and owner information) must be provided',

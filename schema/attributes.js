@@ -126,9 +126,6 @@ module.exports = {
             timestamp: {
                 type: 'integer',
                 minimum: 0
-            },
-            active: {
-                type: 'integer'
             }
         },
         required: ['owner','type','value']
@@ -265,32 +262,6 @@ module.exports = {
         required: ['asset','secret','publicKey','amount']
     },
 
-    activateAttribute: {
-        id: 'attributes.activateAttribute',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset:{
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset','secret','publicKey']
-    },
-
     getAttributeValidationRequests: {
         id: 'attributes.getAttributeValidationRequests',
         type: 'object',
@@ -376,6 +347,21 @@ module.exports = {
     },
     getAttributeValidationScore: {
         id: 'attributes.getAttributeValidationScore',
+        type: 'object',
+        properties: {
+            type: {
+                type: 'string',
+                minLength: 1
+            },
+            owner: {
+                type: 'string',
+                format: 'address'
+            }
+        },
+        required: ['type','owner']
+    },
+    getAttributeActiveState: {
+        id: 'attributes.getAttributeActiveState',
         type: 'object',
         properties: {
             type: {

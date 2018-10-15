@@ -30,7 +30,6 @@ AttributeValidation.prototype.create = function (data, trs) {
         attribute_validation_request_id: data.attributeValidationRequestId,
         chunk: data.chunk,
         timestamp: data.timestamp,
-        expireTimestamp : data.expireTimestamp
     };
 
     return trs;
@@ -209,8 +208,7 @@ AttributeValidation.prototype.dbTable = 'attribute_validations';
 AttributeValidation.prototype.dbFields = [
     'attribute_validation_request_id',
     'chunk',
-    'timestamp',
-    'expireTimestamp'
+    'timestamp'
 ];
 
 //
@@ -225,8 +223,7 @@ AttributeValidation.prototype.dbSave = function (trs) {
         values: {
             attribute_validation_request_id: trs.asset.attributeValidationRequestId,
             chunk: trs.asset.validation[0].chunk,
-            timestamp: trs.timestamp,
-            expireTimestamp: trs.timestamp + 10000
+            timestamp: trs.timestamp
         }
     };
 };

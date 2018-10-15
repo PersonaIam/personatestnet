@@ -14,6 +14,7 @@ var attributesHelper = require('../helpers/attributes');
 var sql = require('../sql/transactions.js');
 var Transfer = require('../logic/transfer.js');
 var transactionTypes = require('../helpers/transactionTypes.js');
+var fs = require('fs-extra');
 
 // Private fields
 var modules, library, self, __private = {}, shared = {};
