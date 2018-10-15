@@ -1089,7 +1089,7 @@ shared.addAttribute = function (req, cb) {
                                         };
 
                                         __private.addAttributeToIpfs(files, function (err, res) {
-                                            if (err) return callback(error, null);
+                                            if (err) return callback(err, null);
 
                                             const {hash} = res;
 

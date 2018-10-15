@@ -1,17 +1,17 @@
 BEGIN;
 
-
-insert into attribute_types (name,data_type) VALUES ('name','regular');
-insert into attribute_types (name,data_type) VALUES ('alias','regular');
-insert into attribute_types (name,data_type) VALUES ('ssn','regular');
-insert into attribute_types (name,data_type) VALUES ('date_of_birth','regular');
-insert into attribute_types (name,data_type) VALUES ('birthplace','regular');
-insert into attribute_types (name,data_type) VALUES ('address','regular');
-insert into attribute_types (name,data_type) VALUES ('email','regular');
-insert into attribute_types (name,data_type) VALUES ('phone_number','regular');
-insert into attribute_types (name,data_type) VALUES ('parent_name','regular');
-insert into attribute_types (name,data_type) VALUES ('notary_confirmation','regular');
-insert into attribute_types (name,data_type) VALUES ('identity_card','ipfs');
+insert into attribute_types (name,data_type,validation) VALUES ('first_name','text', '{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('last_name','text', '{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('ssn','text', '{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('alias','text', '{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('date_of_birth','date', '{"required": true}');
+insert into attribute_types (name,data_type,validation,options) VALUES ('address','text', '{"required": true, "minLength": 2, "maxLength": 80}', '{"type": "textarea"}');
+insert into attribute_types (name,data_type,validation) VALUES ('birthplace','text', '{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation,options) VALUES ('email','text','{"required": true, "minLength": 2, "maxLength": 80, "pattern": "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}" }', '{"type":"email"}');
+insert into attribute_types (name,data_type,validation) VALUES ('phone_number','text','{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('mothers_name','text','{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation) VALUES ('fathers_name','text','{"required": true, "minLength": 2, "maxLength": 80}');
+insert into attribute_types (name,data_type,validation, options) VALUES ('identity_card','file', '{"required":true}','{"accept": ["image/*",".pdf"], "maxSize": 10485760, "expirable": true}');
 
 
 COMMIT;
