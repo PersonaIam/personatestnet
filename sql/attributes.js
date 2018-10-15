@@ -209,7 +209,7 @@ let AttributeConsumptionsSql = {
     getAttributeConsumptionsForRewardsMadeBetween : 'SELECT ac.id,ac.attribute_id,ac.amount,avr.validator,av.chunk FROM attribute_consumptions ac ' +
     'RIGHT OUTER JOIN attribute_validation_requests avr ON ac.attribute_id = avr.attribute_id ' +
     'RIGHT OUTER JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id ' +
-    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp > ac.timestamp',
+    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ac.timestamp',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
 

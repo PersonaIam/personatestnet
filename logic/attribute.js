@@ -222,7 +222,6 @@ Attribute.prototype.dbFields = [
 
 //
 Attribute.prototype.dbSave = function (trs) {
-    console.log('YATZEE');
     return {
         table: this.dbTable,
         fields: this.dbFields,
