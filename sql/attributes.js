@@ -22,8 +22,9 @@ let AttributesSql = {
     'SET ("value", "timestamp", "expire_timestamp") = (${value}, ${timestamp}, ${expire_timestamp}) ' +
     'WHERE "owner" = ${owner} AND "type" = ${type} RETURNING id, owner, type, value;',
 
-    getAttributeActiveState : 'SELECT av.id FROM attribute_validations av RIGHT OUTER JOIN attribute_validation_requests avr '
-    + ' ON avr.id = av.attribute_validation_request_id WHERE av.timestamp > ${before} AND avr.attribute_id = ${attribute_id}',
+    getActiveAttributesForOwner : 'SELECT id from attributes WHERE "owner" = ${owner} and id in (SELECT attribute_id ' +
+    ' FROM attribute_validation_requests avr JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id' +
+    ' GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
 
     getAttributesFiltered: function (params) {
         return [

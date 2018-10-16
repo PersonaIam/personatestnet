@@ -26,6 +26,8 @@ const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const EMAIL = 'yeezy@gmail.com';
+const FIRST_NAME = 'first_name';
+
 
 const INCORRECT_ADDRESS = 'ABC';
 
@@ -70,28 +72,15 @@ describe('PUT /api/transactions', function () {
     });
 });
 
-describe('GET List of attributes - empty list', function () {
-
-    it('List of attributes', function (done) {
-        getAttributes(function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(0);
-            node.expect(res.body).to.have.property('attributes');
-            done();
-        });
-    });
-});
-
 describe('GET Attribute type', function () {
 
     it('Attribute type', function (done) {
-        getAttributeTypeByName('name', function (err, res) {
+        getAttributeTypeByName('first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attribute_type).to.have.property('id');
             node.expect(res.body.attribute_type).to.have.property('data_type');
-            node.expect(res.body.attribute_type).to.have.property('name').to.be.eq('name');
+            node.expect(res.body.attribute_type).to.have.property('name').to.be.eq('first_name');
             node.expect(res.body.attribute_type.id).to.be.at.least(1);
             done();
         });
@@ -116,6 +105,7 @@ describe('POST Create new attribute ( name )', function () {
 
         let unconfirmedBalance = 0;
         getBalance(OWNER, function (err, res) {
+            console.log('before ' + JSON.stringify(res));
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
 
@@ -127,6 +117,7 @@ describe('POST Create new attribute ( name )', function () {
             node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
+                console.log('after ' + JSON.stringify(res));
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
@@ -219,15 +210,16 @@ describe('GET transaction and check if it contains IPFS hash ( identity_card )',
 describe('GET Attribute (name)', function () {
 
     it('Existing attribute (name)', function (done) {
-        getAttribute(OTHER_OWNER, 'name', function (err, res) {
+        getAttribute(OTHER_OWNER, 'first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('name');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('first_name');
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(null);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             done();
         });
     });
@@ -411,21 +403,9 @@ describe('GET All existing attributes for owner', function () {
             types[0] = res.body.attributes[0].type;
             types[1] = res.body.attributes[1].type;
             node.expect(types.indexOf('address') > -1);
-            node.expect(types.indexOf('name') > -1);
+            node.expect(types.indexOf('first_name') > -1);
 
 
-            done();
-        });
-    });
-});
-
-describe('GET List of attributes', function () {
-
-    it('List of attributes', function (done) {
-        getAttributes(function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(4);
             done();
         });
     });
@@ -443,7 +423,7 @@ describe('POST Create an attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'name';
+        param.type = 'first_name';
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -462,7 +442,7 @@ describe('POST Create an attribute validation request', function () {
 
         let params = {};
         params.validator = VALIDATOR;
-        params.type = 'name';
+        params.type = 'first_name';
         params.owner = INCORRECT_ADDRESS;
 
         let request = createAttributeValidationRequest(params);
@@ -479,7 +459,7 @@ describe('POST Create an attribute validation request', function () {
 
         let params = {};
         params.validator = INCORRECT_ADDRESS;
-        params.type = 'name';
+        params.type = 'first_name';
         params.owner = OWNER;
 
         let request = createAttributeValidationRequest(params);
@@ -529,7 +509,7 @@ describe('POST Create same attribute validation request', function () {
         param.owner = OWNER;
 
         param.validator = VALIDATOR;
-        param.type = 'name';
+        param.type = 'first_name';
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -548,7 +528,7 @@ describe('GET Attribute validation request', function () {
         let param = {};
         param.validator = VALIDATOR;
         param.owner = OWNER;
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeValidationRequest(param, function (err, res) {
             console.log(res.body);
@@ -583,7 +563,7 @@ describe('GET Attribute validation request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeValidationRequest(param, function (err, res) {
             console.log(res.body);
@@ -626,7 +606,7 @@ describe('GET Attribute validation request', function () {
     it('Attribute validation request - incorrect parameters', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeValidationRequest(param, function (err, res) {
             console.log(res.body);
@@ -692,29 +672,13 @@ describe('GET Attribute validation score for attribute with no validations', fun
     });
 });
 
-describe('Get Attribute Active state', function () {
-    it('Get Attribute Active state - active', function (done) {
-
-        let params = {};
-        params.owner = OWNER;
-        params.type = 'name';
-
-        getAttributeActiveState(params, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('active').to.be.eq(false);
-            done();
-        });
-    });
-});
-
 describe('Consume attribute with no validations', function () {
 
     it('Consume attribute', function (done) {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.amount = AMOUNT_1;
 
         let request = createAttributeConsume(params);
@@ -739,7 +703,7 @@ describe('POST Create an attribute validation', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.validator = VALIDATOR;
         param.chunk = CHUNK;
 
@@ -762,7 +726,7 @@ describe('POST Create an attribute validation', function () {
 
         let param = {};
         param.owner = INCORRECT_ADDRESS;
-        param.type = 'name';
+        param.type = 'first_name';
         param.validator = VALIDATOR;
         param.chunk = CHUNK;
 
@@ -780,7 +744,7 @@ describe('POST Create an attribute validation', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.validator = INCORRECT_ADDRESS;
         param.chunk = CHUNK;
 
@@ -797,7 +761,7 @@ describe('POST Create an attribute validation', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.validator = VALIDATOR;
         param.chunk = CHUNK;
 
@@ -811,24 +775,6 @@ describe('POST Create an attribute validation', function () {
     });
 });
 
-
-describe('Get Attribute Active state', function () {
-    it('Get Attribute Active state - inactive', function (done) {
-
-        let params = {};
-        params.owner = OWNER;
-        params.type = 'name';
-
-        getAttributeActiveState(params, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('active').to.be.eq(true);
-            done();
-        });
-    });
-});
-
-
 describe('POST Create an attribute validation for non existing attribute validation request', function () {
 
     it('Create an attribute validation for non existing attribute validation request ', function (done) {
@@ -836,7 +782,7 @@ describe('POST Create an attribute validation for non existing attribute validat
         let param = {};
         param.owner = OTHER_OWNER;
         param.validator = VALIDATOR;
-        param.type = 'name';
+        param.type = 'first_name';
 
         let request = createAttributeValidation(param);
         postAttributeValidation(request, function (err, res) {
@@ -855,7 +801,7 @@ describe('GET Attribute validations for validator ', function () {
 
         let param = {};
         param.validator = VALIDATOR;
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
 
         getAttributeValidation(param, function (err, res) {
@@ -892,7 +838,7 @@ describe('GET Attribute validations for validator ', function () {
     it('Get Attribute validation - by attribute', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
 
         getAttributeValidation(param, function (err, res) {
@@ -913,7 +859,7 @@ describe('GET Attribute validation score for attribute', function () {
     it('Get Attribute validation score for attribute', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
 
         getAttributeValidationScore(param, function (err, res) {
@@ -944,7 +890,7 @@ describe('GET Attribute validations for attribute without any validation request
     it('Attribute validation - attribute without validation requests', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OTHER_OWNER;
 
         getAttributeValidation(param, function (err, res) {
@@ -1026,7 +972,7 @@ describe('GET Attribute validation requests', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
 
         getAttributeValidationRequestsForValidator(param, 'completed', function (err, res) {
             console.log(res.body);
@@ -1077,13 +1023,30 @@ describe('POST Create an attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
 
         let request = createAttributeShare(params);
         postShareAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_SHARE_WITH_NO_SHARE_REQUEST);
+            done();
+        });
+    });
+
+    it('Attribute share approval with no share request', function (done) {
+
+        let params = {};
+        params.applicant = APPLICANT;
+        params.owner = OWNER;
+        params.type = 'first_name';
+        params.action = true;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_APPROVAL_SHARE_WITH_NO_SHARE_REQUEST);
             done();
         });
     });
@@ -1097,7 +1060,7 @@ describe('POST Create an attribute share request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShareRequest(param);
@@ -1118,7 +1081,7 @@ describe('POST Create an attribute share request', function () {
 
         let param = {};
         param.owner = INCORRECT_ADDRESS;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShareRequest(param);
@@ -1134,7 +1097,7 @@ describe('POST Create an attribute share request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = INCORRECT_ADDRESS;
 
         let request = createAttributeShareRequest(param);
@@ -1153,7 +1116,7 @@ describe('POST Create an attribute share request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShareRequest(param);
@@ -1185,7 +1148,7 @@ describe('POST Create an attribute share request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = OWNER;
 
         let request = createAttributeShareRequest(param);
@@ -1219,7 +1182,7 @@ describe('GET Attribute share request', function () {
         let param = {};
         param.applicant = APPLICANT;
         param.owner = OWNER;
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -1256,7 +1219,7 @@ describe('GET Attribute share request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -1292,7 +1255,7 @@ describe('POST Attribute share with no approved request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
 
         let request = createAttributeShare(params);
         postShareAttribute(request, function (err, res) {
@@ -1317,7 +1280,7 @@ describe('POST Approve attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = true;
 
         let request = createAttributeShareApproval(params);
@@ -1338,7 +1301,7 @@ describe('POST Approve attribute share request', function () {
         let param = {};
         param.applicant = APPLICANT;
         param.owner = OWNER;
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -1357,7 +1320,7 @@ describe('POST Approve attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = true;
 
         let request = createAttributeShareApproval(params);
@@ -1374,7 +1337,7 @@ describe('POST Approve attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = INCORRECT_ADDRESS;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = true;
 
         let request = createAttributeShareApproval(params);
@@ -1391,7 +1354,7 @@ describe('POST Approve attribute share request', function () {
         let params = {};
         params.applicant = INCORRECT_ADDRESS;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = true;
 
         let request = createAttributeShareApproval(params);
@@ -1403,22 +1366,6 @@ describe('POST Approve attribute share request', function () {
         });
     });
 
-    it('Attribute share approval with no share request', function (done) {
-
-        let params = {};
-        params.applicant = APPLICANT;
-        params.owner = OWNER;
-        params.type = 'identity_card';
-        params.action = true;
-
-        let request = createAttributeShareApproval(params);
-        postApproveShareAttributeRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_APPROVAL_SHARE_WITH_NO_SHARE_REQUEST);
-            done();
-        });
-    });
 });
 
 
@@ -1428,7 +1375,7 @@ describe('GET Attribute shares - share not created yet', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         getAttributeShare(param, function (err, res) {
@@ -1452,7 +1399,7 @@ describe('POST Create an attribute share - with existing approved share request'
         let param = {};
         param.owner = OWNER;
         param.value = 'KLMN';
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShare(param);
@@ -1474,7 +1421,7 @@ describe('POST Create an attribute share - with existing approved share request'
         let param = {};
         param.owner = INCORRECT_ADDRESS;
         param.value = 'KLMN';
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShare(param);
@@ -1491,7 +1438,7 @@ describe('POST Create an attribute share - with existing approved share request'
         let param = {};
         param.owner = OWNER;
         param.value = 'KLMN';
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = INCORRECT_ADDRESS;
 
         let request = createAttributeShare(param);
@@ -1529,7 +1476,7 @@ describe('GET Attribute shares - share exists', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
 
         getAttributeShare(param, function (err, res) {
             console.log(res.body);
@@ -1560,7 +1507,7 @@ describe('GET Attribute shares - share exists', function () {
     it('Attribute share - share exists, type with no owner', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeShare(param, function (err, res) {
             console.log(res.body);
@@ -1575,7 +1522,7 @@ describe('GET Attribute shares - share exists', function () {
         let param = {};
         param.applicant = APPLICANT;
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -1598,7 +1545,7 @@ describe('POST Create an attribute share - same share as one already made', func
         let param = {};
         param.owner = OWNER;
         param.value = 'KLMN';
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShare(param);
@@ -1624,7 +1571,7 @@ describe('POST Unapprove attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = false;
 
         let request = createAttributeShareApproval(params);
@@ -1645,7 +1592,7 @@ describe('POST Unapprove attribute share request', function () {
         let param = {};
         param.applicant = APPLICANT;
         param.owner = OWNER;
-        param.type = 'name';
+        param.type = 'first_name';
 
         getAttributeShareRequest(param, function (err, res) {
             console.log(res.body);
@@ -1665,7 +1612,7 @@ describe('POST Unapprove attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = false;
 
         let request = createAttributeShareApproval(params);
@@ -1682,7 +1629,7 @@ describe('POST Unapprove attribute share request', function () {
         let param = {};
         param.owner = OWNER;
         param.value = 'KLMN';
-        param.type = 'name';
+        param.type = 'first_name';
         param.applicant = APPLICANT;
 
         let request = createAttributeShare(param);
@@ -1699,7 +1646,7 @@ describe('POST Unapprove attribute share request', function () {
         let params = {};
         params.applicant = APPLICANT;
         params.owner = INCORRECT_ADDRESS;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = false;
 
         let request = createAttributeShareApproval(params);
@@ -1716,7 +1663,7 @@ describe('POST Unapprove attribute share request', function () {
         let params = {};
         params.applicant = INCORRECT_ADDRESS;
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.action = false;
 
         let request = createAttributeShareApproval(params);
@@ -1761,7 +1708,7 @@ describe('POST Consume attribute', function () {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.amount = AMOUNT_1;
 
         let request = createAttributeConsume(params);
@@ -1785,7 +1732,7 @@ describe('POST Consume attribute', function () {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.amount = 0;
 
         let request = createAttributeConsume(params);
@@ -1801,7 +1748,7 @@ describe('POST Consume attribute', function () {
 
         let params = {};
         params.owner = INCORRECT_ADDRESS;
-        params.type = 'name';
+        params.type = 'first_name';
         params.amount = 1;
 
         let request = createAttributeConsume(params);
@@ -1821,7 +1768,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - with type & owner', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
 
         getAttributeConsumptions(param, function (err, res) {
@@ -1866,7 +1813,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - type and no owner', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
 
         getAttributeConsumptions(param, function (err, res) {
             console.log(res.body);
@@ -1879,7 +1826,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - with type & owner & before', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
         param.before = timestampConsume1+1;
 
@@ -1898,7 +1845,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - with type & owner & after', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
         param.after = timestampConsume1-1;
 
@@ -1917,7 +1864,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - with type & owner & before & after', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
         param.before = timestampConsume1+1;
         param.after = timestampConsume1-1;
@@ -1937,7 +1884,7 @@ describe('GET Attribute consumptions', function () {
     it('Attribute consumptions - with type & owner & before & after - no results', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
         param.before = timestampConsume1-1;
         param.after = timestampConsume1+1;
@@ -1969,7 +1916,7 @@ describe('POST Consume attribute - second time', function () {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'name';
+        params.type = 'first_name';
         params.amount = AMOUNT_2;
 
         let request = createAttributeConsume(params);
@@ -1992,7 +1939,7 @@ describe('POST Consume attribute - second time', function () {
     it('Get attribute consumptions - with type & owner', function (done) {
 
         let param = {};
-        param.type = "name";
+        param.type = FIRST_NAME;
         param.owner = OWNER;
 
         getAttributeConsumptions(param, function (err, res) {
@@ -2136,6 +2083,80 @@ describe('POST Create new attribute with expiry', function () {
     });
 });
 
+describe('POST Consume inactive attribute', function () {
+    it('Consume attribute for inactive', function (done) {
+
+        let params = {};
+        params.owner = OTHER_OWNER;
+        params.type = 'email';
+        params.amount = 1;
+
+        let request = createAttributeConsume(params);
+        postConsumeAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
+            done();
+        });
+    });
+});
+
+
+describe('POST Share inactive attribute', function () {
+    it('Create attribute share request for inactive attribute', function (done) {
+
+        let params = {};
+        params.owner = OTHER_OWNER;
+        params.applicant = APPLICANT;
+        params.type = 'email';
+        params.amount = 1;
+
+        let request = createAttributeShareRequest(params);
+        postAttributeShareRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Share for inactive attribute ', function (done) {
+
+        let params = {};
+        params.owner = OTHER_OWNER;
+        params.applicant = APPLICANT;
+        params.type = 'email';
+        params.amount = 1;
+
+        let request = createAttributeShare(params);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Approve attribute share request for inactive attribute ', function (done) {
+
+        let params = {};
+        params.owner = OTHER_OWNER;
+        params.applicant = APPLICANT;
+        params.type = 'email';
+        params.amount = 1;
+        params.action = true;
+
+        let request = createAttributeShareApproval(params);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
+            done();
+        });
+    });
+});
+
+
 /**
  * Utilities
  *
@@ -2152,7 +2173,7 @@ function createAttributeRequest(param) {
     request.asset = {};
     request.asset.attribute = [];
     request.asset.attribute[0] = {};
-    request.asset.attribute[0].type = param.type ? param.type : "name";
+    request.asset.attribute[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.attribute[0].owner = param.owner ? param.owner : OTHER_OWNER;
     request.asset.attribute[0].value = param.value ? param.value : NAME_VALUE;
     if (param.expire_timestamp) {
@@ -2174,7 +2195,7 @@ function createAttributeShare(param) {
     request.asset = {};
     request.asset.share = [];
     request.asset.share[0] = {};
-    request.asset.share[0].type = param.type ? param.type : "name";
+    request.asset.share[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.share[0].owner = param.owner ? param.owner : OTHER_OWNER;
     request.asset.share[0].applicant = param.applicant ? param.applicant : APPLICANT;
     request.asset.share[0].value = param.value ? param.value : "KLMN";
@@ -2195,7 +2216,7 @@ function createAttributeConsume(param) {
     request.asset = {};
     request.asset.attribute = [];
     request.asset.attribute[0] = {};
-    request.asset.attribute[0].type = param.type ? param.type : "name";
+    request.asset.attribute[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.attribute[0].owner = param.owner ? param.owner : OWNER;
 
     console.log(request);
@@ -2212,7 +2233,7 @@ function createAttributeShareApproval(param) {
     request.asset = {};
     request.asset.share = [];
     request.asset.share[0] = {};
-    request.asset.share[0].type = param.type ? param.type : "name";
+    request.asset.share[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.share[0].owner = param.owner ? param.owner : OTHER_OWNER;
     request.asset.share[0].applicant = param.applicant ? param.applicant : APPLICANT;
     request.asset.share[0].action = param.action;
@@ -2232,7 +2253,7 @@ function createAttributeValidationRequest(param) {
     request.asset = {};
     request.asset.validation = [];
     request.asset.validation[0] = {};
-    request.asset.validation[0].type = param.type ? param.type : "name";
+    request.asset.validation[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
 
@@ -2252,7 +2273,7 @@ function createAttributeValidation(param) {
     request.asset = {};
     request.asset.validation = [];
     request.asset.validation[0] = {};
-    request.asset.validation[0].type = param.type ? param.type : "name";
+    request.asset.validation[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
     request.asset.validation[0].chunk = param.chunk ? param.chunk : DEFAULT_CHUNK;
@@ -2301,7 +2322,7 @@ function createAttributeShareRequest(param) {
     request.asset = {};
     request.asset.share = [];
     request.asset.share[0] = {};
-    request.asset.share[0].type = param.type ? param.type : "name";
+    request.asset.share[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.share[0].owner = param.owner ? param.owner : OWNER;
     request.asset.share[0].applicant = param.applicant ? param.applicant : APPLICANT;
 
@@ -2455,20 +2476,6 @@ function getAttributeValidationScore(params, done) {
 
 }
 
-function getAttributeActiveState(params, done) {
-    let url = '/api/attributes/active';
-    if (params.type || params.owner) {
-        url += '?';
-    }
-    if (params.type) {
-        url += 'type=' + '' + params.type;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
-    }
-    node.get(url, done);
-}
-
 function getAttributeValidationRequestsForValidator(params, completeSuffix, done) {
 
     let url = '/api/attributes/validationrequest/' + completeSuffix;
@@ -2520,8 +2527,4 @@ function putTransaction(params, done) {
 
 function getTransaction(params, done) {
     node.get(`/api/transactions/get?id=${params.id}`, done);
-}
-
-function getAttributes(done) {
-    node.get('/api/attributes/list', done);
 }
