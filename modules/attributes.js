@@ -4,6 +4,7 @@ let Router = require('../helpers/router.js');
 let OrderBy = require('../helpers/orderBy.js');
 let schema = require('../schema/attributes.js');
 let slots = require('../helpers/slots.js');
+let moment = require('moment');
 let sql = require('../sql/attributes.js');
 let attributedHelper = require('../helpers/attributes.js');
 let transactionTypes = require('../helpers/transactionTypes.js');
@@ -25,6 +26,11 @@ function Attributes(cb, scope) {
     let Attribute = require('../logic/attribute.js');
     __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.CREATE_ATTRIBUTE, new Attribute()
+    );
+
+    let AttributeUpdate = require('../logic/attributeUpdate.js');
+    __private.assetTypes[transactionTypes.UPDATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
+        transactionTypes.UPDATE_ATTRIBUTE, new AttributeUpdate()
     );
 
     let AttributeValidationRequest = require('../logic/attributeValidationRequest.js');
@@ -96,6 +102,10 @@ Attributes.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
+    __private.assetTypes[transactionTypes.UPDATE_ATTRIBUTE].bind({
+        modules: modules, library: library
+    });
+
     __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_VALIDATION].bind({
         modules: modules, library: library
     });
@@ -135,12 +145,6 @@ Attributes.prototype.onBind = function (scope) {
 
 };
 
-Attributes.prototype.verify = function (req, cb) {
-    // dummy verification
-    return cb(null, '');
-};
-
-
 // Private methods
 __private.attachApi = function () {
     let router = new Router();
@@ -157,6 +161,7 @@ __private.attachApi = function () {
         'get /': 'getAttribute',
         'get /types/list': 'listAttributeTypes',
         'get /types': 'getAttributeType',
+        'put /' : 'updateAttribute',
 
         'post /validationrequest': 'requestAttributeValidation',
         'get /validationrequest': 'getAttributeValidationRequests',
@@ -246,8 +251,8 @@ __private.getAttributesByFilter = function (filter, cb) {
         }
         let data = {};
         data.count = count;
-
         library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
+            after : slots.getTime(moment().subtract(1, 'year')),
             owner: filter.owner,
             validations_required: constants.VALIDATIONS_REQUIRED
         })
@@ -258,7 +263,7 @@ __private.getAttributesByFilter = function (filter, cb) {
                 return cb(null, data);
             })
     }).catch(function (err) {
-        library.logger.error("stack", err.stack);
+        library.logger.error("stackyty", err.stack);
         return cb(err.message);
     });
 };
@@ -683,7 +688,7 @@ __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
     const before = filter.before;
 
     library.db.query(sql.AttributeConsumptionsSql.getAttributeConsumptionsForRewardsMadeBetween,
-        {before: before, after: after})
+        {before: before, after: after, offset : moment.duration(1,'y').asMilliseconds()})
         .then(function (attributeConsumptionsForRewards) {
 
             library.db.query(sql.AttributeRewardsSql.getRewardsBetween,
@@ -751,7 +756,6 @@ __private.distributeRewards = function (req, cb) {
                 },
                 cb);
         }, function (err) {
-            console.log(err);
             return cb(err);
         });
     });
@@ -985,7 +989,6 @@ shared.addAttribute = function (req, cb) {
         }
 
         let reqGetAttributeType = req;
-
         const publicKey = req.body.publicKey;
 
         reqGetAttributeType.body.name = req.body.asset.attribute[0].type;
@@ -993,6 +996,17 @@ shared.addAttribute = function (req, cb) {
             if (err || !data.attribute_type) {
                 return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
             }
+
+            if (data.attribute_type.options && JSON.parse(data.attribute_type.options).expirable === true) {
+                if (!req.body.asset.attribute[0].expire_timestamp) {
+                    return cb(messages.EXPIRE_TIMESTAMP_REQUIRED);
+                }
+
+                if (req.body.asset.attribute[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRE_TIMESTAMP_IN_THE_PAST);
+                }
+            }
+
             const attributeDataType = data.attribute_type.data_type;
             const attributeDataName = data.attribute_type.name;
             const owner = req.body.asset.attribute[0].owner;
@@ -1119,6 +1133,66 @@ shared.addAttribute = function (req, cb) {
     });
 };
 
+shared.updateAttribute = function (req, cb) {
+    library.schema.validate(req.body, schema.updateAttribute, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.attribute) {
+            return cb('Attribute is not provided');
+        }
+
+        if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
+            return cb('Owner address is incorrect');
+        }
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        __private.getAttributesByFilter({id: req.body.asset.attribute[0].attributeId}, function (err, data) {
+            if (err || !data || data.attributes.length === 0) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND_FOR_UPDATE);
+            }
+
+            __private.getAttributeType({name : data.attributes[0].type}, function (err, attributeType) {
+                if (err || !attributeType.attribute_type) {
+                    return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+                }
+
+                if (attributeType.attribute_type.options && JSON.parse(attributeType.attribute_type.options).expirable === true) {
+                    if (!req.body.asset.attribute[0].expire_timestamp) {
+                        return cb(messages.EXPIRE_TIMESTAMP_REQUIRED);
+                    }
+
+                    if (req.body.asset.attribute[0].expire_timestamp < slots.getTime()) {
+                        return cb(messages.EXPIRE_TIMESTAMP_IN_THE_PAST);
+                    }
+                }
+                __private.buildTransaction({
+                        req: req,
+                        keypair: keypair,
+                        transactionType: transactionTypes.UPDATE_ATTRIBUTE
+                    },
+                    function (err, resultData) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        return cb(null, resultData);
+                    });
+            });
+        });
+
+    });
+};
+
 shared.requestAttributeValidation = function (req, cb) {
     library.schema.validate(req.body, schema.requestAttributeValidation, function (err) {
         if (err) {
@@ -1169,6 +1243,11 @@ shared.requestAttributeValidation = function (req, cb) {
                 if (!data.attributes || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
+
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
+
                 req.body.asset.validation[0].attribute_id = data.attributes[0].id;
                 req.body.validator = req.body.asset.validation[0].validator;
                 req.body.attribute_id = data.attributes[0].id;
@@ -1329,6 +1408,10 @@ shared.validateAttribute = function (req, cb) {
                 }
                 req.body.attribute_id = data.attributes[0].id;
                 req.body.validator = req.body.asset.validation[0].validator;
+
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
 
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
 

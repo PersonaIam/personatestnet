@@ -9,6 +9,8 @@ let AttributesSql = {
         'timestamp'
     ],
 
+    updateAttribute: 'UPDATE attributes SET value = ${value}, timestamp = ${timestamp}, expire_timestamp = ${expire_timestamp} where id = ${id}',
+
     deleteAttribute: 'DELETE FROM attributes WHERE "id" = ${id};',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attributes',
@@ -18,13 +20,9 @@ let AttributesSql = {
     'VALUES ' +
     '(${type}, ${value}, ${owner}, ${timestamp}, ${expire_timestamp}) RETURNING id,type,value,owner,expire_timestamp',
 
-    update: 'UPDATE attributes ' +
-    'SET ("value", "timestamp", "expire_timestamp") = (${value}, ${timestamp}, ${expire_timestamp}) ' +
-    'WHERE "owner" = ${owner} AND "type" = ${type} RETURNING id, owner, type, value;',
-
-    getActiveAttributesForOwner : 'SELECT id from attributes WHERE "owner" = ${owner} and id in (SELECT attribute_id ' +
+    getActiveAttributesForOwner : 'SELECT id from attributes a WHERE "owner" = ${owner} and id in (SELECT attribute_id ' +
     ' FROM attribute_validation_requests avr JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id' +
-    ' GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
+    ' WHERE av.timestamp > ${after} AND av.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
 
     getAttributesFiltered: function (params) {
         return [
@@ -210,7 +208,7 @@ let AttributeConsumptionsSql = {
     getAttributeConsumptionsForRewardsMadeBetween : 'SELECT ac.id,ac.attribute_id,ac.amount,avr.validator,av.chunk FROM attribute_consumptions ac ' +
     'RIGHT OUTER JOIN attribute_validation_requests avr ON ac.attribute_id = avr.attribute_id ' +
     'RIGHT OUTER JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id ' +
-    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ac.timestamp',
+    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ac.timestamp AND av.timestamp >= ac.timestamp-${offset}',
 
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
 

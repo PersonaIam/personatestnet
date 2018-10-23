@@ -6,6 +6,7 @@ let sleep = require('sleep');
 let messages = require('../../helpers/messages.js');
 let constants = require('../../helpers/constants.js');
 let slots = require('../../helpers/slots.js');
+let moment = require('moment');
 
 // TEST DATA
 
@@ -27,6 +28,8 @@ const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const EMAIL = 'yeezy@gmail.com';
 const FIRST_NAME = 'first_name';
+const BIRTH_PLACE = 'Calgary';
+const NEW_ADDRESS = 'Edmonton';
 
 
 const INCORRECT_ADDRESS = 'ABC';
@@ -46,8 +49,9 @@ let time = 0;
 
 
 describe('PUT /api/transactions', function () {
+    // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
 
-    it('using valid parameters should be ok', function (done) {
+    it('using valid parameters - placeholder to generate public key', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -61,6 +65,30 @@ describe('PUT /api/transactions', function () {
             transactionList.push({
                 'sender': OWNER,
                 'recipient': OWNER,
+                'grossSent': (amountToSend + expectedFee) / node.normalizer,
+                'fee': expectedFee / node.normalizer,
+                'netSent': amountToSend / node.normalizer,
+                'txId': res.body.transactionId,
+                'type': node.txTypes.SEND
+            });
+            done();
+        });
+    });
+
+    // this test IS supposed to send the amount ( checks if transactions can be made )
+    it('using valid parameters should be ok', function (done) {
+        let amountToSend = 7;
+        let expectedFee = node.expectedFee(amountToSend);
+
+        putTransaction({
+            senderPublicKey: PUBLIC_KEY,
+            secret: SECRET,
+            amount: amountToSend,
+            recipientId: OTHER_OWNER
+        }, function (err, res) {
+            transactionList.push({
+                'sender': OWNER,
+                'recipient': OTHER_OWNER,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
                 'netSent': amountToSend / node.normalizer,
@@ -104,21 +132,22 @@ describe('POST Create new attribute ( name )', function () {
     it('Create new attribute ( name )', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
-            console.log('before ' + JSON.stringify(res));
+            balance = parseInt(res.body.balance);
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
 
         let request = createAttributeRequest();
 
         postAttribute(request, function (err, res) {
-            console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('transactionId');
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
-                console.log('after ' + JSON.stringify(res));
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
             done();
@@ -143,16 +172,37 @@ describe('POST Create new attribute ( name )', function () {
 
 describe('POST Create new attribute with value stored on IPFS ( identity_card )', function () {
 
+    it('Create new expirable attribute with no expire_timestamp value ( identity_card )', function (done) {
+
+        let params = {};
+        params.type = 'identity_card';
+        params.value = 'some_random_file_content';
+
+        let request = createAttributeRequest(params);
+
+        ipfsTransaction.req = request; // keep the original requested data
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRE_TIMESTAMP_REQUIRED);
+            done();
+        });
+    });
+
     it('Create new attribute with value stored on IPFS ( identity_card )', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let params = {};
         params.type = 'identity_card';
         params.value = 'some_random_file_content';
+        params.expire_timestamp = slots.getTime() + 20000;
 
         let request = createAttributeRequest(params);
 
@@ -168,6 +218,8 @@ describe('POST Create new attribute with value stored on IPFS ( identity_card )'
 
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
 
@@ -240,8 +292,10 @@ describe('POST Create attribute (name) for different owner', function () {
     it('Create attribute (name) for different owner', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -257,6 +311,8 @@ describe('POST Create attribute (name) for different owner', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
             done();
@@ -286,8 +342,10 @@ describe('POST Create a different attribute ( address )', function () {
     it('Create a different attribute ( address )', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -303,6 +361,8 @@ describe('POST Create a different attribute ( address )', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
             done();
@@ -416,8 +476,10 @@ describe('POST Create an attribute validation request', function () {
     it('Create an attribute validation request', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -432,6 +494,8 @@ describe('POST Create an attribute validation request', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
             });
             done();
@@ -478,8 +542,10 @@ describe('POST Create another attribute validation request', function () {
     it('Create another attribute validation request', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -494,6 +560,8 @@ describe('POST Create another attribute validation request', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
             });
             done();
@@ -697,8 +765,10 @@ describe('POST Create an attribute validation', function () {
     it('Create an attribute validation ', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -715,6 +785,8 @@ describe('POST Create an attribute validation', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidation);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidation);
             });
             done();
@@ -1054,8 +1126,10 @@ describe('POST Create an attribute share request', function () {
     it('Create an attribute share request', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -1071,6 +1145,8 @@ describe('POST Create an attribute share request', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributesharerequest);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributesharerequest);
             });
             done();
@@ -1273,8 +1349,10 @@ describe('POST Approve attribute share request', function () {
     it('Approve attribute share request', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let params = {};
@@ -1290,6 +1368,8 @@ describe('POST Approve attribute share request', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributeshareapproval);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeshareapproval);
             });
             done();
@@ -1392,8 +1472,10 @@ describe('POST Create an attribute share - with existing approved share request'
     it('Create an attribute share', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -1410,6 +1492,8 @@ describe('POST Create an attribute share - with existing approved share request'
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributeshare);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeshare);
             });
             done();
@@ -1564,8 +1648,10 @@ describe('POST Unapprove attribute share request', function () {
     it('Unapprove attribute share request', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let params = {};
@@ -1581,6 +1667,8 @@ describe('POST Unapprove attribute share request', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributeshareapproval);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeshareapproval);
             });
             done();
@@ -1697,12 +1785,16 @@ describe('POST Consume attribute', function () {
     it('Consume attribute', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let unconfirmedBalanceRecipient = 0;
+        let balanceRecipient = 0;
         getBalance(constants.REWARD_FAUCET, function (err, res) {
+            balanceRecipient = parseInt(res.body.balance);
             unconfirmedBalanceRecipient = parseInt(res.body.unconfirmedBalance);
         });
 
@@ -1718,10 +1810,14 @@ describe('POST Consume attribute', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributeconsume);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeconsume);
             });
             getBalance(constants.REWARD_FAUCET, function (err, res) {
                 let unconfirmedBalanceAfterRecipient = parseInt(res.body.unconfirmedBalance);
+                let balanceAfterRecipient = parseInt(res.body.balance);
+                node.expect(balanceAfterRecipient - balanceRecipient === params.amount);
                 node.expect(unconfirmedBalanceAfterRecipient - unconfirmedBalanceRecipient === params.amount);
             });
             done();
@@ -1905,13 +2001,17 @@ describe('POST Consume attribute - second time', function () {
     it('Consume attribute - again, different amount', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let unconfirmedBalanceRecipient = 0;
+        let balanceRecipient = 0;
         getBalance(constants.REWARD_FAUCET, function (err, res) {
             unconfirmedBalanceRecipient = parseInt(res.body.unconfirmedBalance);
+            balanceRecipient = parseInt(res.body.balance);
         });
 
         let params = {};
@@ -1926,10 +2026,14 @@ describe('POST Consume attribute - second time', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributeconsume);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributeconsume);
             });
             getBalance(constants.REWARD_FAUCET, function (err, res) {
                 let unconfirmedBalanceAfterRecipient = parseInt(res.body.unconfirmedBalance);
+                let balanceAfterRecipient = parseInt(res.body.balance);
+                node.expect(balanceAfterRecipient - balance === params.amount);
                 node.expect(unconfirmedBalanceAfterRecipient - unconfirmedBalanceRecipient === params.amount);
             });
             done();
@@ -1981,8 +2085,10 @@ describe('POST Run reward round - with attribute consumptions', function () {
     it('Run reward round - with attribute consumptions', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -1992,6 +2098,8 @@ describe('POST Run reward round - with attribute consumptions', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.rewardRound);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.rewardRound);
             });
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2003,8 +2111,10 @@ describe('POST Run reward round - with attribute consumptions', function () {
     it('Update Last reward round', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -2017,6 +2127,8 @@ describe('POST Run reward round - with attribute consumptions', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.updateRewardRound);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateRewardRound);
             });
             done();
@@ -2039,13 +2151,15 @@ describe('POST Run reward round - with attribute consumptions', function () {
 });
 
 
-describe('POST Create new attribute with expiry', function () {
+describe('POST Create new attribute with expiry in the future', function () {
 
-    it('Create new attribute with expiry', function (done) {
+    it('Create new attribute with expiry in the future', function (done) {
 
         let unconfirmedBalance = 0;
+        let balance = 0;
         getBalance(OWNER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
         });
 
         let param = {};
@@ -2062,13 +2176,15 @@ describe('POST Create new attribute with expiry', function () {
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
             });
             done();
         });
     });
 
-    it('GET Existing attribute with expiry' , function (done) {
+    it('GET Existing attribute with expiry in the future' , function (done) {
         getAttribute(OTHER_OWNER, 'email', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2156,6 +2272,222 @@ describe('POST Share inactive attribute', function () {
     });
 });
 
+describe('POST Create new attribute (expired)', function () {
+
+    it('Create new attribute (expired)', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        time = slots.getTime() - 20000;
+        param.expire_timestamp = time;
+        param.type = 'birthplace';
+        param.value = BIRTH_PLACE;
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('GET Existing attribute with expiry' , function (done) {
+        getAttribute(OTHER_OWNER, 'birthplace', function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(BIRTH_PLACE);
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('birthplace');
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.be.eq(time);
+            done();
+        });
+    });
+
+    it('Create attribute validation request for expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.validator = VALIDATOR;
+        param.type = 'birthplace';
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Create attribute validation for expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.validator = VALIDATOR;
+        param.type = 'birthplace';
+
+        let request = createAttributeValidation(param);
+        postAttributeValidation(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Create attribute share request for expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.applicant = APPLICANT;
+        param.type = 'birthplace';
+
+        let request = createAttributeShareRequest(param);
+        postAttributeShareRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Create attribute share approval for expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.applicant = APPLICANT;
+        param.type = 'birthplace';
+        param.action = true;
+
+        let request = createAttributeShareApproval(param);
+        postApproveShareAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Create attribute share for expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.applicant = APPLICANT;
+        param.type = 'birthplace';
+
+        let request = createAttributeShare(param);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('Consume expired attribute', function (done) {
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.type = 'birthplace';
+        param.amount = 1;
+
+        let request = createAttributeConsume(param);
+        postConsumeAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
+            done();
+        });
+    });
+});
+
+describe('PUT update attribute ( address )', function () {
+
+    it('Update attribute ( address )', function (done) {
+
+        getAttribute(OWNER, 'address', function (err, res) {
+
+            let attributeId = res.body.attributes[0].id;
+            let unconfirmedBalance = 0;
+            let balance = 0;
+            getBalance(OWNER, function (err, res) {
+                unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+                balance = parseInt(res.body.balance);
+            });
+
+            let param = {};
+            param.attributeId = attributeId;
+            param.owner = OWNER;
+            param.value = NEW_ADDRESS;
+            time = slots.getTime();
+            param.expire_timestamp = time + 20000;
+            let request = updateAttributeRequest(param);
+
+            putAttributeUpdate(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('transactionId');
+                sleep.msleep(SLEEP_TIME);
+                getBalance(OWNER, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.updateattribute);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateattribute);
+                });
+                done();
+            });
+        });
+    });
+
+    it('GET attribute after update (address)', function (done) {
+        getAttribute(OWNER, 'address', function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NEW_ADDRESS);
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(time + 20000);
+            node.expect(res.body.attributes[0]).to.have.property('timestamp').to.be.at.least(time);
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
+            done();
+        });
+    });
+
+    it('Update attribute ( non existing attribute )', function (done) {
+
+            let param = {};
+            param.attributeId = 777;
+            param.owner = OWNER;
+            param.value = NEW_ADDRESS;
+            time = slots.getTime();
+            param.expire_timestamp = time + 20000;
+            let request = updateAttributeRequest(param);
+
+            putAttributeUpdate(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND_FOR_UPDATE);
+                done();
+            });
+        });
+});
 
 /**
  * Utilities
@@ -2163,7 +2495,6 @@ describe('POST Share inactive attribute', function () {
  */
 
 function createAttributeRequest(param) {
-    console.log('44444' + JSON.stringify(param));
     let request = {};
     if (!param) {
         param = {}
@@ -2180,6 +2511,26 @@ function createAttributeRequest(param) {
         request.asset.attribute[0].expire_timestamp =  param.expire_timestamp;
     }
 
+    console.log(JSON.stringify(request));
+    return request;
+}
+
+function updateAttributeRequest(param) {
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.attribute = [];
+    request.asset.attribute[0] = {};
+    request.asset.attribute[0].attributeId = param.attributeId;
+    request.asset.attribute[0].owner = param.owner ? param.owner : OTHER_OWNER;
+    request.asset.attribute[0].value = param.value;
+    if (param.expire_timestamp) {
+        request.asset.attribute[0].expire_timestamp =  param.expire_timestamp;
+    }
 
     console.log(JSON.stringify(request));
     return request;
@@ -2336,6 +2687,10 @@ function getAttributeTypeByName(name, done) {
 
 function postAttribute(params, done) {
     node.post('/api/attributes', params, done);
+}
+
+function putAttributeUpdate(params, done) {
+    node.put('/api/attributes', params, done);
 }
 
 function postAttributeValidationRequest(params, done) {

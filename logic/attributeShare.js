@@ -115,13 +115,7 @@ AttributeShare.prototype.getBytes = function (trs) {
 
 AttributeShare.prototype.apply = function (trs, block, sender, cb) {
 
-    modules.accounts.mergeAccountAndGet({
-        address: trs.recipientId,
-        balance: trs.amount,
-        u_balance: trs.amount,
-        blockId: block.id,
-        round: modules.rounds.getRoundFromHeight(block.height)
-    }, cb);
+    return cb(null, trs);
 };
 
 //

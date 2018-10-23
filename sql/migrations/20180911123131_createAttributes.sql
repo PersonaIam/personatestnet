@@ -22,6 +22,13 @@ CREATE TABLE IF NOT EXISTS "attributes"(
   "expire_timestamp" INT
 );
 
+CREATE TABLE IF NOT EXISTS "attribute_updates"(
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "attribute_id" INT NOT NULL,
+  "timestamp" INT NOT NULL,
+  FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS "attribute_validation_requests"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_id" INT NOT NULL,
@@ -91,7 +98,6 @@ CREATE TABLE IF NOT EXISTS "ipfs_pin_queue"(
 );
 
 /* Unique Indexes */
-CREATE UNIQUE INDEX IF NOT EXISTS "attributes_unique" ON "attributes"("type", "owner");
 CREATE UNIQUE INDEX IF NOT EXISTS "attribute_types_unique" ON "attribute_types"("name");
 CREATE UNIQUE INDEX IF NOT EXISTS "ipfs_pin_queue_unique" ON "ipfs_pin_queue"("ipfs_hash");
 

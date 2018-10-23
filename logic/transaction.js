@@ -49,7 +49,7 @@ Transaction.prototype.create = function (data) {
 		amount: data.amount ? data.amount : 0,
 		recipientId: data.recipientId,
 		senderPublicKey: data.sender.publicKey,
-		requesterPublicKey: data.requester ? data.requester.publicKey.toString('hex') : null,
+		requesterPublicKey: ( data.requester && data.requester.publicKey ) ? data.requester.publicKey.toString('hex') : null,
 		timestamp: data.timestamp ? data.timestamp : slots.getTime(),
 		vendorField: data.vendorField,
 		asset: data.asset
@@ -376,7 +376,6 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 
 			return cb(null, trs);
 		}).catch(function (err) {
-			console.log(err)
 			this.scope.logger.error(err.stack);
 			return cb('Transaction#process error');
 		});
@@ -704,9 +703,7 @@ Transaction.prototype.apply = function (trs, block, sender, cb) {
 	if (senderBalance.error) {
 		return cb(senderBalance.error);
 	}
-
 	amount = amount.toNumber();
-
 	this.scope.account.merge(sender.address, {
 		balance: -amount,
 		blockId: block.id,
@@ -781,7 +778,6 @@ Transaction.prototype.applyUnconfirmed = function (trs, sender, requester, cb) {
 	if (senderBalance.error) {
 		return cb(senderBalance.error);
 	}
-
 	amount = amount.toNumber();
 	this.scope.account.merge(sender.address, {u_balance: -amount}, function (err, sender) {
 		if (err) {
@@ -904,7 +900,6 @@ Transaction.prototype.dbSave = function (trs) {
 //
 Transaction.prototype.afterSave = function (trs, cb) {
 	var tx_type = __private.types[trs.type];
-
 	if (!tx_type) {
 		return cb('Unknown transaction type ' + trs.type);
 	} else {

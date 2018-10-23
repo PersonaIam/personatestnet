@@ -1,6 +1,7 @@
 'use strict';
 
 var constants = require('../helpers/constants.js');
+var bignum = require('../helpers/bignum.js');
 
 // Private fields
 var modules, library;
@@ -62,20 +63,7 @@ Attribute.prototype.verify = function (trs, sender, cb) {
     if (!trs.asset.attribute[0].owner) {
         return cb('Attribute owner is undefined');
     }
-
-    modules.attributes.verify({
-        owner: trs.asset.attribute.owner,
-        type: trs.asset.attribute.type
-    }, function (err, attribute) {
-        if (err) {
-            return cb(err);
-        }
-
-        if (attribute) {
-            return cb('Attribute already exists');
-        }
-        return cb(null, trs);
-    });
+    return cb(null, trs);
 };
 
 //
@@ -111,15 +99,9 @@ Attribute.prototype.getBytes = function (trs) {
 
 
 Attribute.prototype.apply = function (trs, block, sender, cb) {
+  return cb(null, trs);
 
-    modules.accounts.mergeAccountAndGet({
-        address: trs.recipientId,
-        balance: trs.amount,
-        u_balance: trs.amount,
-        blockId: block.id,
-        round: modules.rounds.getRoundFromHeight(block.height)
-    }, cb);
-};
+  };
 
 //
 //__API__ `undo`

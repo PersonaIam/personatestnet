@@ -1,15 +1,15 @@
 'use strict';
 
 module.exports = {
-	listAttributes: {
-		id: 'attributes.getAttributesByFilter',
-		type: 'object',
-		properties: {
-			owner: {
-				type: 'string',
-				minLength: 1,
+    listAttributes: {
+        id: 'attributes.getAttributesByFilter',
+        type: 'object',
+        properties: {
+            owner: {
+                type: 'string',
+                minLength: 1,
                 format: 'address'
-			},
+            },
             type: {
                 type: 'string',
                 minimum: 1
@@ -22,8 +22,8 @@ module.exports = {
                 type: 'integer',
                 minimum: 0
             }
-		}
-	},
+        }
+    },
     listAttributeTypes: {
         id: 'attributes.listAttributeTypes',
         type: 'object',
@@ -60,14 +60,13 @@ module.exports = {
                 minLength: 1,
             },
         },
-        required: ['name','data_type']
+        required: ['name', 'data_type']
     },
     getAttribute: {
         id: 'attributes.getAttribute',
         type: 'object',
         properties: {
             owner: {
-
                 type: 'string',
                 minLength: 1,
                 format: 'address'
@@ -101,34 +100,37 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
     updateAttribute: {
         id: 'attributes.updateAttribute',
         type: 'object',
         properties: {
-            value:{
-                minLength: 1
-            },
-            owner: {
+            secret: {
                 type: 'string',
                 minLength: 1,
-                format: 'address'
+                maxLength: 100
             },
-            type: {
+            publicKey: {
+                type: 'string',
+                format: 'publicKey'
+            },
+            secondSecret: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100
+            },
+            asset: {
+                type: 'object',
                 minLength: 1
-            },
-            timestamp: {
-                type: 'integer',
-                minimum: 0
             }
         },
-        required: ['owner','type','value']
+        required: ['asset', 'secret', 'publicKey']
     },
 
     requestAttributeValidation: {
@@ -149,12 +151,12 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
 
     validateAttribute: {
@@ -175,12 +177,12 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
     shareAttribute: {
         id: 'attributes.shareAttribute',
@@ -200,12 +202,12 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
     approveShareAttribute: {
         id: 'attributes.approveShareAttribute',
@@ -225,12 +227,12 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
     consumeAttribute: {
         id: 'attributes.consumeAttribute',
@@ -250,7 +252,7 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             },
@@ -259,7 +261,7 @@ module.exports = {
                 minimum: 1
             },
         },
-        required: ['asset','secret','publicKey','amount']
+        required: ['asset', 'secret', 'publicKey', 'amount']
     },
 
     getAttributeValidationRequests: {
@@ -358,7 +360,7 @@ module.exports = {
                 format: 'address'
             }
         },
-        required: ['type','owner']
+        required: ['type', 'owner']
     },
     getAttributeActiveState: {
         id: 'attributes.getAttributeActiveState',
@@ -373,7 +375,7 @@ module.exports = {
                 format: 'address'
             }
         },
-        required: ['type','owner']
+        required: ['type', 'owner']
     },
     requestAttributeShare: {
         id: 'attributes.requestAttributeShare',
@@ -393,12 +395,12 @@ module.exports = {
                 minLength: 1,
                 maxLength: 100
             },
-            asset:{
+            asset: {
                 type: 'object',
                 minLength: 1
             }
         },
-        required: ['asset','secret','publicKey']
+        required: ['asset', 'secret', 'publicKey']
     },
 
     getRequestAttributeShare: {
@@ -496,7 +498,7 @@ module.exports = {
                 maxLength: 100
             }
         },
-        required: ['secret','publicKey']
+        required: ['secret', 'publicKey']
     },
 
     updateRewardRound: {
@@ -518,7 +520,7 @@ module.exports = {
                 maxLength: 100
             }
         },
-        required: ['secret','publicKey']
+        required: ['secret', 'publicKey']
     },
 
     getLastRewardRound: {
@@ -540,6 +542,6 @@ module.exports = {
                 maxLength: 100
             }
         },
-        required: ['secret','publicKey']
+        required: ['secret', 'publicKey']
     }
 };
