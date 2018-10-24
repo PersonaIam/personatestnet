@@ -11,6 +11,7 @@ module.exports = {
     EXPIRED_ATTRIBUTE : 'Attribute is expired',
     INACTIVE_ATTRIBUTE : 'Attribute is inactive',
     ATTRIBUTE_TYPE_NOT_FOUND : 'Attribute type not found',
+    NOTHING_TO_UPDATE : 'Nothing to update',
     EXPIRE_TIMESTAMP_REQUIRED : 'Expire timestamp is required for this attribute type',
     EXPIRE_TIMESTAMP_IN_THE_PAST : 'Expire timestamp must be a timestamp in the future',
     ATTRIBUTE_VALIDATION_REQUESTS_NOT_FOUND : 'Attribute validation requests not found',

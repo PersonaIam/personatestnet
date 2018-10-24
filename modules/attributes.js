@@ -1162,6 +1162,11 @@ shared.updateAttribute = function (req, cb) {
                 return cb(messages.ATTRIBUTE_NOT_FOUND_FOR_UPDATE);
             }
 
+            if (req.body.asset.attribute[0].value === data.attributes[0].value &&
+                req.body.asset.attribute[0].expire_timestamp === data.attributes[0].expire_timestamp) {
+                return cb(null, {message : messages.NOTHING_TO_UPDATE});
+            }
+
             __private.getAttributeType({name : data.attributes[0].type}, function (err, attributeType) {
                 if (err || !attributeType.attribute_type) {
                     return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);

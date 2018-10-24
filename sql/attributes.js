@@ -82,7 +82,8 @@ let AttributeValidationRequestsSql = {
     'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ',
 
     getAttributeValidationsRequestsForAttributeAndValidator:
-        'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator}',
+        'SELECT avr.id FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+        'WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
 
     getCompletedAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
     'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id ' +
