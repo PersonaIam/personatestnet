@@ -55,10 +55,10 @@ let ipfsTransaction = {};
 let time = 0;
 
 
-describe('PUT /api/transactions', function () {
+describe('Send Funds', function () {
     // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
 
-    it('using valid parameters - placeholder to generate public key', function (done) {
+    it('Send funds - placeholder to generate public key', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -81,12 +81,11 @@ describe('PUT /api/transactions', function () {
             done();
         });
     });
-
 });
 
 describe('Insufficient funds', function () {
 
-    it('send an amount that cannot be used to create an attribute', function (done) {
+    it('Send an amount that cannot be used to create the attribute', function (done) {
         let amountToSend = 1;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -109,7 +108,7 @@ describe('Insufficient funds', function () {
         });
     });
 
-    it('Create an attribute from an account that has insufficient funds', function (done) {
+    it('Create attribute - the account has insufficient funds', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -144,7 +143,7 @@ describe('Insufficient funds', function () {
 
 describe('Send sufficient funds', function () {
 
-    it('send more funds to the other owner', function (done) {
+    it('Send more funds to the other owner', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -170,7 +169,7 @@ describe('Send sufficient funds', function () {
 
 describe('GET Attribute type', function () {
 
-    it('Attribute type', function (done) {
+    it('Get attribute type', function (done) {
         getAttributeTypeByName('first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -181,11 +180,8 @@ describe('GET Attribute type', function () {
             done();
         });
     });
-});
 
-describe('GET Non existing attribute type', function () {
-
-    it('Non existing attribute type', function (done) {
+    it('Get attribute type - attribute type does not exist', function (done) {
         getAttributeTypeByName('weight', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
@@ -236,6 +232,22 @@ describe('POST Create new attribute ( name )', function () {
             done();
         });
     });
+
+    it('Create attribute with non existing attribute type', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.value = 'none';
+        param.type = 'no_such_attribute';
+
+        let request = createAttributeRequest(param);
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+            done();
+        });
+    });
 });
 
 describe('POST Create new attribute with value stored on IPFS ( identity_card )', function () {
@@ -268,6 +280,7 @@ describe('POST Create new attribute with value stored on IPFS ( identity_card )'
         });
 
         let params = {};
+        params.owner = OWNER;
         params.type = 'identity_card';
         params.value = 'some_random_file_content';
         params.expire_timestamp = slots.getTime() + 20000;
@@ -294,11 +307,26 @@ describe('POST Create new attribute with value stored on IPFS ( identity_card )'
             done();
         });
     });
+
+    it('Get attribute - file type', function (done) {
+        getAttribute(OWNER, 'identity_card', function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('identity_card');
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(null);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            done();
+        });
+    });
 });
 
-describe('GET transaction and check if it contains IPFS hash ( identity_card )', function () {
+describe('GET Transaction and check if it contains IPFS hash ( identity_card )', function () {
 
-    it('Should have the IPFS hash as the attribute value ( identity_card )', function (done) {
+    it('Transaction should have the IPFS hash as the attribute value', function (done) {
         node.expect(ipfsTransaction).to.have.property('transactionId').to.be.a('string');
 
         let transactionId = ipfsTransaction.transactionId;
@@ -326,10 +354,9 @@ describe('GET transaction and check if it contains IPFS hash ( identity_card )',
     });
 });
 
+describe('GET Attribute', function () {
 
-describe('GET Attribute (name)', function () {
-
-    it('Existing attribute (name)', function (done) {
+    it('Get attribute, existing (name)', function (done) {
         getAttribute(OTHER_OWNER, 'first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -344,7 +371,7 @@ describe('GET Attribute (name)', function () {
         });
     });
 
-    it('Non existing attribute (address)', function (done) {
+    it('Get Attribute, non existing (address)', function (done) {
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -357,7 +384,7 @@ describe('GET Attribute (name)', function () {
 
 describe('POST Create attribute (name) for different owner', function () {
 
-    it('Create attribute (name) for different owner', function (done) {
+    it('Create attribute (name)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -386,11 +413,8 @@ describe('POST Create attribute (name) for different owner', function () {
             done();
         });
     });
-});
 
-describe('GET All existing attributes for owner 1 result', function () {
-
-    it('All existing attributes for owner', function (done) {
+    it('Get all existing attributes for owner - 1 result', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -407,7 +431,7 @@ describe('GET All existing attributes for owner 1 result', function () {
 
 describe('POST Create a different attribute ( address )', function () {
 
-    it('Create a different attribute ( address )', function (done) {
+    it('Create attribute ( address )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -436,60 +460,8 @@ describe('POST Create a different attribute ( address )', function () {
             done();
         });
     });
-});
 
-
-describe('GET All existing attributes ', function () {
-
-    it('All existing attributes for other owner', function (done) {
-        getAttributesForOwner(OTHER_OWNER, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(1);
-            node.expect(res.body.attributes).to.have.length(1);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
-            done();
-        });
-    });
-
-    it('All existing attributes for owner - 3 results', function (done) {
-        getAttributesForOwner(OWNER, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(3);
-            node.expect(res.body.attributes).to.have.length(3);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[1]).to.have.property('value').to.eq(SECOND_NAME_VALUE);
-            done();
-        });
-    });
-});
-
-describe('POST Create an attribute with non existing attribute type', function () {
-
-    it('Create an attribute with non existing attribute type', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.value = 'none';
-        param.type = 'no_such_attribute';
-
-        let request = createAttributeRequest(param);
-        postAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            done();
-        });
-    });
-});
-
-describe('GET Existing attribute (address)', function () {
-
-    it('Existing attribute (address)', function (done) {
+    it('Get existing attribute (address)', function (done) {
         getAttribute(OWNER, 'address', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -505,7 +477,36 @@ describe('GET Existing attribute (address)', function () {
 
 describe('GET All existing attributes for owner', function () {
 
-    it('All existing attributes for owner', function (done) {
+    it('Get all existing attributes for first owner - single result', function (done) {
+        getAttributesForOwner(OTHER_OWNER, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(1);
+            node.expect(res.body.attributes).to.have.length(1);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);
+            done();
+        });
+    });
+
+    it('Get all existing attributes for second owner, multiple results', function (done) {
+        getAttributesForOwner(OWNER, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('count').to.be.eq(3);
+            node.expect(res.body.attributes).to.have.length(3);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[1]).to.have.property('value').to.eq(SECOND_NAME_VALUE);
+            done();
+        });
+    });
+});
+
+describe('GET All existing attributes for owner', function () {
+
+    it('Get all existing attributes for owner', function (done) {
         getAttribute(OWNER, null, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -539,9 +540,9 @@ describe('GET All existing attributes for owner', function () {
     });
 });
 
-describe('POST Create an attribute validation request', function () {
+describe('POST Create attribute validation request', function () {
 
-    it('Create an attribute validation request', function (done) {
+    it('Create attribute validation request', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -570,7 +571,7 @@ describe('POST Create an attribute validation request', function () {
         });
     });
 
-    it('Create new attribute validation request( incorrect owner address )', function (done) {
+    it('Create attribute validation request( incorrect owner address )', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -587,7 +588,7 @@ describe('POST Create an attribute validation request', function () {
         });
     });
 
-    it('Create new attribute validation request( incorrect validator address )', function (done) {
+    it('Create attribute validation request( incorrect validator address )', function (done) {
 
         let params = {};
         params.validator = INCORRECT_ADDRESS;
@@ -603,9 +604,6 @@ describe('POST Create an attribute validation request', function () {
             done();
         });
     });
-});
-
-describe('POST Create another attribute validation request', function () {
 
     it('Create another attribute validation request', function (done) {
 
@@ -639,7 +637,7 @@ describe('POST Create another attribute validation request', function () {
 
 describe('POST Create same attribute validation request', function () {
 
-    it('Create same attribute validation request', function (done) {
+    it('Create same attribute validation request as existing one', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -678,7 +676,7 @@ describe('GET Attribute validation request', function () {
         });
     });
 
-    it('Get attribute validation request - by validator', function (done) {
+    it('Get attribute validation requests - using validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -695,7 +693,7 @@ describe('GET Attribute validation request', function () {
         });
     });
 
-    it('Get attribute validation requests - by type and owner', function (done) {
+    it('Get attribute validation requests - using type and owner', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -713,7 +711,7 @@ describe('GET Attribute validation request', function () {
         });
     });
 
-    it('Attribute validation request - no requests for validator', function (done) {
+    it('Get attribute validation requests - no results, using validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR_2;
@@ -726,7 +724,7 @@ describe('GET Attribute validation request', function () {
         });
     });
 
-    it('Attribute validation request - incorrect parameters', function (done) {
+    it('Get attribute validation requests with incorrect parameters - using only owner', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -739,7 +737,7 @@ describe('GET Attribute validation request', function () {
         });
     });
 
-    it('Attribute validation request - incorrect parameters', function (done) {
+    it('Get attribute validation request with incorrect parameters - using only type', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -755,7 +753,7 @@ describe('GET Attribute validation request', function () {
 
 describe('POST Create attribute validation request for non existing attribute', function () {
 
-    it('Create attribute validation request for non existing attribute', function (done) {
+    it('Create attribute validation request for a non existing attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -793,9 +791,8 @@ describe('POST Create attribute validation request for existing attribute with o
     });
 });
 
-
 describe('GET Attribute validation score for attribute with no validations', function () {
-    it('Get Attribute validation score for attribute', function (done) {
+    it('Get Attribute validation score for attribute with no validations', function (done) {
 
         let param = {};
         param.type = "address";
@@ -810,9 +807,9 @@ describe('GET Attribute validation score for attribute with no validations', fun
     });
 });
 
-describe('Consume attribute with no validations', function () {
+describe('POST Consume attribute with no validations', function () {
 
-    it('Consume attribute', function (done) {
+    it('Consume attribute with no validations', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -830,9 +827,9 @@ describe('Consume attribute with no validations', function () {
     });
 });
 
-describe('POST Create an attribute validation', function () {
+describe('POST Create attribute validation', function () {
 
-    it('Create an attribute validation ', function (done) {
+    it('Create attribute validation ', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -863,7 +860,7 @@ describe('POST Create an attribute validation', function () {
         });
     });
 
-    it('Create an attribute validation - incorrect address for owner', function (done) {
+    it('Create attribute validation - incorrect address for owner', function (done) {
 
 
         let param = {};
@@ -881,7 +878,7 @@ describe('POST Create an attribute validation', function () {
         });
     });
 
-    it('Create an attribute validation - incorrect address for validator', function (done) {
+    it('Create attribute validation - incorrect address for validator', function (done) {
 
 
         let param = {};
@@ -899,7 +896,7 @@ describe('POST Create an attribute validation', function () {
         });
     });
 
-    it('Create an attribute validation - must fail since validation was already made', function (done) {
+    it('Create attribute validation - must fail since validation was already made', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -915,11 +912,8 @@ describe('POST Create an attribute validation', function () {
             done();
         });
     });
-});
 
-describe('POST Create an attribute validation for non existing attribute validation request', function () {
-
-    it('Create an attribute validation for non existing attribute validation request ', function (done) {
+    it('Create attribute validation for non existing attribute validation request ', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -938,8 +932,7 @@ describe('POST Create an attribute validation for non existing attribute validat
     });
 });
 
-
-describe('GET Attribute validations for validator ', function () {
+describe('GET Attribute validations', function () {
 
     it('Get Attribute validation - using all parameters', function (done) {
 
@@ -1000,7 +993,7 @@ describe('GET Attribute validations for validator ', function () {
 });
 
 describe('GET Attribute validation score for attribute', function () {
-    it('Get Attribute validation score for attribute', function (done) {
+    it('Get attribute validation score for attribute', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -1014,7 +1007,7 @@ describe('GET Attribute validation score for attribute', function () {
         });
     });
 
-    it('Get Attribute validation score for attribute with no validations', function (done) {
+    it('Get attribute validation score for attribute with no validations', function (done) {
 
         let param = {};
         param.type = "address";
@@ -1029,9 +1022,9 @@ describe('GET Attribute validation score for attribute', function () {
     });
 });
 
-describe('GET Attribute validations for attribute without any validation requests', function () {
+describe('GET Attribute validations - negative scenarios', function () {
 
-    it('Attribute validation - attribute without validation requests', function (done) {
+    it('Get attribute validation - attribute without validation requests', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -1046,11 +1039,8 @@ describe('GET Attribute validations for attribute without any validation request
             done();
         });
     });
-});
 
-describe('GET Attribute validations for attribute with validation requests but without any validations', function () {
-
-    it('Attribute validation - attribute with validation requests but without validations', function (done) {
+    it('Get attribute validations - attribute with validation requests but without validations', function (done) {
 
         let param = {};
         param.type = "address";
@@ -1063,11 +1053,8 @@ describe('GET Attribute validations for attribute with validation requests but w
             done();
         });
     });
-});
 
-describe('GET Attribute validations for non existing attribute', function () {
-
-    it('Attribute validation - non existing attribute', function (done) {
+    it('Get attribute validation - non existing attribute', function (done) {
 
         let param = {};
         param.type = "identity_card";
@@ -1086,7 +1073,7 @@ describe('GET Attribute validations for non existing attribute', function () {
 
 describe('GET Attribute validation requests', function () {
 
-    it('Attribute validation requests - completed given validator', function (done) {
+    it('Get completed attribute validation requests using validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1101,7 +1088,7 @@ describe('GET Attribute validation requests', function () {
         });
     });
 
-    it('Attribute validation requests - incomplete given validator', function (done) {
+    it('Get incomplete attribute validation requests using validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1116,7 +1103,7 @@ describe('GET Attribute validation requests', function () {
         });
     });
 
-    it('Attribute validation requests - completed given attribute', function (done) {
+    it('Get completed attribute validation requests using attribute', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1132,7 +1119,7 @@ describe('GET Attribute validation requests', function () {
         });
     });
 
-    it('Attribute validation requests - incomplete given attribute', function (done) {
+    it('Get incomplete attribute validation requests using attribute', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1148,7 +1135,7 @@ describe('GET Attribute validation requests', function () {
         });
     });
 
-    it('Attribute validation requests - no results', function (done) {
+    it('Get attribute validation requests - no results', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1163,10 +1150,9 @@ describe('GET Attribute validation requests', function () {
     });
 });
 
+describe('POST Create attribute share request', function () {
 
-describe('POST Create an attribute share request', function () {
-
-    it('Attribute share with no share request', function (done) {
+    it('Create attribute share - with no share request', function (done) {
 
         let params = {};
         params.applicant = APPLICANT;
@@ -1182,7 +1168,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Attribute share approval with no share request', function (done) {
+    it('Create attribute share approval - with no share request', function (done) {
 
         let params = {};
         params.applicant = APPLICANT;
@@ -1199,7 +1185,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Create an attribute share request', function (done) {
+    it('Create attribute share request - successful', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1229,7 +1215,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Create an attribute share request - Incorrect owner address', function (done) {
+    it('Create attribute share request - incorrect owner address', function (done) {
 
         let param = {};
         param.owner = INCORRECT_ADDRESS;
@@ -1245,7 +1231,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Create an attribute share request - Incorrect owner address', function (done) {
+    it('Create attribute share request - incorrect applicant address', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1260,11 +1246,8 @@ describe('POST Create an attribute share request', function () {
             done();
         });
     });
-});
 
-describe('POST Create an attribute share request', function () {
-
-    it('Create an attribute share request - share request already exists', function (done) {
+    it('Create attribute share request - share request already exists', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1280,7 +1263,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Create an attribute share request - attribute does not exist', function (done) {
+    it('Create attribute share request - attribute does not exist', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1296,7 +1279,7 @@ describe('POST Create an attribute share request', function () {
         });
     });
 
-    it('Create an attribute share request - applicant is owner', function (done) {
+    it('Create attribute share request - applicant is owner', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1313,10 +1296,9 @@ describe('POST Create an attribute share request', function () {
     });
 });
 
-
 describe('GET Attribute share request', function () {
 
-    it('Attribute share request - no query params', function (done) {
+    it('Get attribute share request - no query params', function (done) {
 
         let param = {};
 
@@ -1328,8 +1310,7 @@ describe('GET Attribute share request', function () {
         });
     });
 
-
-    it('Attribute share request - type, owner and applicant', function (done) {
+    it('Get attribute share request - with type, owner and applicant', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1349,7 +1330,7 @@ describe('GET Attribute share request', function () {
         });
     });
 
-    it('Attribute share request - only applicant', function (done) {
+    it('Get attribute share request - only applicant', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1367,7 +1348,7 @@ describe('GET Attribute share request', function () {
         });
     });
 
-    it('Attribute share request - only owner and type', function (done) {
+    it('Get attribute share request - only owner and type', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1386,7 +1367,7 @@ describe('GET Attribute share request', function () {
         });
     });
 
-    it('Attribute share request - no share request for given applicant', function (done) {
+    it('Get attribute share request - no share request for given applicant', function (done) {
 
         let param = {};
         param.applicant = APPLICANT_2;
@@ -1400,9 +1381,9 @@ describe('GET Attribute share request', function () {
     });
 });
 
-describe('POST Attribute share with no approved request', function () {
+describe('POST Approve attribute share request', function () {
 
-    it('Attribute share with no approved share request', function (done) {
+    it('Create attribute share - with no approved share request', function (done) {
 
         let params = {};
         params.applicant = APPLICANT;
@@ -1418,11 +1399,7 @@ describe('POST Attribute share with no approved request', function () {
         });
     });
 
-});
-
-describe('POST Approve attribute share request', function () {
-
-    it('Approve attribute share request', function (done) {
+    it('Create approve attribute share request - successful', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1452,7 +1429,7 @@ describe('POST Approve attribute share request', function () {
         });
     });
 
-    it('Attribute share request - check flag after approval', function (done) {
+    it('Get attribute share request - check flag after approval', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1471,7 +1448,7 @@ describe('POST Approve attribute share request', function () {
         });
     });
 
-    it('Approve attribute share request - request already approved', function (done) {
+    it('Create approve attribute share request - request already approved', function (done) {
 
         let params = {};
         params.applicant = APPLICANT;
@@ -1488,7 +1465,7 @@ describe('POST Approve attribute share request', function () {
         });
     });
 
-    it('Approve attribute share request - incorrect owner address', function (done) {
+    it('Create approve attribute share request - incorrect owner address', function (done) {
 
         let params = {};
         params.applicant = APPLICANT;
@@ -1505,7 +1482,7 @@ describe('POST Approve attribute share request', function () {
         });
     });
 
-    it('Approve attribute share request - incorrect applicant address', function (done) {
+    it('Create approve attribute share request - incorrect applicant address', function (done) {
 
         let params = {};
         params.applicant = INCORRECT_ADDRESS;
@@ -1521,13 +1498,11 @@ describe('POST Approve attribute share request', function () {
             done();
         });
     });
-
 });
 
+describe('POST Create attribute share', function () {
 
-describe('GET Attribute shares - share not created yet', function () {
-
-    it('Attribute share - not created yet', function (done) {
+    it('Get attribute share - share does not exist', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1541,11 +1516,8 @@ describe('GET Attribute shares - share not created yet', function () {
             done();
         });
     });
-});
 
-describe('POST Create an attribute share - with existing approved share request', function () {
-
-    it('Create an attribute share', function (done) {
+    it('Create attribute share - successful', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1576,7 +1548,7 @@ describe('POST Create an attribute share - with existing approved share request'
         });
     });
 
-    it('Create an attribute share - incorrect owner address', function (done) {
+    it('Create attribute share - incorrect owner address', function (done) {
 
         let param = {};
         param.owner = INCORRECT_ADDRESS;
@@ -1593,7 +1565,7 @@ describe('POST Create an attribute share - with existing approved share request'
         });
     });
 
-    it('Create an attribute share - incorrect applicant address', function (done) {
+    it('Create attribute share - incorrect applicant address', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1609,12 +1581,28 @@ describe('POST Create an attribute share - with existing approved share request'
             done();
         });
     });
+
+    it('Create attribute share - same share as one already made', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.value = 'KLMN';
+        param.type = 'first_name';
+        param.applicant = APPLICANT;
+
+        let request = createAttributeShare(param);
+        postShareAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
+            done();
+        });
+    });
 });
 
+describe('GET Attribute shares', function () {
 
-describe('GET Attribute shares - share exists', function () {
-
-    it('Attribute share - share exists, applicant parameter', function (done) {
+    it('Get attribute share - share exists, applicant parameter', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1632,7 +1620,7 @@ describe('GET Attribute shares - share exists', function () {
         });
     });
 
-    it('Attribute share - share exists, owner and type parameters', function (done) {
+    it('Get attribute share - share exists, owner and type parameters', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1651,7 +1639,7 @@ describe('GET Attribute shares - share exists', function () {
         });
     });
 
-    it('Attribute share - share exists, owner with no type', function (done) {
+    it('Get attribute share - share exists, owner with no type', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1664,7 +1652,7 @@ describe('GET Attribute shares - share exists', function () {
         });
     });
 
-    it('Attribute share - share exists, type with no owner', function (done) {
+    it('Get attribute share - share exists, type with no owner', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -1677,7 +1665,7 @@ describe('GET Attribute shares - share exists', function () {
         });
     });
 
-    it('Attribute share request (completed)', function (done) {
+    it('Get attribute share request (completed share)', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1696,28 +1684,9 @@ describe('GET Attribute shares - share exists', function () {
             done();
         });
     });
+
+
 });
-
-describe('POST Create an attribute share - same share as one already made', function () {
-
-    it('Create an attribute share - same share as one already made', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.value = 'KLMN';
-        param.type = 'first_name';
-        param.applicant = APPLICANT;
-
-        let request = createAttributeShare(param);
-        postShareAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
-            done();
-        });
-    });
-});
-
 
 describe('POST Unapprove attribute share request', function () {
 
@@ -1751,7 +1720,7 @@ describe('POST Unapprove attribute share request', function () {
         });
     });
 
-    it('Get attribute share request (unapproved)', function (done) {
+    it('Get attribute share request - unapproved', function (done) {
 
         let param = {};
         param.applicant = APPLICANT;
@@ -1770,7 +1739,7 @@ describe('POST Unapprove attribute share request', function () {
         });
     });
 
-    it('Unapprove attribute share request ( share request is already unapproved )', function (done) {
+    it('Unapprove attribute share request - share request is already unapproved', function (done) {
 
 
         let params = {};
@@ -1788,7 +1757,7 @@ describe('POST Unapprove attribute share request', function () {
         });
     });
 
-    it('Create an attribute share - after unapproval', function (done) {
+    it('Create attribute share - after unapproval', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1840,8 +1809,7 @@ describe('POST Unapprove attribute share request', function () {
     });
 });
 
-
-describe('POST Run reward round - no attribute consumptions', function () {
+describe('POST Run reward round', function () {
 
     it('Run reward round - no attribute consumptions', function (done) {
 
@@ -1858,7 +1826,7 @@ describe('POST Run reward round - no attribute consumptions', function () {
 
 describe('POST Consume attribute', function () {
 
-    it('Consume attribute', function (done) {
+    it('Consume attribute - successful', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1937,7 +1905,7 @@ describe('GET Attribute consumptions', function () {
 
     let timestampConsume1 = 0;
 
-    it('Attribute consumptions - with type & owner', function (done) {
+    it('Get attribute consumptions - with type & owner', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -1957,7 +1925,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - no type & owner', function (done) {
+    it('Get attribute consumptions - no type & owner', function (done) {
 
         let param = {};
 
@@ -1969,7 +1937,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - owner and no type', function (done) {
+    it('Get attribute consumptions - owner and no type', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1982,7 +1950,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - type and no owner', function (done) {
+    it('Get attribute consumptions - type and no owner', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -1995,7 +1963,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - with type & owner & before', function (done) {
+    it('Get attribute consumptions - with type & owner & before', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -2014,7 +1982,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - with type & owner & after', function (done) {
+    it('Get attribute consumptions - with type & owner & after', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -2033,7 +2001,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - with type & owner & before & after', function (done) {
+    it('Get attribute consumptions - with type & owner & before & after', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -2053,7 +2021,7 @@ describe('GET Attribute consumptions', function () {
         });
     });
 
-    it('Attribute consumptions - with type & owner & before & after - no results', function (done) {
+    it('Get attribute consumptions - with type & owner & before & after - no results', function (done) {
 
         let param = {};
         param.type = FIRST_NAME;
@@ -2071,8 +2039,7 @@ describe('GET Attribute consumptions', function () {
     });
 });
 
-
-describe('POST Consume attribute - second time', function () {
+describe('POST Consume attribute', function () {
 
     it('Consume attribute - again, different amount', function (done) {
 
@@ -2137,7 +2104,6 @@ describe('POST Consume attribute - second time', function () {
         });
     });
 
-
     it('Consume attribute - attribute does not exist', function (done) {
 
         let params = {};
@@ -2154,7 +2120,6 @@ describe('POST Consume attribute - second time', function () {
         });
     });
 });
-
 
 describe('POST Run reward round - with attribute consumptions', function () {
 
@@ -2184,7 +2149,7 @@ describe('POST Run reward round - with attribute consumptions', function () {
         });
     });
 
-    it('Update Last reward round', function (done) {
+    it('Update Last reward round - successful', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2211,7 +2176,7 @@ describe('POST Run reward round - with attribute consumptions', function () {
         });
     });
 
-    it('Update Last reward round', function (done) {
+    it('Update Last reward round - no update needed', function (done) {
 
         let param = {};
         let request = createUpdateRewardRound(param);
@@ -2223,13 +2188,11 @@ describe('POST Run reward round - with attribute consumptions', function () {
             done();
         });
     });
-
 });
 
+describe('POST Create attribute with expiry in the future', function () {
 
-describe('POST Create new attribute with expiry in the future', function () {
-
-    it('Create new attribute with expiry in the future', function (done) {
+    it('Create attribute - with expiry in the future', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2260,7 +2223,7 @@ describe('POST Create new attribute with expiry in the future', function () {
         });
     });
 
-    it('GET Existing attribute with expiry in the future' , function (done) {
+    it('Get attribute - with expiry in the future' , function (done) {
         getAttribute(OTHER_OWNER, 'email', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2275,8 +2238,9 @@ describe('POST Create new attribute with expiry in the future', function () {
     });
 });
 
-describe('POST Consume inactive attribute', function () {
-    it('Consume attribute for inactive', function (done) {
+describe('Inactive attribute', function () {
+
+    it('Consume attribute - attribute is inactive', function (done) {
 
         let params = {};
         params.owner = OTHER_OWNER;
@@ -2291,10 +2255,7 @@ describe('POST Consume inactive attribute', function () {
             done();
         });
     });
-});
 
-
-describe('POST Share inactive attribute', function () {
     it('Create attribute share request for inactive attribute', function (done) {
 
         let params = {};
@@ -2312,7 +2273,7 @@ describe('POST Share inactive attribute', function () {
         });
     });
 
-    it('Share for inactive attribute ', function (done) {
+    it('Create attribute share for inactive attribute', function (done) {
 
         let params = {};
         params.owner = OTHER_OWNER;
@@ -2348,9 +2309,9 @@ describe('POST Share inactive attribute', function () {
     });
 });
 
-describe('POST Create new attribute (expired)', function () {
+describe('Expired attribute', function () {
 
-    it('Create new attribute (expired)', function (done) {
+    it('Create new attribute - expired', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2381,7 +2342,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('GET Existing attribute with expiry' , function (done) {
+    it('Get attribute - expired ' , function (done) {
         getAttribute(OTHER_OWNER, 'birthplace', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2395,7 +2356,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Create attribute validation request for expired attribute', function (done) {
+    it('Create attribute validation request - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2413,7 +2374,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Create attribute validation for expired attribute', function (done) {
+    it('Create attribute validation - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2431,7 +2392,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Create attribute share request for expired attribute', function (done) {
+    it('Create attribute share request - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2449,7 +2410,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Create attribute share approval for expired attribute', function (done) {
+    it('Create attribute share approval - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2468,7 +2429,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Create attribute share for expired attribute', function (done) {
+    it('Create attribute share - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2486,7 +2447,7 @@ describe('POST Create new attribute (expired)', function () {
         });
     });
 
-    it('Consume expired attribute', function (done) {
+    it('Consume attribute - expired attribute', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2505,11 +2466,9 @@ describe('POST Create new attribute (expired)', function () {
     });
 });
 
-// ATTRIBUTE UPDATE TESTS
+describe('Attribute update preparations', function () {
 
-describe('Attribute update preparations : create attribute, validation and share requests', function () {
-
-    it('Create an attribute ( address )', function (done) {
+    it('Create attribute - address & other owner', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2544,7 +2503,7 @@ describe('Attribute update preparations : create attribute, validation and share
         });
     });
 
-    it('Create an attribute validation request', function (done) {
+    it('Create attribute validation request - address & other owner' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2577,9 +2536,67 @@ describe('Attribute update preparations : create attribute, validation and share
 
 });
 
-describe('PUT update attribute ( address )', function () {
+describe('PUT update attribute', function () {
 
-    it('Update attribute ( address )', function (done) {
+    it('Update attribute with value stored on IPFS ( identity_card )', function (done) {
+
+        getAttribute(OWNER, 'identity_card', function (err, res) {
+
+            let attributeId = res.body.attributes[0].id;
+            let unconfirmedBalance = 0;
+            let balance = 0;
+            getBalance(OWNER, function (err, res) {
+                unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+                balance = parseInt(res.body.balance);
+            });
+
+            let params = {};
+            params.attributeId = attributeId;
+            params.owner = OWNER;
+            params.type = 'identity_card';
+            params.value = 'some_new_file_content';
+            params.expire_timestamp = slots.getTime() + 20000;
+
+            let request = updateAttributeRequest(params);
+
+            ipfsTransaction.req = request; // keep the original requested data
+
+            putAttributeUpdate(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('transactionId');
+                sleep.msleep(SLEEP_TIME);
+
+                ipfsTransaction.transactionId = res.body.transactionId;
+
+                getBalance(OWNER, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.updateattribute);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateattribute);
+                });
+
+                done();
+            });
+        });
+    });
+
+    it('Get attribute - file type', function (done) {
+        getAttribute(OWNER, 'identity_card', function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmWC2ELAX6vzYUaCpdSLmsGHAYjXC4EufortQ2dPBmMzsD');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('identity_card');
+            node.expect(res.body.attributes[0]).to.have.property('timestamp').to.be.at.least(time);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            done();
+        });
+    });
+
+    it('Update attribute', function (done) {
 
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
 
@@ -2619,7 +2636,7 @@ describe('PUT update attribute ( address )', function () {
 
     });
 
-    it('GET after update', function (done) {
+    it('Get attribute after update', function (done) {
 
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
             console.log(res.body);
@@ -2635,7 +2652,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Update attribute ( non existing attribute )', function (done) {
+    it('Update attribute - non existing attribute', function (done) {
 
             let param = {};
             param.attributeId = 777;
@@ -2655,7 +2672,7 @@ describe('PUT update attribute ( address )', function () {
             });
         });
 
-    it('Update attribute ( only expire timestamp )', function (done) {
+    it('Update attribute - only expire timestamp', function (done) {
 
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
 
@@ -2694,7 +2711,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Update attribute ( only value )', function (done) {
+    it('Update attribute - only value', function (done) {
 
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
 
@@ -2731,7 +2748,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Update attribute ( no change - nothing to update )', function (done) {
+    it('Update attribute - nothing to update', function (done) {
 
         getAttribute(OTHER_OWNER, 'address', function (err, res) {
 
@@ -2768,7 +2785,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Create an attribute validation for validation request made before update ', function (done) {
+    it('Create attribute validation - validation request made before update', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2787,7 +2804,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Create an attribute share request after update ( attribute is inactive )', function (done) {
+    it('Create attribute share request - immediately after update ( attribute is inactive )', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2806,7 +2823,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Create an attribute share approval after update ( attribute is inactive )', function (done) {
+    it('Create attribute share approval - immediately after update ( attribute is inactive )', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -2826,7 +2843,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Consume attribute after update ( attribute is inactive )', function (done) {
+    it('Consume attribute - immediately after update ( attribute is inactive )', function (done) {
 
         let params = {};
         params.owner = OTHER_OWNER;
@@ -2842,7 +2859,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Create an attribute validation request after update', function (done) {
+    it('Create attribute validation request - immediately after update ( attribute is inactive )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2873,7 +2890,7 @@ describe('PUT update attribute ( address )', function () {
         });
     });
 
-    it('Create an attribute validation - for request made after update - should work ', function (done) {
+    it('Create attribute validation - request made after update', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;

@@ -15,7 +15,7 @@ module.exports = {
 		multisignature: 500000000,
 		register: 10000000,
 		verify: 10000000,
-		createattribute: 3,
+		createattribute: 4,
 		updateattribute: 3,
         attributesharerequest: 2,
 		attributevalidationrequest: 2,
