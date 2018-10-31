@@ -199,7 +199,7 @@ AttributeUpdate.prototype.dbSave = function (trs) {
         value : trs.asset.attribute[0].value,
         timestamp : trs.timestamp,
         expire_timestamp : trs.asset.attribute[0].expire_timestamp,
-        associations : trs.asset.attribute[0].associations,
+        associations : JSON.stringify(trs.asset.attribute[0].associations),
         id:trs.asset.attribute[0].attributeId
     };
 
