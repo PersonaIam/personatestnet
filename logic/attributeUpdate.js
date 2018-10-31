@@ -151,9 +151,13 @@ AttributeUpdate.prototype.schema = {
         attributeId : {
             type: 'integer',
             minimum : 1
+        },
+        value: {
+            type: 'string',
+            minLength : 1
         }
     },
-    required: ['attributeId']
+    required: ['attributeId', 'value']
 };
 
 //
@@ -195,6 +199,7 @@ AttributeUpdate.prototype.dbSave = function (trs) {
         value : trs.asset.attribute[0].value,
         timestamp : trs.timestamp,
         expire_timestamp : trs.asset.attribute[0].expire_timestamp,
+        associations : trs.asset.attribute[0].associations,
         id:trs.asset.attribute[0].attributeId
     };
 

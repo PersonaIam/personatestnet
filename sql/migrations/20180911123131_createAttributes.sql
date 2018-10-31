@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS "attributes"(
   "type" VARCHAR(36) NOT NULL,
   "value" TEXT,
   "owner" VARCHAR(36) NOT NULL,
+  "associations" TEXT,
   "timestamp" INT NOT NULL,
   "expire_timestamp" INT
 );
@@ -33,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "attribute_validation_requests"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_id" INT NOT NULL,
   "validator" VARCHAR(36) NOT NULL,
-  "timestamp" INT,
+  "timestamp" INT NOT NULL,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
 );
 

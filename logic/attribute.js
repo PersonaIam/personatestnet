@@ -2,6 +2,7 @@
 
 var constants = require('../helpers/constants.js');
 var bignum = require('../helpers/bignum.js');
+let _ = require('lodash')
 
 // Private fields
 var modules, library;
@@ -158,6 +159,11 @@ Attribute.prototype.schema = {
         value: {
             type: 'string',
         },
+        associations: {
+            type: 'array',
+            minLength: 1,
+            uniqueItems : true
+        },
         expire_timestamp: {
             type: 'integer'
         }
@@ -195,6 +201,7 @@ Attribute.prototype.dbFields = [
     'owner',
     'type',
     'value',
+    'associations',
     'timestamp',
     'expire_timestamp'
 ];
@@ -204,17 +211,19 @@ Attribute.prototype.dbFields = [
 
 //
 Attribute.prototype.dbSave = function (trs) {
-    return {
+    let values = {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
             owner: trs.asset.attribute[0].owner,
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
+            associations : trs.asset.attribute[0].associations,
             timestamp: trs.timestamp,
             expire_timestamp: trs.asset.attribute[0].expire_timestamp
         }
     };
+    return values;
 };
 
 //

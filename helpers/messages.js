@@ -7,6 +7,7 @@ module.exports = {
     ATTRIBUTE_ALREADY_EXISTS : 'Attribute already exists',
     ACCOUNT_NOT_FOUND : 'Account not found',
     ATTRIBUTE_NOT_FOUND : 'Attribute not found',
+    DOCUMENT_NOT_FOUND : 'Document not found',
     ATTRIBUTE_NOT_FOUND_FOR_UPDATE : 'Attribute not found for update',
     EXPIRED_ATTRIBUTE : 'Attribute is expired',
     INACTIVE_ATTRIBUTE : 'Attribute is inactive',

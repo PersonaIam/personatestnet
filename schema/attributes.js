@@ -82,33 +82,9 @@ module.exports = {
         },
         required: ['owner']
     },
-    addAttribute: {
-        id: 'attributes.addAttribute',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
-    updateAttribute: {
-        id: 'attributes.updateAttribute',
+
+    attributeOperation: {
+        id: 'attributes.attributeOperation',
         type: 'object',
         properties: {
             secret: {
@@ -133,107 +109,6 @@ module.exports = {
         required: ['asset', 'secret', 'publicKey']
     },
 
-    requestAttributeValidation: {
-        id: 'attributes.requestAttributeValidation',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
-
-    validateAttribute: {
-        id: 'attributes.validateAttribute',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
-    shareAttribute: {
-        id: 'attributes.shareAttribute',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
-    approveShareAttribute: {
-        id: 'attributes.approveShareAttribute',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
     consumeAttribute: {
         id: 'attributes.consumeAttribute',
         type: 'object',
@@ -377,31 +252,6 @@ module.exports = {
         },
         required: ['type', 'owner']
     },
-    requestAttributeShare: {
-        id: 'attributes.requestAttributeShare',
-        type: 'object',
-        properties: {
-            secret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            publicKey: {
-                type: 'string',
-                format: 'publicKey'
-            },
-            secondSecret: {
-                type: 'string',
-                minLength: 1,
-                maxLength: 100
-            },
-            asset: {
-                type: 'object',
-                minLength: 1
-            }
-        },
-        required: ['asset', 'secret', 'publicKey']
-    },
 
     getRequestAttributeShare: {
         id: 'attributes.getRequestAttributeShare',
@@ -543,5 +393,18 @@ module.exports = {
             }
         },
         required: ['secret', 'publicKey']
+    },
+
+    getAttributeAssociations: {
+        id: 'attributes.getAttributeAssociations',
+        type: 'object',
+        properties: {
+            attributeId: {
+                type: 'integer',
+                minimum: 1
+            }
+        },
+        required: ['attributeId']
     }
+
 };

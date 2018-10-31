@@ -84,6 +84,8 @@ var config = {
 	modules: {
 		accounts: './modules/accounts.js',
         attributes: './modules/attributes.js',
+        attributeValidations: './modules/attributeValidations.js',
+        attributeShares: './modules/attributeShares.js',
 		transactions: './modules/transactions.js',
 		blocks: './modules/blocks.js',
 		signatures: './modules/signatures.js',
