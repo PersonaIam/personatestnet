@@ -218,7 +218,7 @@ Attribute.prototype.dbSave = function (trs) {
             owner: trs.asset.attribute[0].owner,
             type: trs.asset.attribute[0].type,
             value: trs.asset.attribute[0].value,
-            associations : trs.asset.attribute[0].associations,
+            associations : JSON.stringify(trs.asset.attribute[0].associations),
             timestamp: trs.timestamp,
             expire_timestamp: trs.asset.attribute[0].expire_timestamp
         }

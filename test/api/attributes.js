@@ -2750,43 +2750,6 @@ describe('PUT update attribute', function () {
         });
     });
 
-    it('Update attribute - nothing to update', function (done) {
-
-        getAttribute(OTHER_OWNER, 'address', function (err, res) {
-
-            let attributeId = res.body.attributes[0].id;
-            let unconfirmedBalance = 0;
-            let balance = 0;
-            getBalance(OTHER_OWNER, function (err, res) {
-                unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-                balance = parseInt(res.body.balance);
-            });
-
-            let param = {};
-            param.attributeId = attributeId;
-            param.owner = OTHER_OWNER;
-            param.secret = OTHER_SECRET;
-            param.publicKey = OTHER_PUBLIC_KEY;
-            param.value = NEW_ADDRESS2;
-            param.expire_timestamp = res.body.attributes[0].expire_timestamp;
-            let request = updateAttributeRequest(param);
-
-            putAttributeUpdate(request, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('message').to.be.eq(messages.NOTHING_TO_UPDATE);
-                getBalance(OTHER_OWNER, function (err, res) {
-                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                    let balanceAfter = parseInt(res.body.balance);
-                    // balance and unconfirmed balances should remain the same
-                    node.expect(balance - balanceAfter === 0);
-                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === 0);
-                });
-                done();
-            });
-        });
-    });
-
     it('Create attribute validation - validation request made before update', function (done) {
 
         let param = {};
@@ -2951,7 +2914,51 @@ describe('Update Attribute Associations', function () {
 
                 param.value = 'kekis11';
                 param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
-                param.associations = [3];
+                param.associations = [identityCardData.body.attributes[0].id];
+
+                let request = updateAttributeRequest(param);
+
+                putAttributeUpdate(request, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('transactionId');
+                    sleep.msleep(SLEEP_TIME);
+                    getBalance(OTHER_OWNER, function (err, res) {
+                        let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                        let balanceAfter = parseInt(res.body.balance);
+                        node.expect(balance - balanceAfter === constants.fees.updateattribute);
+                        node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateattribute);
+                    });
+                    done();
+                });
+            });
+        });
+    });
+
+    it('Update Associations for attribute', function (done) {
+
+        getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
+
+            let attributeId = identityCardData.body.attributes[0].id;
+
+            getAttribute(OWNER, FIRST_NAME, function (err, attributeData) {
+
+                let unconfirmedBalance = 0;
+                let balance = 0;
+                getBalance(OWNER, function (err, res) {
+                    unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+                    balance = parseInt(res.body.balance);
+                });
+
+                let param = {};
+                param.attributeId = attributeId;
+                param.owner = OWNER;
+                param.secret = SECRET;
+                param.publicKey = PUBLIC_KEY;
+
+                param.value = '23456754324567234';
+                param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
+                param.associations = [identityCardData.body.attributes[0].id, identityCardData.body.attributes[0].id];
 
                 let request = updateAttributeRequest(param);
 
