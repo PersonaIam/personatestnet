@@ -193,6 +193,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
         data.count = count;
         library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
             after: slots.getTime(moment().subtract(1, 'year')),
+            expirationAfter: slots.getTime(),
             owner: filter.owner,
             validations_required: constants.VALIDATIONS_REQUIRED
         })
@@ -274,41 +275,38 @@ __private.checkAssociations = function (filter, cb) {
     if (!attributeFilter.associations) {
         return cb(null);
     }
-
     if (attributeFilter.associations && attributeFilter.associations.length === 0) {
         return cb('If associations are specified, they must be provided');
     }
 
     Attributes.getAttributesByFilter({owner : filter.asset.attribute[0].owner}, function (err, data) {
-        console.log('checking associations')
         let ownerAttributeIds = [];
         if (data && data.attributes && data.attributes.length > 0) {
             ownerAttributeIds = data.attributes.map(element => element.id);
         }
-        attributeFilter.associations.forEach(association => {
-            if(!_.includes(ownerAttributeIds, association)) {
-                return cb('Incorrect association provided : attribute ' + association + ' does not belong to the current owner');
-            } else {
-                let associationAttributeTypes = [];
-                associationAttributeTypes.push(filter.asset.attribute[0].type);
-                associationAttributeTypes.push(data.attributes.filter(i => i.id = association)[0].type);
-                __private.listAttributeTypes({}, function (err, data) {
-                    let attributeTypes = data.attribute_types.filter(i => associationAttributeTypes.includes(i.name));
-                    if (attributeTypes.filter(i=> i.data_type === 'file').size === 0) {
-                        return cb('Incorrect association provided : An association requires at least one of the members to be a file');
+        let originalType = data.attributes.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
+        __private.listAttributeTypes({}, function (err, attributeTypes) {
+            let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o=>o.name);
+            attributeFilter.associations.forEach(association => {
+                    if (!_.includes(ownerAttributeIds, association)) {
+                        return cb('Incorrect association provided : one of the attributes to be associated does not belong to the current owner');
                     } else {
-                        return cb(null);
+                        let associationType = data.attributes.filter(i => i.id = association)[0].type;
+                        if (!attributeFileTypesNames.includes(associationType) && !attributeFileTypesNames.includes(originalType)) {
+                            return cb('Incorrect association provided : An association requires at least one of the members to be a file');
+                        } else {
+                            return cb(null);
+                        }
                     }
                 });
-            }
-        }, function (err) {
-            if (err) {
-                return cb(err);
-            } else {
-                return cb(null);
-            }
-        })
+    }, function (err) {
+        if (err) {
+            return cb(err);
+        } else {
+            return cb(null);
+        }
     })
+})
 }
 
 __private.listAttributeTypes = function (filter, cb) {

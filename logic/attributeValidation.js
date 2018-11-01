@@ -30,6 +30,7 @@ AttributeValidation.prototype.create = function (data, trs) {
         attribute_validation_request_id: data.attributeValidationRequestId,
         chunk: data.chunk,
         timestamp: data.timestamp,
+        expire_timestamp: data.timestamp
     };
 
     return trs;
@@ -168,9 +169,17 @@ AttributeValidation.prototype.schema = {
         chunk: {
             type: 'integer',
             minimum: 0
+        },
+        timestamp: {
+            type: 'integer',
+            minimum: 1
+        },
+        expire_timestamp: {
+            type: 'integer',
+            minimum: 1
         }
     },
-    required: ['owner', 'type', 'validator', 'chunk']
+    required: ['owner', 'type', 'validator', 'chunk', 'timestamp', 'expire_timestamp']
 };
 
 //
@@ -179,9 +188,10 @@ AttributeValidation.prototype.schema = {
 //
 AttributeValidation.prototype.objectNormalize = function (trs) {
     var report = library.schema.validate(trs.asset.validation[0], AttributeValidation.prototype.schema);
+    console.log(' HERE ' + JSON.stringify(trs.asset.validation[0]));
 
     if (!report) {
-        throw 'Failed to validate attribute schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate attribute validation schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -202,7 +212,8 @@ AttributeValidation.prototype.dbTable = 'attribute_validations';
 AttributeValidation.prototype.dbFields = [
     'attribute_validation_request_id',
     'chunk',
-    'timestamp'
+    'timestamp',
+    'expire_timestamp'
 ];
 
 //
@@ -217,7 +228,8 @@ AttributeValidation.prototype.dbSave = function (trs) {
         values: {
             attribute_validation_request_id: trs.asset.attributeValidationRequestId,
             chunk: trs.asset.validation[0].chunk,
-            timestamp: trs.timestamp
+            timestamp: trs.timestamp,
+            expire_timestamp:  trs.asset.validation[0].expire_timestamp
         }
     };
 };

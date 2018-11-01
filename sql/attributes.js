@@ -21,7 +21,8 @@ let AttributesSql = {
 
     getActiveAttributesForOwner : 'SELECT id from attributes a WHERE "owner" = ${owner} and id in (SELECT attribute_id ' +
     ' FROM attribute_validation_requests avr JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id' +
-    ' WHERE av.timestamp > ${after} AND av.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
+    ' WHERE av.timestamp > ${after} AND av.expire_timestamp > ${expirationAfter} ' +
+    ' AND av.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
 
     getAttributesFiltered: function (params) {
         return [
@@ -100,6 +101,7 @@ let AttributeValidationsSql = {
         'expire_timestamp'
     ],
 
+
     getAttributeValidation: 'SELECT * FROM attribute_validations WHERE "id" = ${id}',
     getAttributeValidationBetween: 'SELECT * FROM attribute_validations av JOIN attribute_validation_requests avr ' +
     'ON avr.id=av.attribute_validation_request_id WHERE av.timestamp BETWEEN ${after} and ${before}',
@@ -108,7 +110,18 @@ let AttributeValidationsSql = {
     ' (SELECT id from attribute_validation_requests WHERE "attribute_id" = ${attribute_id})',
     getAttributeValidationForRequest: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" = ANY(${requestIds}::int[])',
     deleteAttributeValidation: 'DELETE FROM attribute_validations WHERE "id" = ${id}',
-    countByRowId: 'SELECT COUNT("id")::int FROM attribute_validations'
+    countByRowId: 'SELECT COUNT("id")::int FROM attribute_validations',
+
+    expireValidationsFromUpdate: function (params) {
+        return [
+            'UPDATE attribute_validations AS av ' +
+            ' SET expire_timestamp = av.timestamp FROM attribute_validation_requests avr ' +
+            ' LEFT JOIN attributes a ON a.id = avr.attribute_id ' +
+            ' WHERE av.attribute_validation_request_id = avr.id AND (a.associations = \'\' OR a.associations = \'[\'])' +
+            ' AND a.id IN ( ' + params.ids.join(' , ')  + ');'
+
+        ].filter(Boolean).join(' ');
+    },
 
 };
 

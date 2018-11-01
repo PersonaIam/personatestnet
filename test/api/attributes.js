@@ -2891,11 +2891,11 @@ describe('PUT update attribute', function () {
 
 describe('Update Attribute Associations', function () {
 
-    it('Update Associations for attribute', function (done) {
+    it('Update Associations for existing attribute', function (done) {
 
         getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
 
-            let attributeId = identityCardData.body.attributes[0].id;
+            let identityCardId = identityCardData.body.attributes[0].id;
 
             getAttribute(OWNER, FIRST_NAME, function (err, attributeData) {
 
@@ -2907,14 +2907,14 @@ describe('Update Attribute Associations', function () {
                 });
 
                 let param = {};
-                param.attributeId = attributeId;
+                param.attributeId = identityCardId;
                 param.owner = OWNER;
                 param.secret = SECRET;
                 param.publicKey = PUBLIC_KEY;
 
-                param.value = 'kekis11';
+                param.value = '3454532';
                 param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
-                param.associations = [identityCardData.body.attributes[0].id];
+                param.associations = [attributeData.body.attributes[0].id];
 
                 let request = updateAttributeRequest(param);
 
@@ -2935,44 +2935,56 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Update Associations for attribute', function (done) {
+    it('Update Associations for existing attribute - associations belong to different owner', function (done) {
 
         getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
-
             let attributeId = identityCardData.body.attributes[0].id;
 
-            getAttribute(OWNER, FIRST_NAME, function (err, attributeData) {
-
-                let unconfirmedBalance = 0;
-                let balance = 0;
-                getBalance(OWNER, function (err, res) {
-                    unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-                    balance = parseInt(res.body.balance);
-                });
-
+            getAttribute(OTHER_OWNER, FIRST_NAME, function (err, attributeData) {
                 let param = {};
                 param.attributeId = attributeId;
                 param.owner = OWNER;
                 param.secret = SECRET;
                 param.publicKey = PUBLIC_KEY;
 
-                param.value = '23456754324567234';
+                param.value = '24681';
                 param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
-                param.associations = [identityCardData.body.attributes[0].id, identityCardData.body.attributes[0].id];
+                param.associations = [attributeData.body.attributes[0].id];
 
                 let request = updateAttributeRequest(param);
 
                 putAttributeUpdate(request, function (err, res) {
                     console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('transactionId');
-                    sleep.msleep(SLEEP_TIME);
-                    getBalance(OTHER_OWNER, function (err, res) {
-                        let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                        let balanceAfter = parseInt(res.body.balance);
-                        node.expect(balance - balanceAfter === constants.fees.updateattribute);
-                        node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateattribute);
-                    });
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                    node.expect(res.body).to.have.property(ERROR).to.be.eq('Incorrect association provided : one of the attributes to be associated does not belong to the current owner');
+                    done();
+                });
+            });
+        });
+    });
+
+    it('Update Associations for existing attribute - attribute to attribute association', function (done) {
+
+        getAttribute(OTHER_OWNER, 'address', function (err, identityCardData) {
+            let attributeId = identityCardData.body.attributes[0].id;
+
+            getAttribute(OTHER_OWNER, FIRST_NAME, function (err, attributeData) {
+                let param = {};
+                param.attributeId = attributeId;
+                param.owner = OTHER_OWNER;
+                param.secret = OTHER_SECRET;
+                param.publicKey = OTHER_PUBLIC_KEY;
+
+                param.value = '24681';
+                param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
+                param.associations = [attributeData.body.attributes[0].id];
+
+                let request = updateAttributeRequest(param);
+
+                putAttributeUpdate(request, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                    node.expect(res.body).to.have.property(ERROR).to.be.eq('Incorrect association provided : An association requires at least one of the members to be a file');
                     done();
                 });
             });
@@ -3125,6 +3137,7 @@ function createAttributeValidation(param) {
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
     request.asset.validation[0].chunk = param.chunk ? param.chunk : DEFAULT_CHUNK;
+    request.asset.validation[0].timestamp = slots.getTime();
     if (param.expire_timestamp) {
         request.asset.validation[0].expire_timestamp =  param.expire_timestamp;
     }

@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS "attribute_validations"(
   "attribute_validation_request_id" INT,
   "chunk" SMALLINT NOT NULL,
   "timestamp" INT NOT NULL,
+  "expire_timestamp" INT NOT NULL,
   FOREIGN KEY("attribute_validation_request_id") REFERENCES "attribute_validation_requests"("id") ON DELETE CASCADE
 );
 

@@ -390,6 +390,7 @@ shared.validateAttribute = function (req, cb) {
                         if (err || attributeValidations) {
                             return cb(messages.ATTRIBUTE_VALIDATION_ALREADY_MADE);
                         }
+                        req.body.asset.validation[0].expire_timestamp = slots.getTime(moment(slots.getRealTime(req.body.asset.validation[0].timestamp)).add(1,'year'));
 
                         attributes.buildTransaction({
                                 req: req,

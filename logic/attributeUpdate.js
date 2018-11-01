@@ -194,6 +194,13 @@ AttributeUpdate.prototype.dbFields = [
 //__API__ `dbSave`
 //
 AttributeUpdate.prototype.dbSave = function (trs) {
+    if (trs.asset.attribute[0].associations && trs.asset.attribute[0].associations.length > 0) {
+        library.db.query(sql.AttributeValidationsSql.expireValidationsFromUpdate({ids: trs.asset.attribute[0].associations}), {}).then(function (err) {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 
     let params = {
         value : trs.asset.attribute[0].value,
