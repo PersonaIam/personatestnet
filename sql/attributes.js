@@ -9,6 +9,8 @@ let AttributesSql = {
         'timestamp'
     ],
 
+    getAttributesForOwner:'SELECT * FROM attributes where "owner" = ${owner}',
+
     updateAttribute: 'UPDATE attributes ' +
     ' SET value = ${value}, timestamp = ${timestamp}, expire_timestamp = ${expire_timestamp}, associations = ${associations}' +
     ' WHERE id = ${id}',

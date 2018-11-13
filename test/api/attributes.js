@@ -513,7 +513,7 @@ describe('Create Attribute', function () {
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
             param.associations = [identityCardData.body.attributes[0].id]
-            param.expire_timestamp = slots.getTime() + 20000;
+            param.expire_timestamp = slots.getTime() + 200000;
 
             let request = createAttributeRequest(param);
 
@@ -671,7 +671,7 @@ describe('Update Attribute', function () {
             param.value = NEW_ADDRESS;
             time = slots.getTime();
             console.log(time);
-            param.expire_timestamp = time + 20000;
+            param.expire_timestamp = time + 200000;
             let request = updateAttributeRequest(param);
 
             putAttributeUpdate(request, function (err, res) {
@@ -699,7 +699,7 @@ describe('Update Attribute', function () {
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NEW_ADDRESS);
-            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(time + 20000);
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(time + 200000);
             node.expect(res.body.attributes[0]).to.have.property('timestamp').to.be.at.least(time);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
@@ -716,7 +716,7 @@ describe('Update Attribute', function () {
         param.publicKey = PUBLIC_KEY;
         param.value = NEW_ADDRESS;
         time = slots.getTime();
-        param.expire_timestamp = time + 20000;
+        param.expire_timestamp = time + 200000;
         let request = updateAttributeRequest(param);
 
         putAttributeUpdate(request, function (err, res) {
@@ -745,7 +745,7 @@ describe('Update Attribute', function () {
             param.secret = SECRET;
             param.publicKey = PUBLIC_KEY;
             time = slots.getTime();
-            param.expire_timestamp = time + 20000;
+            param.expire_timestamp = time + 200000;
             let request = updateAttributeRequest(param);
 
             putAttributeUpdate(request, function (err, res) {
@@ -913,7 +913,7 @@ describe('Update Attribute Associations', function () {
                 param.publicKey = PUBLIC_KEY;
                 param.associations = [attributeData.body.attributes[0].id];
                 time = slots.getTime();
-                param.expire_timestamp = time + 20000;
+                param.expire_timestamp = time + 200000;
                 param.value = 'new value for identity_card';
 
                 let request = updateAttributeRequest(param);
@@ -949,7 +949,7 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Get Attribute - After association was made, check Attribute is still not documented ( IDENTITY_CARD is not active yet )', function (done) {
+    it('Get Attribute - After association was made, check Attribute is still not documented, and is associated( IDENTITY_CARD is not active yet, but the association exists )', function (done) {
         getAttribute(OWNER, 'first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -958,6 +958,7 @@ describe('Update Attribute Associations', function () {
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(false);
+            node.expect(res.body.attributes[0]).to.have.property('associated').to.eq(true);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
             done();
         });
@@ -1234,7 +1235,7 @@ it('Create Attribute - success (Timestamp in the past, but not expirable)', func
             param.publicKey = PUBLIC_KEY;
             param.value = EMAIL;
             time = slots.getTime();
-            param.expire_timestamp = time + 20000;
+            param.expire_timestamp = time + 200000;
             let request = updateAttributeRequest(param);
 
             putAttributeUpdate(request, function (err, res) {
@@ -1472,7 +1473,7 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_WITH_NO_ACTIVE_ASSOCIATIONS_CANNOT_BE_VALIDATED);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED);
             done();
         });
     });

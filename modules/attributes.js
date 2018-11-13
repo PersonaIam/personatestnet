@@ -191,20 +191,24 @@ Attributes.getAttributesByFilter = function (filter, cb) {
         }
         let data = {};
         data.count = count;
-        library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
-            after: slots.getTime(moment().subtract(1, 'year')),
-            expirationAfter: slots.getTime(),
-            owner: filter.owner,
-            validations_required: constants.VALIDATIONS_REQUIRED
-        })
-            .then(function (activeAttributes) {
-                let activeAttributesIds = activeAttributes.map(row => row.id);
-                attributes.forEach(attribute => {
-                    attribute.active = activeAttributesIds.includes(attribute.id);
-                    attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
-                });
-                data.attributes = attributes;
-                return cb(null, data);
+        library.db.query(sql.AttributesSql.getAttributesForOwner,{owner: filter.owner}).then(function (ownerAttributes) {
+                library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
+                    after: slots.getTime(moment().subtract(1, 'year')),
+                    expirationAfter: slots.getTime(),
+                    owner: filter.owner,
+                    validations_required: constants.VALIDATIONS_REQUIRED
+                })
+                    .then(function (activeAttributes) {
+                        let activeAttributesIds = activeAttributes.map(row => row.id);
+                        attributes.forEach(attribute => {
+                            attribute.active = activeAttributesIds.includes(attribute.id);
+                            attribute.associated = ownerAttributes
+                                .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
+                            attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
+                        });
+                        data.attributes = attributes;
+                        return cb(null, data);
+                    })
             })
     }).catch(function (err) {
         return cb(err.message);

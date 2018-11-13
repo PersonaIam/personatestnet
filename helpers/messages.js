@@ -19,7 +19,7 @@ module.exports = {
     ATTRIBUTE_VALIDATION_REQUESTS_NOT_FOUND : 'Attribute validation requests not found',
     ATTRIBUTE_SHARES_NOT_FOUND : 'Attribute shares not found',
     ATTRIBUTE_SHARE_REQUESTS_NOT_FOUND : 'Attribute share requests not found',
-    ATTRIBUTE_WITH_NO_ACTIVE_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no active associations and therefore cannot be validated',
+    ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no associations and therefore cannot be validated',
 
     VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE : 'Validator already has an unapproved validation request for the given attribute',
     VALIDATOR_HAS_NO_VALIDATION_REQUEST : 'Validator does not have any validation request to complete for this attribute',
