@@ -164,7 +164,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
         filter.orderBy, {
             sortFields: sql.AttributesSql.sortFields,
             fieldPrefix: function (sortField) {
-                if (['id', 'owner', 'type'].indexOf(sortField) > -1) {
+                if (['timestamp'].indexOf(sortField) > -1) {
                     return sortField;
                 } else {
                     return sortField;
@@ -197,9 +197,12 @@ Attributes.getAttributesByFilter = function (filter, cb) {
             owner: filter.owner,
             validations_required: constants.VALIDATIONS_REQUIRED
         })
-            .then(function (rows) {
-                let rowsIds = rows.map(row => row.id);
-                attributes.forEach(attribute => attribute.active = rowsIds.includes(attribute.id));
+            .then(function (activeAttributes) {
+                let activeAttributesIds = activeAttributes.map(row => row.id);
+                attributes.forEach(attribute => {
+                    attribute.active = activeAttributesIds.includes(attribute.id);
+                    attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
+                });
                 data.attributes = attributes;
                 return cb(null, data);
             })
@@ -287,27 +290,13 @@ __private.checkAssociations = function (filter, cb) {
         let originalType = data.attributes.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
         __private.listAttributeTypes({}, function (err, attributeTypes) {
             let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o=>o.name);
-            attributeFilter.associations.forEach(association => {
-                    if (!_.includes(ownerAttributeIds, association)) {
-                        return cb('Incorrect association provided : one of the attributes to be associated does not belong to the current owner');
-                    } else {
-                        let associationType = data.attributes.filter(i => i.id = association)[0].type;
-                        if (!attributeFileTypesNames.includes(associationType) && !attributeFileTypesNames.includes(originalType)) {
-                            return cb('Incorrect association provided : An association requires at least one of the members to be a file');
-                        } else {
-                            return cb(null);
-                        }
-                    }
-                });
-    }, function (err) {
-        if (err) {
-            return cb(err);
-        } else {
+            if (!attributeFileTypesNames.includes(originalType)) {
+                return cb(messages.ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE);
+            }
             return cb(null);
-        }
-    })
-})
-}
+        });
+    });
+};
 
 __private.listAttributeTypes = function (filter, cb) {
 
@@ -780,8 +769,12 @@ shared.addAttribute = function (req, cb) {
                                 return cb(err);
                             }
 
-                            if (!account || !account.publicKey) {
+                            if (!account || !account.publicKey || !account.address) {
                                 return cb(messages.ACCOUNT_NOT_FOUND);
+                            }
+
+                            if (account.address !== owner) {
+                                return cb(messages.SENDER_IS_NOT_OWNER);
                             }
 
                             if (account.secondSignature && !req.body.secondSecret) {
@@ -879,9 +872,9 @@ shared.updateAttribute = function (req, cb) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND_FOR_UPDATE);
                 }
 
-                if (req.body.asset.attribute[0].value === data.attributes[0].value &&
-                    req.body.asset.attribute[0].expire_timestamp === data.attributes[0].expire_timestamp &&
-                    req.body.asset.attribute[0].associations === data.attributes[0].associations) {
+                if ((!req.body.asset.attribute[0].value || req.body.asset.attribute[0].value === data.attributes[0].value) &&
+                    (!req.body.asset.attribute[0].expire_timestamp || req.body.asset.attribute[0].expire_timestamp === data.attributes[0].expire_timestamp) &&
+                    (!req.body.asset.attribute[0].associations || req.body.asset.attribute[0].associations === data.attributes[0].associations)) {
                     return cb(null, {message: messages.NOTHING_TO_UPDATE});
                 }
 
@@ -921,6 +914,10 @@ shared.updateAttribute = function (req, cb) {
                                     return cb(messages.ACCOUNT_NOT_FOUND);
                                 }
 
+                                if (account.address !== req.body.asset.attribute[0].owner) {
+                                    return cb(messages.SENDER_IS_NOT_OWNER);
+                                }
+
                                 if (account.secondSignature && !req.body.secondSecret) {
                                     return cb('Missing second passphrase');
                                 }
@@ -930,7 +927,6 @@ shared.updateAttribute = function (req, cb) {
                                 if (account.secondSignature) {
                                     secondKeypair = library.crypto.makeKeypair(req.body.secondSecret);
                                 }
-
 
                                 __private.addAttributeToIpfs(
                                     {

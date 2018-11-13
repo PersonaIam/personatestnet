@@ -196,7 +196,8 @@ AttributeValidationRequest.prototype.dbTable = 'attribute_validation_requests';
 AttributeValidationRequest.prototype.dbFields = [
     'attribute_id',
     'validator',
-    'timestamp'
+    'timestamp',
+    'status'
 ];
 
 //
@@ -204,12 +205,14 @@ AttributeValidationRequest.prototype.dbFields = [
 
 //
 AttributeValidationRequest.prototype.dbSave = function (trs) {
+    console.log('HERE')
     return {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
             attribute_id: trs.asset.validation[0].attribute_id,
             validator: trs.asset.validation[0].validator,
+            status: constants.validationRequestStatus.PENDING_APPROVAL,
             timestamp: trs.timestamp
         }
     };

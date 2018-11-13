@@ -110,6 +110,7 @@ __private.cleanLocks = function (cb) {
 __private.startIpfsDaemon = function () {
     self.ipfsDaemon.start(function (err) {
         if (err) {
+            console.log('Error starting IPFS Daemon - ' + err)
             return err;
         }
         else {

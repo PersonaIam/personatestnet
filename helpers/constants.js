@@ -20,6 +20,10 @@ module.exports = {
         attributesharerequest: 2,
 		attributevalidationrequest: 2,
 		attributevalidation: 1,
+        attributevalidationrequestapprove: 1,
+        attributevalidationrequestdecline: 1,
+        attributevalidationrequestnotarize: 1,
+        attributevalidationrequestreject: 1,
 		attributeshare: 1,
 		attributeshareapproval: 1,
 		attributeconsume: 1,
@@ -58,6 +62,23 @@ module.exports = {
 		APPROVED : 1,
 		COMPLETED : 2
 	},
+    validationRequestStatus : {
+        PENDING_APPROVAL : 'PENDING_APPROVAL',
+        IN_PROGRESS : 'IN_PROGRESS',
+        DECLINED : 'DECLINED',
+        COMPLETED : 'COMPLETED',
+		REJECTED: 'REJECTED'
+    },
+    validationRequestAction : {
+        DECLINE : 0,
+        APPROVE : 1,
+		NOTARIZE : 2,
+		REJECT : 3
+    },
+    validationType : {
+        FACE_TO_FACE : 'FACE_TO_FACE',
+        REMOTE : 'REMOTE'
+    },
 	totalAmount: 6677610400000000,
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 	VALIDATIONS_REQUIRED : 1,

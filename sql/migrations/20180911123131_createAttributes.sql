@@ -34,17 +34,11 @@ CREATE TABLE IF NOT EXISTS "attribute_validation_requests"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_id" INT NOT NULL,
   "validator" VARCHAR(36) NOT NULL,
+  "status" VARCHAR(36) NOT NULL,
+  "validation_type" VARCHAR(36),
   "timestamp" INT NOT NULL,
+  "expire_timestamp" INT,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS "attribute_validations"(
-  "id" SERIAL NOT NULL PRIMARY KEY,
-  "attribute_validation_request_id" INT,
-  "chunk" SMALLINT NOT NULL,
-  "timestamp" INT NOT NULL,
-  "expire_timestamp" INT NOT NULL,
-  FOREIGN KEY("attribute_validation_request_id") REFERENCES "attribute_validation_requests"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "attribute_share_requests"(
@@ -68,8 +62,17 @@ CREATE TABLE IF NOT EXISTS "attribute_shares"(
 CREATE TABLE IF NOT EXISTS "attribute_share_request_approvals"(
   "id" SERIAL NOT NULL PRIMARY KEY,
   "attribute_share_request_id" INT,
+  "status" SMALLINT NOT NULL,
   "timestamp" INT NOT NULL,
   FOREIGN KEY("attribute_share_request_id") REFERENCES "attribute_share_requests"("id") ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "attribute_validation_request_actions"(
+  "id" SERIAL NOT NULL PRIMARY KEY,
+  "attribute_validation_request_id" INT,
+  "action" SMALLINT NOT NULL,
+  "timestamp" INT NOT NULL,
+  FOREIGN KEY("attribute_validation_request_id") REFERENCES "attribute_validation_requests"("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "attribute_consumptions"(
@@ -105,7 +108,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS "ipfs_pin_queue_unique" ON "ipfs_pin_queue"("i
 
 
 /* Indexes */
-CREATE INDEX IF NOT EXISTS "attribute_validation_id" ON "attribute_validations"("id");
 CREATE INDEX IF NOT EXISTS "ipfs_pin_queue_id" ON "ipfs_pin_queue"("id");
 
 COMMIT;

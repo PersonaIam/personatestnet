@@ -19,10 +19,11 @@ let AttributesSql = {
     'VALUES ' +
     '(${type}, ${value}, ${owner}, ${timestamp}, ${expire_timestamp}) RETURNING id,type,value,owner,expire_timestamp',
 
-    getActiveAttributesForOwner : 'SELECT id from attributes a WHERE "owner" = ${owner} and id in (SELECT attribute_id ' +
-    ' FROM attribute_validation_requests avr JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id' +
-    ' WHERE av.timestamp > ${after} AND av.expire_timestamp > ${expirationAfter} ' +
-    ' AND av.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
+    getActiveAttributesForOwner : 'SELECT a.id,a.type,at.data_type from attributes a JOIN attribute_types at ON at.name = a.type ' +
+    ' WHERE "owner" = ${owner} and a.id in (SELECT attribute_id ' +
+    ' FROM attribute_validation_requests avr ' +
+    ' WHERE avr.timestamp > ${after} AND avr.expire_timestamp > ${expirationAfter} ' +
+    ' AND avr.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
 
     getAttributesFiltered: function (params) {
         return [
@@ -63,25 +64,32 @@ let AttributeValidationRequestsSql = {
         'id',
         'attribute_id',
         'validator',
-        'timestamp'
+        'timestamp',
+        'status',
+        'type'
     ],
-
+    getAttributeValidationsForAttributeAndStatus : 'SELECT * FROM attribute_validation_requests ' +
+    'WHERE "attribute_id" = ${attribute_id} AND "status" = ${status}',
     getAttributeValidationRequest: 'SELECT * FROM attribute_validation_requests WHERE "id" = ${id}',
-    getAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attribute_id}',
+    getAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attributeId}',
     getAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests WHERE "validator" = ${validator}',
-    getAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
-    'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ',
     getAttributeValidationsRequestsForAttributeAndValidator:
-        'SELECT avr.id FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
-        'WHERE "attribute_id" = ${attribute_id} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
-    getCompletedAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
-    'RIGHT OUTER JOIN attribute_validations av ON avr.id=av.attribute_validation_request_id ' +
-    'WHERE avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})',
-    getIncompleteAttributeValidationRequests: 'SELECT * FROM attribute_validation_requests avr ' +
-    'WHERE (avr.validator = ${validator} OR avr.attribute_id = (SELECT id from attributes a where a.type = ${type} and a.owner = ${owner})) ' +
-    'AND id NOT IN (SELECT attribute_validation_request_id from attribute_validations)',
+    'SELECT avr.id,avr.attribute_id,avr.status,avr.validator FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    'WHERE attribute_id = ${attributeId} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
     deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_validation_requests',
+    updateValidationRequest : 'UPDATE attribute_validation_requests SET status = ${status} WHERE id = ${id}',
+    updateValidationRequestWithType : 'UPDATE attribute_validation_requests SET status = ${status}, validation_type = ${validationType} WHERE id = ${id}',
+
+    expireValidationsFromUpdate: function (params) {
+        return [
+            'UPDATE attribute_validation_requests ' +
+            ' SET expire_timestamp = avr.timestamp FROM  attribute_validation_requests avr' +
+            ' LEFT JOIN attributes a ON a.id = avr.attribute_id ' +
+            ' WHERE a.id IN ( ' + params.ids.join(' , ')  + ');'
+
+        ].filter(Boolean).join(' ');
+    },
 
     getAttributeValidationRequestsFiltered: function (params) {
         return [
@@ -90,39 +98,6 @@ let AttributeValidationRequestsSql = {
             (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
         ].filter(Boolean).join(' ');
     },
-};
-
-let AttributeValidationsSql = {
-    sortFields: [
-        'id',
-        'attribute_validation_request_id',
-        'chunk',
-        'timestamp',
-        'expire_timestamp'
-    ],
-
-
-    getAttributeValidation: 'SELECT * FROM attribute_validations WHERE "id" = ${id}',
-    getAttributeValidationBetween: 'SELECT * FROM attribute_validations av JOIN attribute_validation_requests avr ' +
-    'ON avr.id=av.attribute_validation_request_id WHERE av.timestamp BETWEEN ${after} and ${before}',
-    getAttributeValidationList: 'SELECT * FROM attribute_validations WHERE "id" IN ${attribute_ids}',
-    getAttributeValidationsForAttribute: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" IN ' +
-    ' (SELECT id from attribute_validation_requests WHERE "attribute_id" = ${attribute_id})',
-    getAttributeValidationForRequest: 'SELECT * FROM attribute_validations WHERE "attribute_validation_request_id" = ANY(${requestIds}::int[])',
-    deleteAttributeValidation: 'DELETE FROM attribute_validations WHERE "id" = ${id}',
-    countByRowId: 'SELECT COUNT("id")::int FROM attribute_validations',
-
-    expireValidationsFromUpdate: function (params) {
-        return [
-            'UPDATE attribute_validations AS av ' +
-            ' SET expire_timestamp = av.timestamp FROM attribute_validation_requests avr ' +
-            ' LEFT JOIN attributes a ON a.id = avr.attribute_id ' +
-            ' WHERE av.attribute_validation_request_id = avr.id AND (a.associations = \'\' OR a.associations = \'[\'])' +
-            ' AND a.id IN ( ' + params.ids.join(' , ')  + ');'
-
-        ].filter(Boolean).join(' ');
-    },
-
 };
 
 let AttributeShareRequestsSql = {
@@ -188,8 +163,7 @@ let AttributeConsumptionsSql = {
     getLastReward : 'SELECT * FROM transactions WHERE "type" = ${type} order by timestamp DESC limit 1',
     getAttributeConsumptionsForRewardsMadeBetween : 'SELECT ac.id,ac.attribute_id,ac.amount,avr.validator,av.chunk FROM attribute_consumptions ac ' +
     'RIGHT OUTER JOIN attribute_validation_requests avr ON ac.attribute_id = avr.attribute_id ' +
-    'RIGHT OUTER JOIN attribute_validations av ON avr.id = av.attribute_validation_request_id ' +
-    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND av.timestamp < ac.timestamp AND av.timestamp >= ac.timestamp-${offset}',
+    'WHERE ac.timestamp < ${before} AND ac.timestamp >= ${after} AND avr.timestamp < ac.timestamp AND avr.timestamp >= ac.timestamp-${offset}',
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_consumptions',
 
     getAttributeConsumptionsFiltered: function (params) {
@@ -245,7 +219,6 @@ module.exports = {
     AttributeValidationRequestsSql,
     AttributeTypesSql,
     AttributesSql,
-    AttributeValidationsSql,
     AttributeShareRequestsSql,
     AttributeSharesSql,
     AttributeConsumptionsSql,

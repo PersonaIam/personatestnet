@@ -6,6 +6,7 @@ module.exports = {
 
     ATTRIBUTE_ALREADY_EXISTS : 'Attribute already exists',
     ACCOUNT_NOT_FOUND : 'Account not found',
+    SENDER_IS_NOT_OWNER : 'Sender is not the attribute owner',
     ATTRIBUTE_NOT_FOUND : 'Attribute not found',
     DOCUMENT_NOT_FOUND : 'Document not found',
     ATTRIBUTE_NOT_FOUND_FOR_UPDATE : 'Attribute not found for update',
@@ -18,15 +19,24 @@ module.exports = {
     ATTRIBUTE_VALIDATION_REQUESTS_NOT_FOUND : 'Attribute validation requests not found',
     ATTRIBUTE_SHARES_NOT_FOUND : 'Attribute shares not found',
     ATTRIBUTE_SHARE_REQUESTS_NOT_FOUND : 'Attribute share requests not found',
+    ATTRIBUTE_WITH_NO_ACTIVE_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no active associations and therefore cannot be validated',
 
-    VALIDATOR_ALREADY_HAS_VALIDATION_REQUEST : 'Validator already has an active validation request for the given attribute',
+    VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE : 'Validator already has an unapproved validation request for the given attribute',
     VALIDATOR_HAS_NO_VALIDATION_REQUEST : 'Validator does not have any validation request to complete for this attribute',
     NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS : 'No attribute validation requests exists for the given parameters',
     NO_ATTRIBUTE_VALIDATIONS : 'No attribute validations were found for the given parameters',
     NO_ATTRIBUTE_VALIDATION_REQUESTS : 'No attribute validation requests were found for the given parameters',
     ATTRIBUTE_VALIDATION_ALREADY_MADE : 'Attribute validation already made',
+    VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
+    ATTRIBUTE_VALIDATION_WITH_NO_APPROVED_VALIDATION_REQUEST : 'Validator does not have an approved validation request for this attribute',
 
-    INCORRECT_VALIDATION_PARAMETERS : 'Either the validator or the attribute (type and owner information) must be provided',
+    ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
+    ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
+    UNKNOWN_VALIDATION_REQUEST_ANSWER : 'Unknown validation request answer',
+
+    ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
+    ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one of the attributes to be associated does not belong to the current owner',
+    INCORRECT_VALIDATION_PARAMETERS : 'Either the validator or the attributeId must be provided',
     INCORRECT_SHARE_PARAMETERS : 'Either the applicant or the attribute (type and owner information) must be provided',
 
     ATTRIBUTE_SHARE_REQUEST_ALREADY_EXISTS : 'Applicant already has a share request for the given attribute',
@@ -48,6 +58,7 @@ module.exports = {
 
     OWNER_IS_APPLICANT_ERROR : 'Owner cannot be the applicant of his own attribute',
     OWNER_IS_VALIDATOR_ERROR : 'Owner cannot be the validator of his own attribute',
+    VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR : 'Only the validator is allowed to answer a validation request',
 
     NO_CONSUMPTIONS_FOR_REWARD_ROUND : 'The reward was round not generated because there were no attribute consumptions since the last completed reward round',
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',

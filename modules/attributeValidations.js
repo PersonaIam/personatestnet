@@ -27,9 +27,24 @@ function AttributeValidations(cb, scope) {
         transactionTypes.REQUEST_ATTRIBUTE_VALIDATION, new AttributeValidationRequest()
     );
 
-    let AttributeValidation = require('../logic/attributeValidation.js');
-    __private.assetTypes[transactionTypes.VALIDATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
-        transactionTypes.VALIDATE_ATTRIBUTE, new AttributeValidation()
+    let ApproveAttributeValidationRequest = require('../logic/attributeValidationRequestApprove.js');
+    __private.assetTypes[transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
+        transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST, new ApproveAttributeValidationRequest()
+    );
+
+    let DeclineAttributeValidationRequest = require('../logic/attributeValidationRequestDecline.js');
+    __private.assetTypes[transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
+        transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST, new DeclineAttributeValidationRequest()
+    );
+
+    let NotarizeAttributeValidationRequest = require('../logic/attributeValidationRequestNotarize.js');
+    __private.assetTypes[transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
+        transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST, new NotarizeAttributeValidationRequest()
+    );
+
+    let RejectAttributeValidationRequest = require('../logic/attributeValidationRequestReject.js');
+    __private.assetTypes[transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
+        transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST, new RejectAttributeValidationRequest()
     );
 
     return cb(null, self);
@@ -55,7 +70,19 @@ AttributeValidations.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
-    __private.assetTypes[transactionTypes.VALIDATE_ATTRIBUTE].bind({
+    __private.assetTypes[transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST].bind({
+        modules: modules, library: library
+    });
+
+    __private.assetTypes[transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST].bind({
         modules: modules, library: library
     });
 };
@@ -74,11 +101,11 @@ __private.attachApi = function () {
     router.map(shared, {
         'post /validationrequest': 'requestAttributeValidation',
         'get /validationrequest': 'getAttributeValidationRequests',
-        'get /validationrequest/completed': 'getCompletedAttributeValidationRequests',
-        'get /validationrequest/incomplete': 'getIncompleteAttributeValidationRequests',
-        'post /validation': 'validateAttribute',
-        'get /validation': 'getAttributeValidations',
         'get /validationscore': 'getAttributeValidationScore',
+        'post /approve': 'approveValidationRequest',
+        'post /decline': 'declineValidationRequest',
+        'post /notarize': 'notarizeValidationRequest',
+        'post /reject': 'rejectValidationRequest',
     });
 
     router.use(function (req, res, next) {
@@ -130,7 +157,6 @@ __private.getAttributeValidationRequestsByFilter = function (filter, cb) {
         return cb(orderBy.error);
     }
 
-
     library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationRequestsFiltered({
         where: where,
     }), params).then(function (rows) {
@@ -153,14 +179,27 @@ __private.getAttributeValidationRequestsByFilter = function (filter, cb) {
 };
 
 __private.getAttributeValidationRequests = function (filter, cb) {
+    let query, params;
+    if (filter.attributeId && filter.validator) {
+        query = sql.AttributeValidationRequestsSql.getAttributeValidationsRequestsForAttributeAndValidator;
+        params = {attributeId: filter.attributeId, validator: filter.validator}
+    } else
+        if (filter.attributeId && !filter.validator) {
+            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttribute;
+            params = {attributeId: filter.attributeId}
+         } else
+             if (!filter.attributeId && filter.validator) {
+                query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForValidator;
+                 params = {validator: filter.validator}
+            }
 
-    library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationsRequestsForAttributeAndValidator,
-        {attribute_id: filter.attribute_id, validator: filter.validator}).then(function (rows) {
+    library.db.query(query, params).then(function (validationRequests) {
 
-        let data = {};
-        if (rows.length > 0) {
-            data = rows;
-            return cb(null, data);
+        if (validationRequests.length > 0) {
+            if (filter.status) {
+                validationRequests = validationRequests.filter(validationRequest => validationRequest.status === filter.status)
+            }
+            return cb(null, validationRequests);
         }
 
         return cb(null, null);
@@ -172,18 +211,11 @@ __private.getAttributeValidationRequests = function (filter, cb) {
 
 __private.getAttributeValidationScore = function (filter, cb) {
 
-    library.db.query(sql.AttributeValidationsSql.getAttributeValidationsForAttribute,
-        {attribute_id: filter.attribute_id}).then(function (rows) {
+    library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationsForAttributeAndStatus,
+        {attribute_id: filter.attribute_id, status : constants.validationRequestStatus.COMPLETED}).then(function (rows) {
 
         let attributeValidationScore = {};
-        let score = 0;
-        if (rows.length > 0) {
-            for (let i = 0; i < rows.length; i++) {
-                score += rows[i].chunk;
-            }
-
-        }
-        attributeValidationScore.score = score;
+        attributeValidationScore.score = rows.length;
         return cb(null, attributeValidationScore);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
@@ -191,53 +223,131 @@ __private.getAttributeValidationScore = function (filter, cb) {
     })
 };
 
-__private.getAttributeValidationRequestsByQuery = function (filter, cb) {
+__private.checkValidationAnswer = function(params, cb) {
 
-    let param = {validator: '', type: '', owner: ''};
-    if (filter.validator) {
-        param.validator = filter.validator;
-    } else {
-        param.type = filter.type;
-        param.owner = filter.owner;
+    if (params.answer === constants.validationRequestAction.APPROVE) {
+        if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
+            return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+        }
+
+        return cb(null, {transactionType : transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST});
+    }
+    if (params.answer === constants.validationRequestAction.DECLINE) {
+        if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
+            return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+        }
+
+        return cb(null, {transactionType : transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST});
     }
 
-    library.db.query(filter.query,
-        param).then(function (rows) {
-        let attributeValidationRequests = [];
-        for (let i = 0; i < rows.length; i++) {
-            attributeValidationRequests.push(rows[i]);
+    if (params.answer === constants.validationRequestAction.NOTARIZE) {
+        if (params.status !== constants.validationRequestStatus.IN_PROGRESS) {
+            return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
         }
-        let count = rows.length ? rows.length : 0;
-        let data = {};
-        if (count > 0) {
-            data.attributeValidationRequests = attributeValidationRequests;
-        }
-        data.count = count;
-        return cb(null, data);
+        return cb(null, {transactionType : transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST});
+    }
 
-    }).catch(function (err) {
-        library.logger.error("stack", err.stack);
-        return cb(err.message);
-    })
+    if (params.answer === constants.validationRequestAction.REJECT) {
+        if (params.status !== constants.validationRequestStatus.IN_PROGRESS) {
+            return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+        }
+        return cb(null, {transactionType : transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST});
+    }
+
+   return cb(null, null);
 };
 
-__private.getAttributeValidationsForRequests = function (filter, cb) {
-
-    library.db.query(sql.AttributeValidationsSql.getAttributeValidationForRequest,
-        {requestIds: filter.requestIds}).then(function (rows) {
-
-        let data = {};
-        if (rows.length > 0) {
-            data.count = rows.length;
-            data.attribute_validations = rows;
-            return cb(null, data);
+__private.validationRequestAnswer = function (req, cb) {
+    library.schema.validate(req.body, schema.attributeOperation, function (err) {
+        if (err) {
+            return cb(err[0].message);
         }
 
-        return cb(null, null);
-    }).catch(function (err) {
-        library.logger.error("stack", err.stack);
-        return cb(err.message);
-    })
+        if (!req.body.asset || !req.body.asset.validation) {
+            return cb('Validation is not provided');
+        }
+
+        if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].owner)) {
+            return cb('Owner address is incorrect');
+        }
+
+        if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].validator)) {
+            return cb('Validator address is incorrect');
+        }
+
+        let keypair;
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        let reqGetAttributeType = req;
+        reqGetAttributeType.body.name = req.body.asset.validation[0].type;
+        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
+            if (err || !data.attribute_type) {
+                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+            }
+            let reqGetAttributesByFilter = req;
+            reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
+            reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
+
+            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
+                if (err || !data.attributes) {
+                    return cb(messages.ATTRIBUTE_NOT_FOUND);
+                }
+
+                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                    return cb(messages.EXPIRED_ATTRIBUTE);
+                }
+
+                req.body.attributeId = data.attributes[0].id;
+                req.body.validator = req.body.asset.validation[0].validator;
+
+                __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
+
+                    if (err || !attributeValidationRequests) {
+                        return cb(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+                    }
+                    let paramsCheckAnswer = {};
+                    paramsCheckAnswer.answer = req.body.asset.validation.answer;
+                    paramsCheckAnswer.status = attributeValidationRequests[0].status;
+
+                    __private.checkValidationAnswer(paramsCheckAnswer, function (err, response) {
+                        if (err) {
+                            return cb(err)
+                        }
+
+                        if (!response) {
+                            return cb(messages.UNKNOWN_VALIDATION_REQUEST_ANSWER)
+                        }
+                        let transactionType = response.transactionType;
+                        req.body.asset.attributeValidationRequestId = attributeValidationRequests[0].id; // this is required inside the logic
+
+                        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+                            if (!account || account.address !== req.body.validator) {
+                                return cb(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR)
+                            }
+                            attributes.buildTransaction({
+                                    req: req,
+                                    keypair: keypair,
+                                    transactionType: transactionType
+                                },
+                                function (err, resultData) {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+                                    return cb(null, resultData);
+                                });
+                        });
+                    });
+                });
+            });
+        });
+    });
 };
 
 shared.requestAttributeValidation = function (req, cb) {
@@ -274,13 +384,13 @@ shared.requestAttributeValidation = function (req, cb) {
 
         let reqGetAttributeType = req;
         reqGetAttributeType.body.name = req.body.asset.validation[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
+        attributes.getAttributeType(reqGetAttributeType.body, function (err, dataAttributeType) {
+            if (err || !dataAttributeType.attribute_type) {
                 return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
             }
             let reqGetAttributesByFilter = req;
             reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
-            reqGetAttributesByFilter.body.type = data.attribute_type.name;
+            reqGetAttributesByFilter.body.type = dataAttributeType.attribute_type.name;
 
             attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
                 if (err) {
@@ -295,18 +405,23 @@ shared.requestAttributeValidation = function (req, cb) {
                     return cb(messages.EXPIRED_ATTRIBUTE);
                 }
 
+                let attributeTypeOptions = JSON.parse(dataAttributeType.attribute_type.options)
+                if (attributeTypeOptions && attributeTypeOptions.documentRequired === true && !data.attributes[0].documented) {
+                    return cb(messages.ATTRIBUTE_WITH_NO_ACTIVE_ASSOCIATIONS_CANNOT_BE_VALIDATED);
+                }
+
                 req.body.asset.validation[0].attribute_id = data.attributes[0].id;
                 req.body.validator = req.body.asset.validation[0].validator;
-                req.body.attribute_id = data.attributes[0].id;
+                req.body.attributeId = data.attributes[0].id;
+                req.body.status = constants.validationRequestStatus.PENDING_APPROVAL;
 
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
 
                     if (err) {
                         return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
                     }
-
                     if (attributeValidationRequests) {
-                        return cb(messages.VALIDATOR_ALREADY_HAS_VALIDATION_REQUEST);
+                        return cb(messages.VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE);
                     }
                     attributes.buildTransaction({
                             req: req,
@@ -325,216 +440,28 @@ shared.requestAttributeValidation = function (req, cb) {
     });
 };
 
-shared.validateAttribute = function (req, cb) {
-    library.schema.validate(req.body, schema.attributeOperation, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!req.body.asset || !req.body.asset.validation) {
-            return cb('Validation is not provided.');
-        }
-
-        if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].owner)) {
-            return cb('Owner address is incorrect');
-        }
-
-        if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].validator)) {
-            return cb('Validator address is incorrect');
-        }
-
-        let keypair;
-        if (!req.body.signature) {
-            keypair = library.crypto.makeKeypair(req.body.secret);
-        }
-        if (keypair && req.body.publicKey) {
-            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
-                return cb(messages.INVALID_PASSPHRASE);
-            }
-        }
-
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.validation[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
-            reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
-
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
-                    return cb('Cannot create validation request : ' + messages.ATTRIBUTE_NOT_FOUND);
-                }
-                req.body.attribute_id = data.attributes[0].id;
-                req.body.validator = req.body.asset.validation[0].validator;
-
-                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
-                }
-
-                __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
-
-                    if (err || !attributeValidationRequests) {
-                        return cb(messages.VALIDATOR_HAS_NO_VALIDATION_REQUEST);
-                    }
-                    req.body.asset.attributeValidationRequestId = attributeValidationRequests[0].id;
-
-                    let ids = [];
-                    attributeValidationRequests.forEach(i => ids.push(i.id));
-                    req.body.requestIds = ids;
-
-                    __private.getAttributeValidationsForRequests(req.body, function (err, attributeValidations) {
-
-                        if (err || attributeValidations) {
-                            return cb(messages.ATTRIBUTE_VALIDATION_ALREADY_MADE);
-                        }
-                        req.body.asset.validation[0].expire_timestamp = slots.getTime(moment(slots.getRealTime(req.body.asset.validation[0].timestamp)).add(1,'year'));
-
-                        attributes.buildTransaction({
-                                req: req,
-                                keypair: keypair,
-                                transactionType: transactionTypes.VALIDATE_ATTRIBUTE
-                            },
-                            function (err, resultData) {
-                                if (err) {
-                                    return cb(err);
-                                }
-                                return cb(null, resultData);
-                            });
-                    });
-                });
-            });
-        });
-    });
-};
-
-shared.getCompletedAttributeValidationRequests = function (req, cb) {
-    library.schema.validate(req.body, schema.getCompletedAttributeValidationRequests, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
-        }
-
-        req.body.query = sql.AttributeValidationRequestsSql.getCompletedAttributeValidationRequests;
-
-        __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
-            if (err) {
-                return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
-            }
-
-            if (res.count === 0) {
-                return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
-            }
-
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
-
-            return cb(null, resultData);
-        });
-
-    });
-};
-
-shared.getIncompleteAttributeValidationRequests = function (req, cb) {
-    library.schema.validate(req.body, schema.getIncompleteAttributeValidationRequests, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
-        }
-
-        req.body.query = sql.AttributeValidationRequestsSql.getIncompleteAttributeValidationRequests;
-
-        __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
-            if (err) {
-                return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
-            }
-
-            if (res.count === 0) {
-                return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
-            }
-
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
-
-            return cb(null, resultData);
-        });
-    });
-};
-
 shared.getAttributeValidationRequests = function (req, cb) {
     library.schema.validate(req.body, schema.getAttributeValidationRequests, function (err) {
         if (err) {
             return cb(err[0].message);
         }
 
-        if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
+        if (!req.body.attributeId && !req.body.validator) {
+            return cb(messages.INCORRECT_VALIDATION_PARAMETERS)
         }
 
-        req.body.query = sql.AttributeValidationRequestsSql.getAttributeValidationRequests;
-
-        __private.getAttributeValidationRequestsByQuery(req.body, function (err, res) {
+        __private.getAttributeValidationRequests(req.body, function (err, res) {
             if (err) {
                 return cb(messages.ATTRIBUTE_VALIDATION_REQUESTS_FAIL);
             }
 
-            if (res.count === 0) {
+            if (!res) {
                 return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
             }
 
-            let resultData = {attribute_validation_requests: res.attributeValidationRequests, count: res.count};
+            let resultData = {attribute_validation_requests: res, count: res.length};
 
             return cb(null, resultData);
-        });
-    });
-};
-
-shared.getAttributeValidations = function (req, cb) {
-    library.schema.validate(req.body, schema.getAttributeValidations, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!(req.body.validator || (req.body.type && req.body.owner))) {
-            return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
-        }
-
-        attributes.getAttributesByFilter(req.body, function (err, res1) {
-
-            if (req.body.type && req.body.owner && res1 && (!res1.attributes || res1.attributes.length === 0)) {
-                return cb(messages.ATTRIBUTE_NOT_FOUND)
-            }
-
-            if (res1 && res1.attributes && req.body.type && req.body.owner) {
-                req.body.attribute_id = res1.attributes[0].id;
-            }
-
-            __private.getAttributeValidationRequestsByFilter(req.body, function (err, res) {
-
-                if (!res.attributeValidationRequests || res.attributeValidationRequests.length === 0) {
-                    return cb(messages.NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS);
-                }
-
-                let ids = [];
-                res.attributeValidationRequests.forEach(i => ids.push(i.id));
-                req.body.requestIds = ids;
-
-                __private.getAttributeValidationsForRequests(req.body, function (err, res) {
-                    if (!res) {
-                        return cb(messages.NO_ATTRIBUTE_VALIDATIONS);
-                    }
-
-                    let resultData = {attribute_validations: res.attribute_validations, count: res.count};
-
-                    return cb(null, resultData);
-                });
-            });
         });
     });
 };
@@ -554,16 +481,63 @@ shared.getAttributeValidationScore = function (req, cb) {
             req.body.attribute_id = result.attributes[0].id;
 
             __private.getAttributeValidationScore(req.body, function (err, res) {
+                if (err) {
+                    return cb(err)
+                }
                 if (!res) {
-                    return cb(messages.NO_ATTRIBUTE_VALIDATIONS)
+                    return cb(null, {attribute_validations: 0});
                 }
 
-                return cb(null, {attribute_validation_score: res.score});
+                return cb(null, {attribute_validations: res.score});
             });
         });
     });
 };
 
+shared.approveValidationRequest = function (req, cb) {
+
+    req.body.asset.validation.answer = constants.validationRequestAction.APPROVE;
+    __private.validationRequestAnswer(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+
+        return cb(null, res);
+    });
+};
+
+shared.declineValidationRequest = function (req, cb) {
+
+    req.body.asset.validation.answer = constants.validationRequestAction.DECLINE;
+    __private.validationRequestAnswer(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+        return cb(null, res);
+    });
+};
+
+shared.notarizeValidationRequest = function (req, cb) {
+
+    req.body.asset.validation.answer = constants.validationRequestAction.NOTARIZE;
+    __private.validationRequestAnswer(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+        return cb(null, res);
+    });
+};
+
+shared.rejectValidationRequest = function (req, cb) {
+
+    req.body.asset.validation.answer = constants.validationRequestAction.REJECT;
+    __private.validationRequestAnswer(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+        return cb(null, res);
+    });
+};
 
 AttributeValidations.prototype.getAttributeValidationScore = function (filter, cb) {
     return __private.getAttributeValidationScore(filter, cb);

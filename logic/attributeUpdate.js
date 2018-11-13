@@ -155,9 +155,15 @@ AttributeUpdate.prototype.schema = {
         value: {
             type: 'string',
             minLength : 1
+        },
+        expire_timestamp: {
+            type: 'integer',
+            minimum : 1
+        },
+        associations: {
         }
     },
-    required: ['attributeId', 'value']
+    required: ['attributeId']
 };
 
 //
@@ -195,7 +201,7 @@ AttributeUpdate.prototype.dbFields = [
 //
 AttributeUpdate.prototype.dbSave = function (trs) {
     if (trs.asset.attribute[0].associations && trs.asset.attribute[0].associations.length > 0) {
-        library.db.query(sql.AttributeValidationsSql.expireValidationsFromUpdate({ids: trs.asset.attribute[0].associations}), {}).then(function (err) {
+        library.db.query(sql.AttributeValidationRequestsSql.expireValidationsFromUpdate({ids: trs.asset.attribute[0].associations}), {}).then(function (err) {
             if (err) {
                 console.log(err);
             }

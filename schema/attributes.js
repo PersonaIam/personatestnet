@@ -152,54 +152,9 @@ module.exports = {
                 minLength: 1,
                 format: 'address'
             },
-            owner: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
-            },
-            type: {
-                type: 'string',
-                minLength: 1,
-            }
-        }
-    },
-    getIncompleteAttributeValidationRequests: {
-        id: 'attributes.getIncompleteAttributeValidationRequests',
-        type: 'object',
-        properties: {
-            validator: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
-            },
-            type: {
-                type: 'string',
-                minLength: 1
-            },
-            owner: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
-            },
-        }
-    },
-    getCompletedAttributeValidationRequests: {
-        id: 'attributes.getCompletedAttributeValidationRequests',
-        type: 'object',
-        properties: {
-            validator: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
-            },
-            type: {
-                type: 'string',
-                minLength: 1
-            },
-            owner: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
+            attributeId: {
+                type: 'integer',
+                minimum: 1,
             },
         }
     },

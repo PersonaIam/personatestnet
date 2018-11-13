@@ -169,7 +169,7 @@ AttributeShareApprove.prototype.schema = {
             type : 'boolean'
         }
     },
-    required: ['owner', 'type', 'applicant', 'action']
+    required: ['owner', 'type', 'applicant']
 };
 
 //
@@ -186,6 +186,7 @@ AttributeShareApprove.prototype.dbTable = 'attribute_share_request_approvals';
 AttributeShareApprove.prototype.dbFields = [
     'attribute_share_request_id',
     'timestamp',
+    'status'
 ];
 
 //
@@ -196,7 +197,7 @@ AttributeShareApprove.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeShareRequestId;
-    params.status = trs.asset.share[0].action ? constants.shareStatus.APPROVED : constants.shareStatus.UNAPPROVED;
+    params.status = constants.shareStatus.APPROVED;
 
     library.db.query(sql.AttributeShareRequestsSql.updateShareRequest, params).then(function (err) {
     });
@@ -206,7 +207,8 @@ AttributeShareApprove.prototype.dbSave = function (trs) {
         fields: this.dbFields,
         values: {
             attribute_share_request_id: trs.asset.attributeShareRequestId,
-            timestamp: trs.timestamp
+            timestamp: trs.timestamp,
+            status : params.status
         }
     };
 };

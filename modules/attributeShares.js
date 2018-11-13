@@ -85,7 +85,7 @@ __private.attachApi = function () {
         'post /sharerequest': 'requestAttributeShare',
         'get /sharerequest': 'getRequestAttributeShare',
 
-        'post /approvesharerequest': 'approveShareAttribute',
+        'post /approvesharerequest': 'approveShareRequest',
 
         'get /share': 'getAttributeShare',
         'post /share': 'shareAttribute',
@@ -321,7 +321,7 @@ shared.requestAttributeShare = function (req, cb) {
     });
 };
 
-shared.approveShareAttribute = function (req, cb) {
+shared.approveShareRequest = function (req, cb) {
     library.schema.validate(req.body, schema.attributeOperation, function (err) {
         if (err) {
             return cb(err[0].message);
@@ -380,17 +380,17 @@ shared.approveShareAttribute = function (req, cb) {
                         return cb(messages.ATTRIBUTE_APPROVAL_SHARE_WITH_NO_SHARE_REQUEST);
                     }
 
-                    if (req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.APPROVED) {
-                        return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_APPROVED);
-                    }
-
-                    if (req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.COMPLETED) {
-                        return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
-                    }
-
-                    if (!req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.UNAPPROVED) {
-                        return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_UNAPPROVED);
-                    }
+                    // if (req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.APPROVED) {
+                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_APPROVED);
+                    // }
+                    //
+                    // if (req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.COMPLETED) {
+                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
+                    // }
+                    //
+                    // if (!req.body.asset.share[0].action && attributeShareRequests[0].status === constants.shareStatus.UNAPPROVED) {
+                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_UNAPPROVED);
+                    // }
 
                     req.body.asset.attributeShareRequestId = attributeShareRequests[0].id;
 
