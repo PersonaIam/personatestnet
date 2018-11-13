@@ -37,6 +37,7 @@ const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
+const THIRD_ID_VALUE = "QUEENS";
 const EMAIL = 'yeezy@gmail.com';
 const FIRST_NAME = 'first_name';
 const PHONE_NUMBER = 'phone_number';
@@ -172,6 +173,20 @@ describe('Attribute Type', function () {
 });
 
 describe('Create Attribute', function () {
+
+    it('Create Attribute - Non file type, with associations', function (done) {
+
+        let params = {};
+        params.associations = [1];
+        let request = createAttributeRequest(params);
+
+        postAttribute(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE)
+
+            done();
+        });
+    });
 
     it('Create Attribute - FIRST_NAME', function (done) {
 
@@ -478,6 +493,43 @@ describe('Create Attribute', function () {
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(SECOND_NAME_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
             done();
+        });
+    });
+
+    it('Create Attribute - IDENTITY_CARD, other owner, with associations', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OTHER_OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        getAttribute(OTHER_OWNER, 'first_name', function (err, identityCardData) {
+            let param = {};
+            param.owner = OTHER_OWNER;
+            param.type = 'identity_card';
+            param.secret = OTHER_SECRET;
+            param.publicKey = OTHER_PUBLIC_KEY;
+            param.value = THIRD_ID_VALUE;
+            param.associations = [identityCardData.body.attributes[0].id]
+            param.expire_timestamp = slots.getTime() + 20000;
+
+            let request = createAttributeRequest(param);
+
+            postAttribute(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('transactionId');
+                sleep.msleep(SLEEP_TIME);
+                getBalance(OTHER_OWNER, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.createattribute);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+                });
+                done();
+            });
         });
     });
 

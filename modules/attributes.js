@@ -287,9 +287,17 @@ __private.checkAssociations = function (filter, cb) {
         if (data && data.attributes && data.attributes.length > 0) {
             ownerAttributeIds = data.attributes.map(element => element.id);
         }
-        let originalType = data.attributes.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
         __private.listAttributeTypes({}, function (err, attributeTypes) {
             let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o=>o.name);
+            if (!filter.asset.attribute[0].attributeId) { // newly created attribute
+                if (!attributeFileTypesNames.includes(filter.asset.attribute[0].type)) {
+                    return cb(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE);
+                } else {
+                    return cb(null);
+                }
+            }
+            let originalType = data.attributes.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
+
             if (!attributeFileTypesNames.includes(originalType)) {
                 return cb(messages.ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE);
             }

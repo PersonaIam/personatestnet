@@ -62,6 +62,8 @@ module.exports = {
 
     NO_CONSUMPTIONS_FOR_REWARD_ROUND : 'The reward was round not generated because there were no attribute consumptions since the last completed reward round',
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
-    REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed'
+    REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed',
+
+    NO_ASSOCIATIONS_FOR_NON_FILE_TYPE : 'Associations are not supported for non-file attribute types'
 };
 
