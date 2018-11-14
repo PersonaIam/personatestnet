@@ -70,13 +70,18 @@ let AttributeValidationRequestsSql = {
         'status',
         'type'
     ],
-    getAttributeValidationsForAttributeAndStatus : 'SELECT * FROM attribute_validation_requests ' +
-    'WHERE "attribute_id" = ${attribute_id} AND "status" = ${status}',
+    getAttributeValidationsForAttributeAndStatus : 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator ' +
+    'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    'WHERE "attribute_id" = ${attribute_id} AND "status" = ${status} AND avr.timestamp > a.timestamp',
     getAttributeValidationRequest: 'SELECT * FROM attribute_validation_requests WHERE "id" = ${id}',
-    getAttributeValidationRequestsForAttribute: 'SELECT * FROM attribute_validation_requests WHERE "attribute_id" = ${attributeId}',
-    getAttributeValidationRequestsForValidator: 'SELECT * FROM attribute_validation_requests WHERE "validator" = ${validator}',
-    getAttributeValidationsRequestsForAttributeAndValidator:
-    'SELECT avr.id,avr.attribute_id,avr.status,avr.validator FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    getAttributeValidationRequestsForAttribute: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator ' +
+    'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    'WHERE "attribute_id" = ${attributeId} AND avr.timestamp > a.timestamp',
+    getAttributeValidationRequestsForValidator: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator ' +
+    'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    'WHERE "validator" = ${validator} AND avr.timestamp > a.timestamp',
+    getAttributeValidationsRequestsForAttributeAndValidator: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator ' +
+    'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
     'WHERE attribute_id = ${attributeId} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
     deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_validation_requests',
