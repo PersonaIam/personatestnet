@@ -64,6 +64,12 @@ module.exports = {
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
     REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed',
 
-    NO_ASSOCIATIONS_FOR_NON_FILE_TYPE : 'Associations are not supported for non-file attribute types'
+    NO_ASSOCIATIONS_FOR_NON_FILE_TYPE : 'Associations are not supported for non-file attribute types',
+    MISSING_VALIDATION_TYPE : 'Validation type is missing',
+    INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
+    REASON_TOO_BIG_DECLINE : 'The reason for declining a validation request is limited to 1024 characters',
+    REASON_TOO_BIG_REJECT : 'The reason for rejecting a validation request is limited to 1024 characters',
+    REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when rejecting a validation request',
+    DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when declining a validation request',
 };
 

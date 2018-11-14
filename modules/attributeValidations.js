@@ -313,7 +313,7 @@ __private.validationRequestAnswer = function (req, cb) {
                         return cb(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
                     }
                     let paramsCheckAnswer = {};
-                    paramsCheckAnswer.answer = req.body.asset.validation.answer;
+                    paramsCheckAnswer.answer = req.body.asset.validation[0].answer;
                     paramsCheckAnswer.status = attributeValidationRequests[0].status;
 
                     __private.checkValidationAnswer(paramsCheckAnswer, function (err, response) {
@@ -496,7 +496,7 @@ shared.getAttributeValidationScore = function (req, cb) {
 
 shared.approveValidationRequest = function (req, cb) {
 
-    req.body.asset.validation.answer = constants.validationRequestAction.APPROVE;
+    req.body.asset.validation[0].answer = constants.validationRequestAction.APPROVE;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -507,8 +507,16 @@ shared.approveValidationRequest = function (req, cb) {
 };
 
 shared.declineValidationRequest = function (req, cb) {
+    if (!req.body.asset.validation[0].reason) {
+        return cb(messages.DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON)
+    }
 
-    req.body.asset.validation.answer = constants.validationRequestAction.DECLINE;
+    if (req.body.asset.validation[0].reason.length > 1024) {
+        return cb(messages.REASON_TOO_BIG_DECLINE)
+    }
+
+    req.body.asset.validation[0].answer = constants.validationRequestAction.DECLINE;
+
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -519,7 +527,14 @@ shared.declineValidationRequest = function (req, cb) {
 
 shared.notarizeValidationRequest = function (req, cb) {
 
-    req.body.asset.validation.answer = constants.validationRequestAction.NOTARIZE;
+    if (!req.body.asset.validation[0].validationType) {
+        return cb(messages.MISSING_VALIDATION_TYPE);
+    }
+    if (!(req.body.asset.validation[0].validationType in constants.validationType)) {
+        return cb(messages.INCORRECT_VALIDATION_TYPE);
+    }
+
+    req.body.asset.validation[0].answer = constants.validationRequestAction.NOTARIZE;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -530,7 +545,16 @@ shared.notarizeValidationRequest = function (req, cb) {
 
 shared.rejectValidationRequest = function (req, cb) {
 
-    req.body.asset.validation.answer = constants.validationRequestAction.REJECT;
+    if (!req.body.asset.validation[0].reason) {
+        return cb(messages.REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON)
+    }
+
+    if (req.body.asset.validation[0].reason.length > 1024) {
+        return cb(messages.REASON_TOO_BIG_REJECT)
+    }
+
+
+    req.body.asset.validation[0].answer = constants.validationRequestAction.REJECT;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)

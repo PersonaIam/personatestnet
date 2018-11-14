@@ -73,6 +73,11 @@ AttributeValidationRequestReject.prototype.verify = function (trs, sender, cb) {
         return cb('Validation attribute validator is undefined');
     }
 
+    if (!trs.asset.validation[0].reason) {
+        return cb('Reject reason is undefined');
+    }
+
+
     // if (trs.senderId !== trs.asset.validation[0].validator) {
     //     return cb(messages.SENDER_IS_NOT_VALIDATOR_ERROR);
     // }
@@ -200,8 +205,9 @@ AttributeValidationRequestReject.prototype.dbSave = function (trs) {
     params.id = trs.asset.attributeValidationRequestId;
     params.action = constants.validationRequestAction.REJECT;
     params.status = constants.validationRequestStatus.REJECTED;
+    params.reason = trs.asset.validation[0].reason;
 
-    library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequest, params).then(function (err) {
+    library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequestWithReason, params).then(function (err) {
     });
 
     return {

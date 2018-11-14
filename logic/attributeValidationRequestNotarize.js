@@ -62,15 +62,19 @@ AttributeValidationRequestNotarize.prototype.verify = function (trs, sender, cb)
     }
 
     if (!trs.asset.validation[0].owner) {
-        return cb('Validation attribute owner is undefined');
+        return cb('Attribute owner is undefined');
     }
 
     if (!trs.asset.validation[0].type) {
-        return cb('Validation attribute type is undefined');
+        return cb('Attribute type is undefined');
     }
 
     if (!trs.asset.validation[0].validator) {
-        return cb('Validation attribute validator is undefined');
+        return cb('Validator is undefined');
+    }
+
+    if (!trs.asset.validation[0].validationType) {
+        return cb('Validation type is undefined');
     }
 
     // if (trs.senderId !== trs.asset.validation[0].validator) {
@@ -200,7 +204,7 @@ AttributeValidationRequestNotarize.prototype.dbSave = function (trs) {
     params.id = trs.asset.attributeValidationRequestId;
     params.action = constants.validationRequestAction.NOTARIZE;
     params.status = constants.validationRequestStatus.COMPLETED;
-    params.validationType = constants.validationRequestStatus.FACE_TO_FACE;
+    params.validationType = trs.asset.validation[0].validationType;
 
     library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequestWithType, params).then(function (err) {
     });

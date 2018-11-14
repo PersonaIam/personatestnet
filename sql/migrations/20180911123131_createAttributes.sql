@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS "attribute_validation_requests"(
   "validator" VARCHAR(36) NOT NULL,
   "status" VARCHAR(36) NOT NULL,
   "validation_type" VARCHAR(36),
+  "reason" VARCHAR(1024),
   "timestamp" INT NOT NULL,
   "expire_timestamp" INT,
   FOREIGN KEY("attribute_id") REFERENCES "attributes"("id") ON DELETE CASCADE

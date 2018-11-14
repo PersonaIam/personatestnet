@@ -47,7 +47,17 @@ const NEW_ADDRESS = 'Edmonton';
 const NEW_ADDRESS2 = 'Toronto';
 const INCORRECT_ADDRESS = 'ABC';
 
-const FACE_TO_FACE = 'FACE_TO_FACE';
+const INCORRECT_VALIDATION_TYPE = 'INCORRECT_VALIDATION_TYPE';
+
+const REASON_FOR_DECLINE_1024_GOOD =
+    '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
+const REASON_FOR_DECLINE_1025_TOO_LONG =
+    '10000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
+const REASON_FOR_REJECT_1024_GOOD =
+    '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
+const REASON_FOR_REJECT_1025_TOO_LONG =
+    '10000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
+
 
 // TEST UTILS
 
@@ -1661,6 +1671,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
         postNotarizeValidationAttributeRequest(request, function (err, res) {
@@ -1708,6 +1719,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postRejectValidationAttributeRequest(request, function (err, res) {
@@ -1925,6 +1937,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.secret = VALIDATOR_SECRET;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postDeclineValidationAttributeRequest(request, function (err, res) {
@@ -1958,6 +1971,43 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
+    it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'phone_number';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1025_TOO_LONG;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REASON_TOO_BIG_DECLINE);
+            done();
+        });
+    });
+
+    it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL, but no reason is specified', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'phone_number';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON);
+            done();
+        });
+    });
+
     // Successful Decline
 
     it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL', function (done) {
@@ -1975,6 +2025,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'email';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postDeclineValidationAttributeRequest(request, function (err, res) {
@@ -2009,6 +2060,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_FOR_DECLINE_1024_GOOD);
                 done();
             });
         });
@@ -2024,6 +2076,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'email';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postDeclineValidationAttributeRequest(request, function (err, res) {
@@ -2108,7 +2161,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'email';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
         postNotarizeValidationAttributeRequest(request, function (err, res) {
@@ -2150,6 +2203,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'email';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
 
         let request = createAnswerAttributeValidationRequest(params);
@@ -2184,9 +2238,69 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
+    it('Notarize Attribute validation request - Request exists and is in IN_PROGRESS, but validation type is missing', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'identity_card';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_VALIDATION_TYPE);
+            done();
+        });
+    });
+
+    it('Notarize Attribute validation request - Request exists and is in IN_PROGRESS, but validation type is incorrect', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'identity_card';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = INCORRECT_VALIDATION_TYPE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_VALIDATION_TYPE);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is incorrectly NOTARIZED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, 'identity_card', function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                done();
+            });
+        });
+    });
+
     // Successful Notarization
 
-    it('Notarize Attribute validation request - Request exists and is in IN_PROGRESS', function (done) {
+    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2201,6 +2315,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
         postNotarizeValidationAttributeRequest(request, function (err, res) {
@@ -2235,8 +2350,46 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validation_type').to.be.eq(constants.validationType.FACE_TO_FACE);
                 done();
             });
+        });
+    });
+
+    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS, but reason is too long', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'phone_number';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1025_TOO_LONG;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REASON_TOO_BIG_REJECT);
+            done();
+        });
+    });
+
+    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS, but no reason is specified', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'phone_number';
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON);
+            done();
         });
     });
 
@@ -2257,6 +2410,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'phone_number';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postRejectValidationAttributeRequest(request, function (err, res) {
@@ -2291,6 +2445,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_FOR_REJECT_1024_GOOD);
                 done();
             });
         });
@@ -2306,6 +2461,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postDeclineValidationAttributeRequest(request, function (err, res) {
@@ -2389,7 +2545,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
         postNotarizeValidationAttributeRequest(request, function (err, res) {
@@ -2431,7 +2587,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'identity_card';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postRejectValidationAttributeRequest(request, function (err, res) {
@@ -2475,6 +2631,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'phone_number';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postRejectValidationAttributeRequest(request, function (err, res) {
@@ -2517,7 +2674,6 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
-
         let request = createAnswerAttributeValidationRequest(params);
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
@@ -2558,7 +2714,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = 'phone_number';
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
         postNotarizeValidationAttributeRequest(request, function (err, res) {
@@ -3939,6 +4095,12 @@ function createAnswerAttributeValidationRequest(param) {
     request.asset.validation[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
+    if (param.validationType){
+        request.asset.validation[0].validationType = param.validationType;
+    }
+    if (param.reason){
+        request.asset.validation[0].reason = param.reason;
+    }
 
     console.log(request);
     return request;

@@ -73,6 +73,10 @@ AttributeValidationRequestDecline.prototype.verify = function (trs, sender, cb) 
         return cb('Validation attribute validator is undefined');
     }
 
+    if (!trs.asset.validation[0].reason) {
+        return cb('Decline reason is undefined');
+    }
+
     // if (trs.sender.address !== trs.asset.validation[0].validator) {
     //     return cb(messages.SENDER_IS_NOT_VALIDATOR_ERROR);
     // }
@@ -201,8 +205,9 @@ AttributeValidationRequestDecline.prototype.dbSave = function (trs) {
     params.id = trs.asset.attributeValidationRequestId;
     params.action = constants.validationRequestAction.DECLINE;
     params.status = constants.validationRequestStatus.DECLINED;
+    params.reason = trs.asset.validation[0].reason;
 
-    library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequest, params).then(function (err) {
+    library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequestWithReason, params).then(function (err) {
     });
 
     return {
