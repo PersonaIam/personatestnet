@@ -77,12 +77,15 @@ let AttributeValidationRequestsSql = {
     getAttributeValidationRequestsForAttribute: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason ' +
     'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
     'WHERE "attribute_id" = ${attributeId} AND avr.timestamp > a.timestamp',
+    getAttributeValidationRequestsForOwner: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason ' +
+    'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
+    'WHERE "owner" = ${owner} AND avr.timestamp > a.timestamp',
     getAttributeValidationRequestsForValidator: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason ' +
     'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
     'WHERE "validator" = ${validator} AND avr.timestamp > a.timestamp',
-    getAttributeValidationsRequestsForAttributeAndValidator: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason ' +
+    getAttributeValidationRequestsForOwnerAndValidator: 'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason ' +
     'FROM attribute_validation_requests avr JOIN attributes a ON a.id = avr.attribute_id ' +
-    'WHERE attribute_id = ${attributeId} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
+    'WHERE owner = ${owner} AND "validator" = ${validator} AND avr.timestamp > a.timestamp',
     deleteAttributeValidationRequest: 'DELETE FROM attribute_validation_requests WHERE "id" = ${id}',
     countByRowId: 'SELECT COUNT("id")::int FROM attribute_validation_requests',
     updateValidationRequest : 'UPDATE attribute_validation_requests SET status = ${status} WHERE id = ${id}',

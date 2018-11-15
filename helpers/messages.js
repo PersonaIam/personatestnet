@@ -35,7 +35,7 @@ module.exports = {
 
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
     ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one of the attributes to be associated does not belong to the current owner',
-    INCORRECT_VALIDATION_PARAMETERS : 'Either the validator or the attributeId must be provided',
+    INCORRECT_VALIDATION_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
     INCORRECT_SHARE_PARAMETERS : 'Either the applicant or the attribute (type and owner information) must be provided',
 
     ATTRIBUTE_SHARE_REQUEST_ALREADY_EXISTS : 'Applicant already has a share request for the given attribute',

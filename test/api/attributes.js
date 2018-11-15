@@ -595,8 +595,8 @@ describe('Create Attribute', function () {
             node.expect(res.body.attributes).to.have.length(4);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);        // first_name
-            node.expect(res.body.attributes[3]).to.have.property('value').to.eq(ADDRESS_VALUE);     // address
+            // node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);        // first_name
+            // node.expect(res.body.attributes[3]).to.have.property('value').to.eq(ADDRESS_VALUE);     // address
             done();
         });
     });
@@ -1430,7 +1430,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute validation request - 1 result, using all parameters', function (done) {
+    it('Get Attribute validation request - 1 result, using validator and attributeId', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1594,16 +1594,20 @@ describe('Get Attribute validation requests', function () {
                 done();
             });
         });
+    })
 
-        it('Get Attribute validation requests - incorrect parameters, using only owner', function (done) {
+        it('Get Attribute validation requests - correct parameters, using only owner', function (done) {
 
             let param = {};
             param.owner = OWNER;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_VALIDATION_PARAMETERS);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(3);
+                node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(3);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 done();
             });
         });
@@ -1617,10 +1621,11 @@ describe('Get Attribute validation requests', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(3);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(0);
-                node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(0);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 done();
             });
         });
@@ -1630,18 +1635,18 @@ describe('Get Attribute validation requests', function () {
             let param = {};
             getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
                 param.attributeId = res.body.attributes[0].id;
-                getAttributeValidationRequests(param, function (err, res) {
+                getAttributeValidationRequest(param, function (err, res) {
                     console.log(res.body);
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                     node.expect(res.body).to.have.property('attribute_validation_requests');
                     node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
-                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(0);
+                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                     done();
                 });
             });
         });
-    });
+
 });
 
 describe('Approve/Decline/Notarize/Reject attribute validation request', function () {
@@ -4237,7 +4242,7 @@ function getAttributesForOwner(owner, done) {
 
 function getAttributeValidationRequest(params, done) {
     let url = '/api/attribute-validations/validationrequest';
-    if (params.validator || params.attributeId) {
+    if (params.validator || params.attributeId || params.owner) {
         url += '?';
     }
     if (params.validator) {
@@ -4245,6 +4250,9 @@ function getAttributeValidationRequest(params, done) {
     }
     if (params.attributeId) {
         url += '&attributeId=' + '' + params.attributeId;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
     }
     node.get(url, done);
 }

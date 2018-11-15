@@ -179,19 +179,29 @@ __private.getAttributeValidationRequestsByFilter = function (filter, cb) {
 };
 
 __private.getAttributeValidationRequests = function (filter, cb) {
+
+    if (!filter.validator && !filter.owner && !filter.attributeId) {
+        return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
+    }
     let query, params;
-    if (filter.attributeId && filter.validator) {
-        query = sql.AttributeValidationRequestsSql.getAttributeValidationsRequestsForAttributeAndValidator;
-        params = {attributeId: filter.attributeId, validator: filter.validator}
-    } else
-        if (filter.attributeId && !filter.validator) {
-            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttribute;
-            params = {attributeId: filter.attributeId}
-         } else
-             if (!filter.attributeId && filter.validator) {
-                query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForValidator;
-                 params = {validator: filter.validator}
-            }
+    if (filter.attributeId) {
+        query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttribute;
+        params = {attributeId: filter.attributeId}
+    } else {
+
+        if (!filter.validator && filter.owner) {
+            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwner;
+            params = {owner: filter.owner}
+        }
+        if (filter.validator && !filter.owner) {
+            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForValidator;
+            params = {validator: filter.validator}
+        }
+        if (filter.validator && filter.owner) {
+            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwnerAndValidator;
+            params = {owner: filter.owner, validator: filter.validator}
+        }
+    }
 
     library.db.query(query, params).then(function (validationRequests) {
 
@@ -418,7 +428,7 @@ shared.requestAttributeValidation = function (req, cb) {
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
 
                     if (err) {
-                        return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
+                        return cb(err);
                     }
                     if (attributeValidationRequests) {
                         return cb(messages.VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE);
@@ -446,7 +456,7 @@ shared.getAttributeValidationRequests = function (req, cb) {
             return cb(err[0].message);
         }
 
-        if (!req.body.attributeId && !req.body.validator) {
+        if (!req.body.attributeId && !req.body.validator && !req.body.owner) {
             return cb(messages.INCORRECT_VALIDATION_PARAMETERS)
         }
 
