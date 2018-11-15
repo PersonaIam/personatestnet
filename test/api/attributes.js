@@ -27,6 +27,7 @@ const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
 
 const FIRST_NAME = 'first_name';
 const PHONE_NUMBER = 'phone_number';
+const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
 
@@ -36,7 +37,7 @@ const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
 const EMAIL = 'yeezy@gmail.com';
 const PHONE_NUMBER_VALUE = '345654321';
-const BIRTH_PLACE = 'Calgary';
+const BIRTHPLACE_VALUE = 'Calgary';
 const NEW_ADDRESS = 'Edmonton';
 const NEW_ADDRESS2 = 'Toronto';
 const INCORRECT_ADDRESS = 'ABC';
@@ -237,6 +238,36 @@ describe('Create Attribute', function () {
         param.owner = OWNER;
         param.value = PHONE_NUMBER_VALUE;
         param.type = PHONE_NUMBER;
+
+        let request = createAttributeRequest(param);
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('Create Attribute - BIRTHPLACE ', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.value = BIRTHPLACE_VALUE;
+        param.type = BIRTHPLACE;
 
         let request = createAttributeRequest(param);
         postAttribute(request, function (err, res) {
@@ -591,8 +622,8 @@ describe('Create Attribute', function () {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
-            node.expect(res.body.attributes).to.have.length(4);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
+            node.expect(res.body.attributes).to.have.length(5);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             // node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);        // first_name
@@ -1346,6 +1377,35 @@ describe('Create Attribute validation request', function () {
         });
     });
 
+    it('Create Attribute validation request - success (BIRTHPLACE)', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = BIRTHPLACE;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
     it('Create Attribute validation request - incorrect owner address', function (done) {
 
         let params = {};
@@ -1540,6 +1600,8 @@ describe('Get Attribute validation requests', function () {
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
             done();
         });
     });
@@ -1560,6 +1622,8 @@ describe('Get Attribute validation requests', function () {
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
@@ -1604,15 +1668,17 @@ describe('Get Attribute validation requests', function () {
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(3);
-                node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(3);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+                node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(4);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
 
-        it('Get Attribute validation requests - 2 incomplete requests, using validator', function (done) {
+        it('Get Attribute validation requests - 4 PENDING_APPROVAL requests, using validator', function (done) {
 
             let param = {};
             param.validator = VALIDATOR;
@@ -1621,11 +1687,14 @@ describe('Get Attribute validation requests', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(3);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                node.expect(res.body.attribute_validation_requests[3]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
@@ -1642,6 +1711,8 @@ describe('Get Attribute validation requests', function () {
                     node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                     node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                     done();
                 });
             });
@@ -1714,6 +1785,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
@@ -1762,6 +1835,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
@@ -1823,6 +1898,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // the request was approved - action
                 done();
             });
         });
@@ -1931,6 +2008,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -1944,7 +2023,6 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-        params.secret = VALIDATOR_SECRET;
         params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
@@ -1974,6 +2052,52 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Cancel Attribute validation request - Request exists and is already IN_PROGRESS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2069,6 +2193,66 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_FOR_DECLINE_1024_GOOD);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // decline was a successful action
+                done();
+            });
+        });
+    });
+
+    // Successful cancel
+
+    it('Cancel Attribute validation request - Request exists and is in PENDING_APPROVAL', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestcancel);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestcancel);
+            });
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is CANCELLED after a PENDING_APPROVAL request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // cancel was a successful action
                 done();
             });
         });
@@ -2113,6 +2297,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2156,6 +2342,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2198,6 +2386,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2241,6 +2431,53 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Cancel Attribute validation request - Request exists and is already DECLINED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'email';
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, 'email', function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2301,6 +2538,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2359,6 +2598,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validation_type').to.be.eq(constants.validationType.FACE_TO_FACE);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // successful notarization
                 done();
             });
         });
@@ -2454,6 +2695,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_FOR_REJECT_1024_GOOD);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2498,6 +2741,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2540,6 +2785,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2582,6 +2829,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2624,6 +2873,52 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Cancel Attribute validation request - Request exists and is already COMPLETED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2668,6 +2963,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2709,6 +3006,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
@@ -2751,10 +3050,276 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
     });
+
+    it('Cancel Attribute validation request - Request exists and is already REJECTED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'phone_number';
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still REJECTED after a REJECTED request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, 'phone_number', function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    // Actions on a CANCELLED validation request
+
+    it('Approve Attribute validation request - Request exists and is already CANCELLED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is APPROVED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Decline Attribute validation request - Request exists and is already CANCELLED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is DECLINED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Notarize Attribute validation request - Request exists and is already CANCELLED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is NOTARIZED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Reject Attribute validation request - Request exists and is already CANCELLED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is REJECTED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('Cancel Attribute validation request - Request exists and is already CANCELLED', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = BIRTHPLACE;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is CANCELLED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
 });
 
 describe('GET Attribute validation score', function () {
@@ -4193,6 +4758,10 @@ function postNotarizeValidationAttributeRequest(params, done) {
 
 function postRejectValidationAttributeRequest(params, done) {
     node.post('/api/attribute-validations/reject', params, done);
+}
+
+function postCancelValidationAttributeRequest(params, done) {
+    node.post('/api/attribute-validations/cancel', params, done);
 }
 
 

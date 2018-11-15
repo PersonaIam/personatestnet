@@ -57,7 +57,8 @@ module.exports = {
 
     OWNER_IS_APPLICANT_ERROR : 'Owner cannot be the applicant of his own attribute',
     OWNER_IS_VALIDATOR_ERROR : 'Owner cannot be the validator of his own attribute',
-    VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR : 'Only the validator is allowed to answer a validation request',
+    VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR : 'Only the validator is allowed to perform this action on a validation request',
+    VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to perform this action on a validation request',
 
     NO_CONSUMPTIONS_FOR_REWARD_ROUND : 'The reward was round not generated because there were no attribute consumptions since the last completed reward round',
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',

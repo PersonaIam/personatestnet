@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS "attribute_share_request_approvals"(
 
 CREATE TABLE IF NOT EXISTS "attribute_validation_request_actions"(
   "id" SERIAL NOT NULL PRIMARY KEY,
-  "attribute_validation_request_id" INT,
-  "action" SMALLINT NOT NULL,
+  "attribute_validation_request_id" INT NOT NULL,
+  "action" VARCHAR(36) NOT NULL,
   "timestamp" INT NOT NULL,
   FOREIGN KEY("attribute_validation_request_id") REFERENCES "attribute_validation_requests"("id") ON DELETE CASCADE
 );

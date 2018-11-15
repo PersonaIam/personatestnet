@@ -24,6 +24,7 @@ module.exports = {
         attributevalidationrequestdecline: 1,
         attributevalidationrequestnotarize: 1,
         attributevalidationrequestreject: 1,
+        attributevalidationrequestcancel: 1,
 		attributeshare: 1,
 		attributeshareapproval: 1,
 		attributeconsume: 1,
@@ -67,13 +68,24 @@ module.exports = {
         IN_PROGRESS : 'IN_PROGRESS',
         DECLINED : 'DECLINED',
         COMPLETED : 'COMPLETED',
-		REJECTED: 'REJECTED'
+		REJECTED: 'REJECTED',
+        CANCELLED : 'CANCELLED'
     },
     validationRequestAction : {
-        DECLINE : 0,
-        APPROVE : 1,
-		NOTARIZE : 2,
-		REJECT : 3
+        DECLINE : 'DECLINE',
+        APPROVE : 'APPROVE',
+		NOTARIZE : 'NOTARIZE',
+		REJECT : 'REJECT',
+		CANCEL : 'CANCEL'
+    },
+    validationRequestValidatorActions : {
+        DECLINE : 'DECLINE',
+        APPROVE : 'APPROVE',
+        NOTARIZE : 'NOTARIZE',
+        REJECT : 'REJECT',
+    },
+    validationRequestOwnerActions : {
+        CANCEL : 'CANCEL'
     },
     validationType : {
         FACE_TO_FACE : 'FACE_TO_FACE',

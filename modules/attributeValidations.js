@@ -47,6 +47,11 @@ function AttributeValidations(cb, scope) {
         transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST, new RejectAttributeValidationRequest()
     );
 
+    let CancelAttributeValidationRequest = require('../logic/attributeValidationRequestCancel.js');
+    __private.assetTypes[transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
+        transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST, new CancelAttributeValidationRequest()
+    );
+
     return cb(null, self);
 }
 
@@ -85,6 +90,10 @@ AttributeValidations.prototype.onBind = function (scope) {
     __private.assetTypes[transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST].bind({
         modules: modules, library: library
     });
+
+    __private.assetTypes[transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST].bind({
+        modules: modules, library: library
+    });
 };
 
 // Private methods
@@ -106,6 +115,7 @@ __private.attachApi = function () {
         'post /decline': 'declineValidationRequest',
         'post /notarize': 'notarizeValidationRequest',
         'post /reject': 'rejectValidationRequest',
+        'post /cancel': 'cancelValidationRequest',
     });
 
     router.use(function (req, res, next) {
@@ -264,8 +274,35 @@ __private.checkValidationAnswer = function(params, cb) {
         return cb(null, {transactionType : transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST});
     }
 
-   return cb(null, null);
+    if (params.answer === constants.validationRequestAction.CANCEL) {
+        if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
+            return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+        }
+        return cb(null, {transactionType : transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST});
+    }
+
+
+    return cb(null, null);
 };
+
+__private.checkValidationAnswerSender = function (params, cb) {
+
+    // only validators can answer with a validationRequestValidatorAction
+    if (params.answer in constants.validationRequestValidatorActions){
+        if (!params.account || params.account.address !== params.validator) {
+            return cb(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR)
+        }
+    }
+
+    // only owners can answer with a validationRequestOwnerAction
+    if (params.answer in constants.validationRequestOwnerActions){
+        if (!params.account || params.account.address !== params.owner) {
+            return cb(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR)
+        }
+    }
+
+    return cb(null, null);
+}
 
 __private.validationRequestAnswer = function (req, cb) {
     library.schema.validate(req.body, schema.attributeOperation, function (err) {
@@ -338,19 +375,29 @@ __private.validationRequestAnswer = function (req, cb) {
                         req.body.asset.attributeValidationRequestId = attributeValidationRequests[0].id; // this is required inside the logic
 
                         modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
-                            if (!account || account.address !== req.body.validator) {
-                                return cb(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR)
-                            }
-                            attributes.buildTransaction({
-                                    req: req,
-                                    keypair: keypair,
-                                    transactionType: transactionType
+                            __private.checkValidationAnswerSender(
+                                {
+                                    account: account,
+                                    answer: paramsCheckAnswer.answer,
+                                    owner: req.body.owner,
+                                    validator: req.body.validator
                                 },
-                                function (err, resultData) {
+                                function (err, response) {
                                     if (err) {
                                         return cb(err);
                                     }
-                                    return cb(null, resultData);
+
+                                    attributes.buildTransaction({
+                                            req: req,
+                                            keypair: keypair,
+                                            transactionType: transactionType
+                                        },
+                                        function (err, resultData) {
+                                            if (err) {
+                                                return cb(err);
+                                            }
+                                            return cb(null, resultData);
+                                        });
                                 });
                         });
                     });
@@ -565,6 +612,18 @@ shared.rejectValidationRequest = function (req, cb) {
 
 
     req.body.asset.validation[0].answer = constants.validationRequestAction.REJECT;
+    __private.validationRequestAnswer(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+        return cb(null, res);
+    });
+};
+
+
+shared.cancelValidationRequest = function (req, cb) {
+
+    req.body.asset.validation[0].answer = constants.validationRequestAction.CANCEL;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
