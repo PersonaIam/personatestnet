@@ -6,48 +6,46 @@ let sleep = require('sleep');
 let messages = require('../../helpers/messages.js');
 let constants = require('../../helpers/constants.js');
 let slots = require('../../helpers/slots.js');
-let moment = require('moment');
 let xlsx = require('xlsx');
 
 // TEST DATA
 
-const APPLICANT = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
-const APPLICANT_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
-
-const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
-
-const DEFAULT_CHUNK = 7;
-const DEFAULT_AMOUNT = 0;
-const CHUNK = 8;
-const AMOUNT_1 = 2;
-const AMOUNT_2 = 11;
-
+const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
-const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 
+const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
 const OTHER_SECRET = "city maple antenna above hurt random later common toss reveal torch label";
 const OTHER_PUBLIC_KEY = '026434affd98ea4f0d9220d30263a46834076058feca62894352e16b4cddce3bae';
-const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
 
+const APPLICANT = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
+const APPLICANT_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
 const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy burden digital copy online";
 const VALIDATOR_PUBLIC_KEY = '022a09511647055f00f46d1546595fa5950349ffd8ac477d5684294ea107f4f84c';
 const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
+const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
+
+const FIRST_NAME = 'first_name';
+const PHONE_NUMBER = 'phone_number';
+const ADDRESS = 'address';
+const IDENTITY_CARD = 'identity_card';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
 const EMAIL = 'yeezy@gmail.com';
-const FIRST_NAME = 'first_name';
-const PHONE_NUMBER = 'phone_number';
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTH_PLACE = 'Calgary';
 const NEW_ADDRESS = 'Edmonton';
 const NEW_ADDRESS2 = 'Toronto';
 const INCORRECT_ADDRESS = 'ABC';
-
 const INCORRECT_VALIDATION_TYPE = 'INCORRECT_VALIDATION_TYPE';
+const DEFAULT_CHUNK = 7;
+const DEFAULT_AMOUNT = 0;
+const CHUNK = 8;
+const AMOUNT_1 = 2;
+const AMOUNT_2 = 11;
 
 const REASON_FOR_DECLINE_1024_GOOD =
     '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
@@ -58,21 +56,24 @@ const REASON_FOR_REJECT_1024_GOOD =
 const REASON_FOR_REJECT_1025_TOO_LONG =
     '10000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
 
+// RESULTS
+
+const SUCCESS = 'success';
+const ERROR = 'error';
+const COUNT = 'count';
+const TRUE = true;
+const FALSE = false;
 
 // TEST UTILS
 
 const SLEEP_TIME = 10001; // in milliseconds
-const SUCCESS = 'success';
-const ERROR = 'error';
-const TRUE = true;
-const FALSE = false;
-
 let transactionList = [];
 let ipfsTransaction = {};
-
 let time = 0;
-
 let reportData = [];
+
+
+// TESTS
 
 describe('Send Funds', function () {
 
@@ -175,7 +176,7 @@ describe('Attribute Type', function () {
         getAttributeTypesList(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.at.least(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.at.least(1);
             node.expect(res.body).to.have.property('attribute_types');
             done();
         });
@@ -269,7 +270,7 @@ describe('Create Attribute', function () {
     });
 
     it('Get Attribute - Attribute does not exist', function (done) {
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attributes');
@@ -333,7 +334,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
     it('Create Attribute - File Data Type with no expiration timestamp', function (done) {
 
         let params = {};
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.value = 'some_random_file_content';
 
         let request = createAttributeRequest(params);
@@ -351,7 +352,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
     it('Create Attribute - Expirable type, expire timestamp is in the past', function (done) {
 
         let params = {};
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.value = 'some_random_file_content';
         params.expire_timestamp = slots.getTime() - 20000;
 
@@ -378,7 +379,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.value = 'some_random_file_content';
         params.expire_timestamp = slots.getTime() + 20000;
 
@@ -433,14 +434,14 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
     });
 
     it('Get Attribute - File Data Type', function (done) {
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('identity_card');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.be.at.least(1);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             done();
@@ -454,7 +455,7 @@ describe('Create Attribute', function () {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
             node.expect(res.body.attributes).to.have.length(0);
             done();
         });
@@ -496,7 +497,7 @@ describe('Create Attribute', function () {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             node.expect(res.body.attributes).to.have.length(1);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
@@ -518,7 +519,7 @@ describe('Create Attribute', function () {
         getAttribute(OTHER_OWNER, 'first_name', function (err, identityCardData) {
             let param = {};
             param.owner = OTHER_OWNER;
-            param.type = 'identity_card';
+            param.type = IDENTITY_CARD;
             param.secret = OTHER_SECRET;
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
@@ -555,7 +556,7 @@ describe('Create Attribute', function () {
         let param = {};
         param.owner = OWNER;
         param.value = ADDRESS_VALUE;
-        param.type = 'address';
+        param.type = ADDRESS;
 
         let request = createAttributeRequest(param);
         postAttribute(request, function (err, res) {
@@ -574,14 +575,14 @@ describe('Create Attribute', function () {
     });
 
     it('Get Attribute - ADDRESS', function (done) {
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ADDRESS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ADDRESS);
             done();
         });
     });
@@ -590,7 +591,7 @@ describe('Create Attribute', function () {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(4);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
             node.expect(res.body.attributes).to.have.length(4);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
@@ -605,7 +606,7 @@ describe('Update Attribute', function () {
 
     it('Update Attribute - Value stored in IPFS ( IDENTITY_CARD )', function (done) {
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
 
             let attributeId = res.body.attributes[0].id;
             let unconfirmedBalance = 0;
@@ -618,7 +619,7 @@ describe('Update Attribute', function () {
             let params = {};
             params.attributeId = attributeId;
             params.owner = OWNER;
-            params.type = 'identity_card';
+            params.type = IDENTITY_CARD;
             params.value = 'some_new_file_content';
             params.expire_timestamp = slots.getTime() + 20000;
 
@@ -647,14 +648,14 @@ describe('Update Attribute', function () {
     });
 
     it('Get Attribute - After Update ( IDENTITY_CARD )', function (done) {
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmWC2ELAX6vzYUaCpdSLmsGHAYjXC4EufortQ2dPBmMzsD');
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('identity_card');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
             node.expect(res.body.attributes[0]).to.have.property('timestamp').to.be.at.least(time);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             done();
@@ -663,7 +664,7 @@ describe('Update Attribute', function () {
 
     it('Update Attribute - ( ADDRESS )', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
 
             let attributeId = res.body.attributes[0].id;
             let unconfirmedBalance = 0;
@@ -703,7 +704,7 @@ describe('Update Attribute', function () {
 
     it('Get Attribute - After Update ( ADDRESS )', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
@@ -712,7 +713,7 @@ describe('Update Attribute', function () {
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(time + 200000);
             node.expect(res.body.attributes[0]).to.have.property('timestamp').to.be.at.least(time);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ADDRESS);
             done();
         });
     });
@@ -739,7 +740,7 @@ describe('Update Attribute', function () {
 
     it('Update Attribute - Only expire timestamp ( ADDRESS )', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
 
             let attributeId = res.body.attributes[0].id;
             let unconfirmedBalance = 0;
@@ -776,7 +777,7 @@ describe('Update Attribute', function () {
 
     it('Update Attribute - Only value ( ADDRESS )', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
 
             let attributeId = res.body.attributes[0].id;
             let unconfirmedBalance = 0;
@@ -812,7 +813,7 @@ describe('Update Attribute', function () {
 
     it('Update Attribute - Sender and attribute owner do not correspond', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             let param = {};
             param.attributeId = res.body.attributes[0].id;
             param.owner = OTHER_OWNER;
@@ -832,14 +833,14 @@ describe('Update Attribute', function () {
 
     it('Get Attribute - After Second Update ( ADDRESS )', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NEW_ADDRESS2);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('address');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ADDRESS);
             done();
         });
     });
@@ -851,7 +852,7 @@ describe('Update Attribute', function () {
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.value = 'KLMN';
-        param.type = 'address';
+        param.type = ADDRESS;
         param.applicant = APPLICANT;
 
         let request = createAttributeShareRequest(param);
@@ -870,7 +871,7 @@ describe('Update Attribute', function () {
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.value = 'KLMN';
-        param.type = 'address';
+        param.type = ADDRESS;
         param.applicant = APPLICANT;
 
         let request = createAttributeShareApproval(param);
@@ -886,7 +887,7 @@ describe('Update Attribute', function () {
 
         let params = {};
         params.owner = OWNER;
-        params.type = 'address';
+        params.type = ADDRESS;
         params.amount = AMOUNT_1;
 
         let request = createAttributeConsume(params);
@@ -903,7 +904,7 @@ describe('Update Attribute Associations', function () {
 
     it('Update Associations - Document to Attribute association ( IDENTITY_CARD -> FIRST_NAME )', function (done) {
 
-        getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
 
             let identityCardId = identityCardData.body.attributes[0].id;
 
@@ -947,14 +948,14 @@ describe('Update Attribute Associations', function () {
 
     it('Get Attribute - After Association Update ( IDENTITY_CARD )', function (done) {
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('associations');
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq('identity_card');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
             done();
         });
     });
@@ -963,7 +964,7 @@ describe('Update Attribute Associations', function () {
         getAttribute(OWNER, 'first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('count').to.be.eq(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             node.expect(res.body.attributes).to.have.length(1);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
@@ -976,7 +977,7 @@ describe('Update Attribute Associations', function () {
 
     // it('Update Associations - One association element, and it belongs to different owner', function (done) {
     //
-    //     getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
+    //     getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
     //         let attributeId = identityCardData.body.attributes[0].id;
     //
     //         getAttribute(OTHER_OWNER, FIRST_NAME, function (err, attributeData) {
@@ -1004,7 +1005,7 @@ describe('Update Attribute Associations', function () {
 
     // it('Update Associations - Two association elements, and the second belongs to different owner', function (done) {
     //
-    //     getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
+    //     getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
     //         let attributeId = identityCardData.body.attributes[0].id;
     //
     //         getAttribute(OWNER, FIRST_NAME, function (err, firstNameData) {
@@ -1036,7 +1037,7 @@ describe('Update Attribute Associations', function () {
 
     it('Update Associations - Attribute to Attribute association', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, addressAttribute) {
+        getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
             let addressAttributeId = addressAttribute.body.attributes[0].id;
 
             getAttribute(OWNER, FIRST_NAME, function (err, attributeData) {
@@ -1063,10 +1064,10 @@ describe('Update Attribute Associations', function () {
 
     it('Update Associations - Attribute to Document association', function (done) {
 
-        getAttribute(OWNER, 'address', function (err, addressAttribute) {
+        getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
             let addressAttributeId = addressAttribute.body.attributes[0].id;
 
-            getAttribute(OWNER, 'identity_card', function (err, identityCardData) {
+            getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
                 let param = {};
                 param.attributeId = addressAttributeId;
                 param.owner = OWNER;
@@ -1299,7 +1300,7 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'identity_card';
+        param.type = IDENTITY_CARD;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -1384,13 +1385,13 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'identity_card';
+        param.type = IDENTITY_CARD;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE);
             done();
         });
     });
@@ -1401,7 +1402,7 @@ describe('Create Attribute validation request', function () {
         param.owner = OTHER_OWNER;
         param.secret = OTHER_SECRET;
         param.publicKey = OTHER_PUBLIC_KEY;
-        param.type = 'address';
+        param.type = ADDRESS;
         param.validator = VALIDATOR;
 
         let request = createAttributeValidationRequest(param);
@@ -1417,7 +1418,7 @@ describe('Create Attribute validation request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = 'address';
+        param.type = ADDRESS;
         param.validator = OWNER;
 
         let request = createAttributeValidationRequest(param);
@@ -1434,14 +1435,14 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -1457,14 +1458,14 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
@@ -1481,7 +1482,7 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'address';
+        param.type = ADDRESS;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -1533,7 +1534,7 @@ describe('Get Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
-            node.expect(res.body).to.have.property('count');
+            node.expect(res.body).to.have.property(COUNT);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -1547,13 +1548,13 @@ describe('Get Attribute validation requests', function () {
 
         let param = {};
         param.owner = OWNER;
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count');
+                node.expect(res.body).to.have.property(COUNT);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -1571,8 +1572,9 @@ describe('Get Attribute validation requests', function () {
 
         getAttributeValidationRequest(param, function (err, res) {
             console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(0);
             done();
         });
     });
@@ -1582,12 +1584,13 @@ describe('Get Attribute validation requests', function () {
         let param = {};
         param.owner = OWNER;
 
-        getAttribute(OWNER, 'address', function (err, res) {
+        getAttribute(OWNER, ADDRESS, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+                node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(0);
                 done();
             });
         });
@@ -1614,7 +1617,7 @@ describe('Get Attribute validation requests', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(2);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(0);
                 node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(0);
@@ -1625,13 +1628,13 @@ describe('Get Attribute validation requests', function () {
         it('Get Incomplete Attribute validation requests - 1 incomplete request, using attributeId', function (done) {
 
             let param = {};
-            getAttribute(OWNER, 'identity_card', function (err, res) {
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
                 param.attributeId = res.body.attributes[0].id;
                 getAttributeValidationRequests(param, function (err, res) {
                     console.log(res.body);
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                     node.expect(res.body).to.have.property('attribute_validation_requests');
-                    node.expect(res.body).to.have.property('count').to.be.eq(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                     node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(0);
                     done();
@@ -1668,7 +1671,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = constants.validationType.FACE_TO_FACE;
@@ -1693,14 +1696,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.PENDING_APPROVAL);
@@ -1716,7 +1719,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -1741,14 +1744,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.PENDING_APPROVAL);
@@ -1773,7 +1776,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -1802,14 +1805,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
@@ -1868,7 +1871,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
@@ -1886,7 +1889,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -1910,14 +1913,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
@@ -1933,7 +1936,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.secret = VALIDATOR_SECRET;
@@ -1953,14 +1956,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
@@ -2054,7 +2057,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
@@ -2099,7 +2102,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
@@ -2142,7 +2145,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
@@ -2184,7 +2187,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
@@ -2227,7 +2230,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.DECLINED);
@@ -2243,7 +2246,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -2261,7 +2264,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = INCORRECT_VALIDATION_TYPE;
@@ -2280,14 +2283,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
@@ -2312,7 +2315,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = constants.validationType.FACE_TO_FACE;
@@ -2337,14 +2340,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
@@ -2439,7 +2442,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
@@ -2458,7 +2461,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_DECLINE_1024_GOOD;
@@ -2477,14 +2480,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
@@ -2500,7 +2503,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -2519,14 +2522,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
@@ -2542,7 +2545,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = constants.validationType.FACE_TO_FACE;
@@ -2561,14 +2564,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
@@ -2584,7 +2587,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'identity_card';
+        params.type = IDENTITY_CARD;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -2603,14 +2606,14 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'identity_card', function (err, res) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
@@ -2654,7 +2657,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
@@ -2695,7 +2698,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
@@ -2737,7 +2740,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property('count').to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
@@ -2768,7 +2771,7 @@ describe('GET Attribute validation score', function () {
     it('Get Attribute validation score - with validations', function (done) {
 
         let param = {};
-        param.type = 'identity_card';
+        param.type = IDENTITY_CARD;
         param.owner = OWNER;
 
         getAttributeValidationScore(param, function (err, res) {
@@ -2854,7 +2857,7 @@ describe('Generate Report', function () {
 //         console.log(res.body);
 //         node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //         node.expect(res.body).to.have.property('attribute_validation_requests');
-//         node.expect(res.body).to.have.property('count');
+//         node.expect(res.body).to.have.property(COUNT);
 //         node.expect(res.body.attribute_validation_requests[0]).to.have.property('chunk').to.eq(8);
 //         done();
 //     });
@@ -2870,7 +2873,7 @@ describe('Generate Report', function () {
 //         console.log(res.body);
 //         node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //         node.expect(res.body).to.have.property('attribute_validation_requests');
-//         node.expect(res.body).to.have.property('count');
+//         node.expect(res.body).to.have.property(COUNT);
 //         node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
 //         done();
 //     });
@@ -3046,7 +3049,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_share_requests');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -3064,7 +3067,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_share_requests');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -3083,7 +3086,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_share_requests');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -3332,7 +3335,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_shares');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_shares).to.have.length(1);
 //             node.expect(res.body.attribute_shares[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_shares[0]).to.have.property('attribute_id').to.be.at.least(1);
@@ -3351,7 +3354,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_shares');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_shares).to.have.length(1);
 //             node.expect(res.body.attribute_shares[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_shares[0]).to.have.property('attribute_id').to.be.at.least(1);
@@ -3397,7 +3400,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attribute_share_requests');
-//             node.expect(res.body).to.have.property('count');
+//             node.expect(res.body).to.have.property(COUNT);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
 //             node.expect(res.body.attribute_share_requests[0]).to.have.property('applicant').to.be.eq(APPLICANT);
@@ -3629,7 +3632,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attributeConsumptions');
-//             node.expect(res.body).to.have.property('count').to.be.eq(1);
+//             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
 //             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
 //             node.expect(res.body.attributeConsumptions[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -3807,7 +3810,7 @@ describe('Generate Report', function () {
 //             console.log(res.body);
 //             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
 //             node.expect(res.body).to.have.property('attributeConsumptions');
-//             node.expect(res.body).to.have.property('count').to.be.eq(2);
+//             node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
 //             node.expect(res.body.attributeConsumptions).to.have.length(2);
 //             node.expect(res.body.attributeConsumptions[0]).to.have.property('id').to.be.at.least(1);
 //             node.expect(res.body.attributeConsumptions[0]).to.have.property('attribute_id').to.be.at.least(1);
@@ -4404,7 +4407,7 @@ function addToReportData(data, cb){
 //         param.secret = OTHER_SECRET;
 //         param.publicKey = OTHER_PUBLIC_KEY;
 //         param.value = ADDRESS_VALUE;
-//         param.type = 'address';
+//         param.type = ADDRESS;
 //
 //         let request = createAttributeRequest(param);
 //         postAttribute(request, function (err, res) {

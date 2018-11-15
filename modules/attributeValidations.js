@@ -421,7 +421,7 @@ shared.requestAttributeValidation = function (req, cb) {
                         return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
                     }
                     if (attributeValidationRequests) {
-                        return cb(messages.VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE);
+                        return cb(messages.VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE);
                     }
                     attributes.buildTransaction({
                             req: req,
@@ -456,7 +456,7 @@ shared.getAttributeValidationRequests = function (req, cb) {
             }
 
             if (!res) {
-                return cb(messages.NO_ATTRIBUTE_VALIDATION_REQUESTS);
+                return cb(null, {attribute_validation_requests: [], count: 0});
             }
 
             let resultData = {attribute_validation_requests: res, count: res.length};

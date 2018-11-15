@@ -21,11 +21,10 @@ module.exports = {
     ATTRIBUTE_SHARE_REQUESTS_NOT_FOUND : 'Attribute share requests not found',
     ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no associations and therefore cannot be validated',
 
-    VALIDATOR_ALREADY_HAS_UNAPPROVED_VALIDATION_REQUEST_FOR_ATTRIBUTE : 'Validator already has an unapproved validation request for the given attribute',
+    VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE : 'Validator already has a pending approval validation request for the given attribute',
     VALIDATOR_HAS_NO_VALIDATION_REQUEST : 'Validator does not have any validation request to complete for this attribute',
-    NO_ATTRIBUTE_VALIDATIONS_OR_REQUESTS : 'No attribute validation requests exists for the given parameters',
-    NO_ATTRIBUTE_VALIDATIONS : 'No attribute validations were found for the given parameters',
     NO_ATTRIBUTE_VALIDATION_REQUESTS : 'No attribute validation requests were found for the given parameters',
+    NO_ATTRIBUTE_VALIDATIONS : 'No attribute validations were found for the given parameters',
     ATTRIBUTE_VALIDATION_ALREADY_MADE : 'Attribute validation already made',
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
     ATTRIBUTE_VALIDATION_WITH_NO_APPROVED_VALIDATION_REQUEST : 'Validator does not have an approved validation request for this attribute',
