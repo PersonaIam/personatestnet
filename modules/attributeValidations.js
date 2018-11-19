@@ -194,22 +194,27 @@ __private.getAttributeValidationRequests = function (filter, cb) {
         return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
     }
     let query, params;
-    if (filter.attributeId) {
+    console.log(JSON.stringify(filter))
+    if (filter.attributeId && !filter.validator) {
         query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttribute;
         params = {attributeId: filter.attributeId}
     } else {
-
-        if (!filter.validator && filter.owner) {
-            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwner;
-            params = {owner: filter.owner}
-        }
-        if (filter.validator && !filter.owner) {
-            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForValidator;
-            params = {validator: filter.validator}
-        }
-        if (filter.validator && filter.owner) {
-            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwnerAndValidator;
-            params = {owner: filter.owner, validator: filter.validator}
+        if (filter.attributeId && filter.validator) {
+            query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttributeAndValidator;
+            params = {validator: filter.validator, attributeId: filter.attributeId}
+        } else {
+            if (!filter.validator && filter.owner) {
+                query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwner;
+                params = {owner: filter.owner}
+            }
+            if (filter.validator && !filter.owner) {
+                query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForValidator;
+                params = {validator: filter.validator}
+            }
+            if (filter.validator && filter.owner) {
+                query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForOwnerAndValidator;
+                params = {owner: filter.owner, validator: filter.validator}
+            }
         }
     }
 

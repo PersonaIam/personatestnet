@@ -24,6 +24,7 @@ const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy bu
 const VALIDATOR_PUBLIC_KEY = '022a09511647055f00f46d1546595fa5950349ffd8ac477d5684294ea107f4f84c';
 const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
+const VALIDATOR_3 = 'Ld9UMYSCaY6r6WFq7xQByULqyyA1S8NvKN';
 
 const FIRST_NAME = 'first_name';
 const PHONE_NUMBER = 'phone_number';
@@ -1406,6 +1407,35 @@ describe('Create Attribute validation request', function () {
         });
     });
 
+    it('Create Attribute validation request - success (BIRTHPLACE), another validator', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR_2;
+        param.type = BIRTHPLACE;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
     it('Create Attribute validation request - incorrect owner address', function (done) {
 
         let params = {};
@@ -1632,7 +1662,7 @@ describe('Get Attribute validation requests', function () {
     it('Get Attribute validation requests - no results, using validator', function (done) {
 
         let param = {};
-        param.validator = VALIDATOR_2;
+        param.validator = VALIDATOR_3;
 
         getAttributeValidationRequest(param, function (err, res) {
             console.log(res.body);
@@ -1660,63 +1690,63 @@ describe('Get Attribute validation requests', function () {
         });
     })
 
-        it('Get Attribute validation requests - correct parameters, using only owner', function (done) {
+    it('Get Attribute validation requests - correct parameters, using only owner', function (done) {
 
-            let param = {};
-            param.owner = OWNER;
+        let param = {};
+        param.owner = OWNER;
 
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
+            node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(5);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
+            done();
+        });
+    });
+
+    it('Get Attribute validation requests - 4 PENDING_APPROVAL requests, using validator', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttributeValidationRequests(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[3]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
+            done();
+        });
+    });
+
+    it('Get Incomplete Attribute validation requests - 1 incomplete request, using attributeId', function (done) {
+
+        let param = {};
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
             getAttributeValidationRequest(param, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
-                node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(4);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
-                done();
-            });
-        });
-
-        it('Get Attribute validation requests - 4 PENDING_APPROVAL requests, using validator', function (done) {
-
-            let param = {};
-            param.validator = VALIDATOR;
-
-            getAttributeValidationRequests(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-                node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-                node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-                node.expect(res.body.attribute_validation_requests[3]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
                 done();
             });
         });
-
-        it('Get Incomplete Attribute validation requests - 1 incomplete request, using attributeId', function (done) {
-
-            let param = {};
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
-                getAttributeValidationRequest(param, function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('attribute_validation_requests');
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
-                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                    node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
-                    done();
-                });
-            });
-        });
+    });
 
 });
 
