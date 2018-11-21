@@ -194,7 +194,6 @@ __private.getAttributeValidationRequests = function (filter, cb) {
         return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
     }
     let query, params;
-    console.log(JSON.stringify(filter))
     if (filter.attributeId && !filter.validator) {
         query = sql.AttributeValidationRequestsSql.getAttributeValidationRequestsForAttribute;
         params = {attributeId: filter.attributeId}

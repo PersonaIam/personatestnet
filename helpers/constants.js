@@ -93,7 +93,7 @@ module.exports = {
     },
 	totalAmount: 6677610400000000,
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
-	VALIDATIONS_REQUIRED : 1,
+	VALIDATIONS_REQUIRED : 2,
     REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',
     REWARD_FAUCET_KEY : '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6',
     REWARD_ROUND_INTERVAL : 1 // TBD 1 hour in milliseconds

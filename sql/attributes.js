@@ -9,7 +9,7 @@ let AttributesSql = {
         'timestamp'
     ],
 
-    getAttributesForOwner:'SELECT * FROM attributes where "owner" = ${owner}',
+    getAttributesForOwner:'SELECT * FROM attributes where "owner" = ${owner} order by id',
 
     updateAttribute: 'UPDATE attributes ' +
     ' SET value = ${value}, timestamp = ${timestamp}, expire_timestamp = ${expire_timestamp}, associations = ${associations}' +
@@ -24,7 +24,7 @@ let AttributesSql = {
     getActiveAttributesForOwner : 'SELECT a.id,a.type,at.data_type from attributes a JOIN attribute_types at ON at.name = a.type ' +
     ' WHERE "owner" = ${owner} and a.id in (SELECT attribute_id ' +
     ' FROM attribute_validation_requests avr ' +
-    ' WHERE avr.timestamp > ${after} AND avr.expire_timestamp > ${expirationAfter} ' +
+    ' WHERE avr.timestamp > ${after} AND (avr.expire_timestamp > ${expirationAfter} OR avr.expire_timestamp IS NULL) AND avr.status = ${status}' +
     ' AND avr.timestamp > a.timestamp GROUP BY attribute_id HAVING COUNT(*)>= ${validations_required})',
 
     getAttributesFiltered: function (params) {

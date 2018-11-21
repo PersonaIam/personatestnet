@@ -20,10 +20,14 @@ const OTHER_PUBLIC_KEY = '026434affd98ea4f0d9220d30263a46834076058feca62894352e1
 
 const APPLICANT = 'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
 const APPLICANT_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
+
+const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy burden digital copy online";
 const VALIDATOR_PUBLIC_KEY = '022a09511647055f00f46d1546595fa5950349ffd8ac477d5684294ea107f4f84c';
-const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
+const VALIDATOR_SECRET_2 = "isolate spoil weekend protect swallow trap brown cross message patient public reward";
+const VALIDATOR_PUBLIC_KEY_2 = '032699280d1527ed944131ac488fe264a80617b0acc9305fe0d40c61b9a1b924f9';
+
 const VALIDATOR_3 = 'Ld9UMYSCaY6r6WFq7xQByULqyyA1S8NvKN';
 
 const FIRST_NAME = 'first_name';
@@ -140,6 +144,29 @@ describe('Send Funds', function () {
             transactionList.push({
                 'sender': OWNER,
                 'recipient': VALIDATOR,
+                'grossSent': (amountToSend + expectedFee) / node.normalizer,
+                'fee': expectedFee / node.normalizer,
+                'netSent': amountToSend / node.normalizer,
+                'txId': res.body.transactionId,
+                'type': node.txTypes.SEND
+            });
+            done();
+        });
+    });
+
+    it('Send funds - to the second validator', function (done) {
+        let amountToSend = 100000;
+        let expectedFee = node.expectedFee(amountToSend);
+
+        putTransaction({
+            senderPublicKey: PUBLIC_KEY,
+            secret: SECRET,
+            amount: amountToSend,
+            recipientId: VALIDATOR_2
+        }, function (err, res) {
+            transactionList.push({
+                'sender': OWNER,
+                'recipient': VALIDATOR_2,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
                 'netSent': amountToSend / node.normalizer,
@@ -619,7 +646,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attributes - Multiple Results', function (done) {
+    it('Get Attributes - Multiple Results and checks order is expected', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -627,8 +654,15 @@ describe('Create Attribute', function () {
             node.expect(res.body.attributes).to.have.length(5);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            // node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);        // first_name
-            // node.expect(res.body.attributes[3]).to.have.property('value').to.eq(ADDRESS_VALUE);     // address
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(NAME_VALUE);        // first_name
+            node.expect(res.body.attributes[4]).to.have.property('value').to.eq(ADDRESS_VALUE);     // address
+
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(FIRST_NAME);
+            node.expect(res.body.attributes[1]).to.have.property('type').to.eq(PHONE_NUMBER);
+            node.expect(res.body.attributes[2]).to.have.property('type').to.eq(BIRTHPLACE);
+            node.expect(res.body.attributes[3]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[4]).to.have.property('type').to.eq(ADDRESS);
+
             done();
         });
     });
@@ -992,7 +1026,7 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Get Attribute - After association was made, check Attribute is still not documented, and is associated( IDENTITY_CARD is not active yet, but the association exists )', function (done) {
+    it('Get Attribute - After association was made, verify Attribute is still not documented, and is associated( IDENTITY_CARD is not active yet, but the association exists )', function (done) {
         getAttribute(OWNER, 'first_name', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1407,7 +1441,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (BIRTHPLACE), another validator', function (done) {
+    it('Create Attribute validation request - success (IDENTITY_CARD), another validator', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1419,7 +1453,7 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR_2;
-        param.type = BIRTHPLACE;
+        param.type = IDENTITY_CARD;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -1432,6 +1466,18 @@ describe('Create Attribute validation request', function () {
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
             });
+            done();
+        });
+    });
+
+    it('Get Attribute - IDENTITY_CARD - attribute is still inactive, with 2 requests, 1 COMPLETED & 1 PENDING_APPROVAL', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             done();
         });
     });
@@ -1729,7 +1775,7 @@ describe('Get Attribute validation requests', function () {
         });
     });
 
-    it('Get Incomplete Attribute validation requests - 1 incomplete request, using attributeId', function (done) {
+    it('Get Incomplete Attribute validation requests - 2 incomplete requests, using attributeId', function (done) {
 
         let param = {};
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
@@ -1738,7 +1784,7 @@ describe('Get Attribute validation requests', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -1766,6 +1812,43 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR);
+            done();
+        });
+    });
+
+    it('Decline Attribute validation request - Decliner is the owner, not the validator', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = 'email';
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR);
+            done();
+        });
+    });
+
+    it('Cancel Attribute validation request - Canceller is the validator, not the owner', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR);
             done();
         });
     });
@@ -1910,10 +1993,71 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
+    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR_2, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR_2;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET_2;
+        params.publicKey = VALIDATOR_PUBLIC_KEY_2;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR_2, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
+            });
+            addToReportData(
+                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )",
+                    expected: "SUCCESS"
+                }, function (err, res) {
+                    done();
+                });
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED ', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
+
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // the request was approved - action
+                done();
+            });
+        });
+    });
+
+    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED (second validator)', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR_2;
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
@@ -1991,6 +2135,44 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 done();
             });
+        });
+    });
+
+    it('Notarize Attribute validation request - Action is made by the owner, not the validator', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR);
+            done();
+        });
+    });
+
+    it('Reject Attribute validation request - Action is made by the owner, not the validator', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR);
+            done();
         });
     });
 
@@ -2581,7 +2763,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(VALIDATOR, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -2599,12 +2781,72 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
             });
+            done();
+        });
+    });
+
+    it('Get Attribute - Before last notarization - still inactive ( IDENTITY_CARD )', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmUmE1KWPSt5ukdQJuYvbUcRCHBE3Htiw3JE7bLz5gvncS');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            done();
+        });
+    });
+
+    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct ( second validator )' , function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR_2, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR_2;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET_2;
+        params.publicKey = VALIDATOR_PUBLIC_KEY_2;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR_2, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+            });
+            done();
+        });
+    });
+
+    it('Get Attribute - After last notarization - becomes active ( IDENTITY_CARD )', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmUmE1KWPSt5ukdQJuYvbUcRCHBE3Htiw3JE7bLz5gvncS');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
             done();
         });
     });
@@ -3377,7 +3619,7 @@ describe('GET Attribute validation score', function () {
         getAttributeValidationScore(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('attribute_validations').to.be.eq(1);
+            node.expect(res.body).to.have.property('attribute_validations').to.be.eq(2);
             done();
         });
     });
