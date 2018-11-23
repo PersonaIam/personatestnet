@@ -30,7 +30,8 @@ module.exports = {
 		attributeconsume: 1,
 		reward:1,
 		startrewardround:1,
-		updaterewardround:1
+		updaterewardround:1,
+		createservice:1
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,

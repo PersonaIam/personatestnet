@@ -1,16 +1,16 @@
 'use strict';
 
-let Router = require('../helpers/router.js');
-let OrderBy = require('../helpers/orderBy.js');
-let schema = require('../schema/attributes.js');
-let slots = require('../helpers/slots.js');
+let Router = require('../../helpers/router.js');
+let OrderBy = require('../../helpers/orderBy.js');
+let schema = require('../../schema/business/attributes.js');
+let slots = require('../../helpers/slots.js');
 let moment = require('moment');
-let sql = require('../sql/attributes.js');
-let transactionTypes = require('../helpers/transactionTypes.js');
-let messages = require('../helpers/messages.js');
-let constants = require('../helpers/constants.js');
+let sql = require('../../sql/business/attributes.js');
+let transactionTypes = require('../../helpers/transactionTypes.js');
+let messages = require('../../helpers/messages.js');
+let constants = require('../../helpers/constants.js');
 let _ = require('lodash');
-let attributes = require('../modules/attributes.js');
+let attributes = require('./attributes.js');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -22,17 +22,17 @@ function AttributeShares(cb, scope) {
     library = scope;
     self = this;
 
-    let AttributeShareRequest = require('../logic/attributeShareRequest.js');
+    let AttributeShareRequest = require('../../logic/attributeShareRequest.js');
     __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_SHARE] = library.logic.transaction.attachAssetType(
         transactionTypes.REQUEST_ATTRIBUTE_SHARE, new AttributeShareRequest()
     );
 
-    let AttributeShare = require('../logic/attributeShare.js');
+    let AttributeShare = require('../../logic/attributeShare.js');
     __private.assetTypes[transactionTypes.SHARE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.SHARE_ATTRIBUTE, new AttributeShare()
     );
 
-    let AttributeShareApprove = require('../logic/attributeShareApprove.js');
+    let AttributeShareApprove = require('../../logic/attributeShareApprove.js');
     __private.assetTypes[transactionTypes.APPROVE_ATTRIBUTE_SHARE] = library.logic.transaction.attachAssetType(
         transactionTypes.APPROVE_ATTRIBUTE_SHARE, new AttributeShareApprove()
     );

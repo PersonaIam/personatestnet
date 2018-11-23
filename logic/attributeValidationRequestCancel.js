@@ -2,7 +2,7 @@
 
 var constants = require('../helpers/constants.js');
 var messages = require('../helpers/messages.js');
-let sql = require('../sql/attributes.js');
+let sql = require('../sql/business/attributes.js');
 
 // Private fields
 var modules, library, db;

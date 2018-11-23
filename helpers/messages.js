@@ -53,6 +53,9 @@ module.exports = {
     ATTRIBUTE_GET_FAIL : 'Failed to get attribute',
     ATTRIBUTE_VALIDATION_REQUESTS_FAIL : 'Failed to get attribute validation requests',
 
+    SERVICES_LIST_FAIL :'Failed to list services',
+    SERVICE_NOT_FOUND :'Service not found',
+
     INVALID_PASSPHRASE : 'Invalid passphrase',
 
     OWNER_IS_APPLICANT_ERROR : 'Owner cannot be the applicant of his own attribute',

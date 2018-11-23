@@ -1,5 +1,5 @@
 require('./api/accounts.js');
-require('./api/attributes.js');
+require('./api/business/attributes.js');
 require('./api/blocks.js');
 require('./api/delegates.js');
 require('./api/loader.js');

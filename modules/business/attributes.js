@@ -1,16 +1,16 @@
 'use strict';
 
-let Router = require('../helpers/router.js');
-let OrderBy = require('../helpers/orderBy.js');
-let schema = require('../schema/attributes.js');
-let slots = require('../helpers/slots.js');
+let Router = require('../../helpers/router.js');
+let OrderBy = require('../../helpers/orderBy.js');
+let schema = require('../../schema/business/attributes.js');
+let slots = require('../../helpers/slots.js');
 let moment = require('moment');
-let sql = require('../sql/attributes.js');
-let attributedHelper = require('../helpers/attributes.js');
-let transactionTypes = require('../helpers/transactionTypes.js');
-let messages = require('../helpers/messages.js');
+let sql = require('../../sql/business/attributes.js');
+let attributedHelper = require('../../helpers/attributes.js');
+let transactionTypes = require('../../helpers/transactionTypes.js');
+let messages = require('../../helpers/messages.js');
 let async = require('async');
-let constants = require('../helpers/constants.js');
+let constants = require('../../helpers/constants.js');
 let _ = require('lodash')
 
 // Private fields
@@ -23,32 +23,32 @@ function Attributes(cb, scope) {
     library = scope;
     self = this;
 
-    let Attribute = require('../logic/attribute.js');
+    let Attribute = require('../../logic/attribute.js');
     __private.assetTypes[transactionTypes.CREATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.CREATE_ATTRIBUTE, new Attribute()
     );
 
-    let AttributeUpdate = require('../logic/attributeUpdate.js');
+    let AttributeUpdate = require('../../logic/attributeUpdate.js');
     __private.assetTypes[transactionTypes.UPDATE_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.UPDATE_ATTRIBUTE, new AttributeUpdate()
     );
 
-    let AttributeConsume = require('../logic/attributeConsume.js');
+    let AttributeConsume = require('../../logic/attributeConsume.js');
     __private.assetTypes[transactionTypes.CONSUME_ATTRIBUTE] = library.logic.transaction.attachAssetType(
         transactionTypes.CONSUME_ATTRIBUTE, new AttributeConsume()
     );
 
-    let RewardRound = require('../logic/rewardRound.js');
+    let RewardRound = require('../../logic/rewardRound.js');
     __private.assetTypes[transactionTypes.RUN_REWARD_ROUND] = library.logic.transaction.attachAssetType(
         transactionTypes.RUN_REWARD_ROUND, new RewardRound()
     );
 
-    let Reward = require('../logic/reward.js');
+    let Reward = require('../../logic/reward.js');
     __private.assetTypes[transactionTypes.REWARD] = library.logic.transaction.attachAssetType(
         transactionTypes.REWARD, new Reward()
     );
 
-    let UpdateRewardRound = require('../logic/updateRewardRound.js');
+    let UpdateRewardRound = require('../../logic/updateRewardRound.js');
     __private.assetTypes[transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE] = library.logic.transaction.attachAssetType(
         transactionTypes.UPDATE_REWARD_ROUND_TO_COMPLETE, new UpdateRewardRound()
     );

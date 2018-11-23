@@ -1,7 +1,7 @@
 'use strict';
 
 var constants = require('../helpers/constants.js');
-let sql = require('../sql/attributes.js');
+let sql = require('../sql/business/attributes.js');
 
 // Private fields
 var modules, library;

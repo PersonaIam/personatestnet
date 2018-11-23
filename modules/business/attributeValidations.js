@@ -1,16 +1,16 @@
 'use strict';
 
-let Router = require('../helpers/router.js');
-let OrderBy = require('../helpers/orderBy.js');
-let schema = require('../schema/attributes.js');
-let slots = require('../helpers/slots.js');
+let Router = require('../../helpers/router.js');
+let OrderBy = require('../../helpers/orderBy.js');
+let schema = require('../../schema/business/attributes.js');
+let slots = require('../../helpers/slots.js');
 let moment = require('moment');
-let sql = require('../sql/attributes.js');
-let transactionTypes = require('../helpers/transactionTypes.js');
-let messages = require('../helpers/messages.js');
-let constants = require('../helpers/constants.js');
+let sql = require('../../sql/business/attributes.js');
+let transactionTypes = require('../../helpers/transactionTypes.js');
+let messages = require('../../helpers/messages.js');
+let constants = require('../../helpers/constants.js');
 let _ = require('lodash');
-let attributes = require('../modules/attributes.js');
+let attributes = require('./attributes.js');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -22,32 +22,32 @@ function AttributeValidations(cb, scope) {
     library = scope;
     self = this;
 
-    let AttributeValidationRequest = require('../logic/attributeValidationRequest.js');
+    let AttributeValidationRequest = require('../../logic/attributeValidationRequest.js');
     __private.assetTypes[transactionTypes.REQUEST_ATTRIBUTE_VALIDATION] = library.logic.transaction.attachAssetType(
         transactionTypes.REQUEST_ATTRIBUTE_VALIDATION, new AttributeValidationRequest()
     );
 
-    let ApproveAttributeValidationRequest = require('../logic/attributeValidationRequestApprove.js');
+    let ApproveAttributeValidationRequest = require('../../logic/attributeValidationRequestApprove.js');
     __private.assetTypes[transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
         transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST, new ApproveAttributeValidationRequest()
     );
 
-    let DeclineAttributeValidationRequest = require('../logic/attributeValidationRequestDecline.js');
+    let DeclineAttributeValidationRequest = require('../../logic/attributeValidationRequestDecline.js');
     __private.assetTypes[transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
         transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST, new DeclineAttributeValidationRequest()
     );
 
-    let NotarizeAttributeValidationRequest = require('../logic/attributeValidationRequestNotarize.js');
+    let NotarizeAttributeValidationRequest = require('../../logic/attributeValidationRequestNotarize.js');
     __private.assetTypes[transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
         transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST, new NotarizeAttributeValidationRequest()
     );
 
-    let RejectAttributeValidationRequest = require('../logic/attributeValidationRequestReject.js');
+    let RejectAttributeValidationRequest = require('../../logic/attributeValidationRequestReject.js');
     __private.assetTypes[transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
         transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST, new RejectAttributeValidationRequest()
     );
 
-    let CancelAttributeValidationRequest = require('../logic/attributeValidationRequestCancel.js');
+    let CancelAttributeValidationRequest = require('../../logic/attributeValidationRequestCancel.js');
     __private.assetTypes[transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST] = library.logic.transaction.attachAssetType(
         transactionTypes.CANCEL_ATTRIBUTE_VALIDATION_REQUEST, new CancelAttributeValidationRequest()
     );
