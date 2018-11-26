@@ -12,11 +12,12 @@ let _ = require('lodash')
 // TEST DATA
 
 const PROVIDER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-const NAME = 'serviceName';
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
 
-const SERVICE_NAME = 'serviceName';
+const NON_EXISTING_SERVICE_NAME = 'gonzo';
+const SERVICE_NAME = 'firstService';
+const SERVICE2_NAME = 'secondService';
 const DESCRIPTION = 'description';
 
 // RESULTS
@@ -73,7 +74,18 @@ describe('Get Services', function () {
         });
     });
 });
+
 describe('Create Service', function () {
+
+    it('Get Services by provider - no results', function (done) {
+        getServices({provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            done();
+        });
+    });
 
     it('Create Service - Simple', function (done) {
 
@@ -100,6 +112,17 @@ describe('Create Service', function () {
         });
     });
 
+    it('Create Service - Service already exists for provider', function (done) {
+
+        let request = createServiceRequest();
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_ALREADY_EXISTS);
+            done();
+        });
+    });
+
     it('Get Services by provider - 1 result', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -110,8 +133,35 @@ describe('Create Service', function () {
         });
     });
 
+    it('Create Service - Second service for a given provider', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE2_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
     it('Get Services by name - 1 result', function (done) {
-        getServices({name: NAME}, function (err, res) {
+        getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(1);
@@ -120,8 +170,18 @@ describe('Create Service', function () {
         });
     });
 
+    it('Get Services by name - 2 results', function (done) {
+        getServices({provider : PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(2);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
+            done();
+        });
+    });
+
     it('Get Services attribute types', function (done) {
-        getServiceAttributeTypes({name: NAME, provider : PROVIDER}, function (err, res) {
+        getServiceAttributeTypes({name: SERVICE_NAME, provider : PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.service_attribute_types).to.have.length(12);
@@ -130,6 +190,86 @@ describe('Create Service', function () {
         });
     });
 });
+
+describe('Inactivate Service', function () {
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('Inactivate Service - non existing service', function (done) {
+
+        let params = {};
+        params.name = NON_EXISTING_SERVICE_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_NOT_FOUND);
+            done();
+        });
+    });
+
+    it('Inactivate Service - service is already inactive', function (done) {
+
+        let params = {};
+        params.name = SERVICE_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_IS_ALREADY_INACTIVE);
+            done();
+        });
+    });
+
+});
+
 // Utilities
 
 function createServiceRequest(param) {
@@ -148,6 +288,23 @@ function createServiceRequest(param) {
     console.log(JSON.stringify(request));
     return request;
 }
+
+function inactivateServiceRequest(param) {
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.service = {};
+    request.asset.service.name = param.name ? param.name : SERVICE_NAME;
+    request.asset.service.provider = param.provider ? param.provider : PROVIDER;
+    console.log(JSON.stringify(request));
+    return request;
+}
+
+// Requests
 
 function listServices(done) {
     let url = '/api/services/list';
@@ -189,6 +346,10 @@ function putTransaction(params, done) {
 
 function postService(params, done) {
     node.post('/api/services', params, done);
+}
+
+function putInactivateService(params, done) {
+    node.put('/api/services/inactivate', params, done);
 }
 
 function getBalance(address, done) {

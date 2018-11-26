@@ -287,7 +287,7 @@ __private.promiseTransactions = function (t, block, blockPromises) {
 		if (promise && promise.table) {
 			return promise.table;
 		} else {
-			throw 'Invalid promise';
+            return t;
 		}
 	};
 
@@ -298,11 +298,14 @@ __private.promiseTransactions = function (t, block, blockPromises) {
 			if (promise && promise.values) {
 				values = values.concat(promise.values);
 			} else {
-				throw 'Invalid promise';
+                return t;
 			}
 		});
 
 		var inserts = new Inserts(type[0], values, true);
+		if (!inserts.template) {
+			return t;
+		}
 		t.none(inserts.template(), inserts);
 	};
 

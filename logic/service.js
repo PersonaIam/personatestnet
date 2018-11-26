@@ -75,13 +75,6 @@ Service.prototype.verify = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
-//
-//__API__ `process`
-
-//
-Service.prototype.process = function (trs, sender, cb) {
-    return cb(null, trs);
-};
 
 //
 //__API__ `getBytes`
@@ -95,7 +88,6 @@ Service.prototype.getBytes = function (trs) {
     try {
         buf = new Buffer(JSON.stringify(trs.asset.service), 'utf8');
     } catch (e) {
-        console.log('4 ' + JSON.stringify(e))
         throw e;
     }
 
@@ -223,7 +215,7 @@ Service.prototype.dbSave = function (trs) {
             provider: trs.asset.service.provider,
             name: trs.asset.service.name,
             description : trs.asset.service.description,
-            status: 'ACTIVE',
+            status: constants.serviceStatus.ACTIVE,
             timestamp: trs.timestamp
         }
     };

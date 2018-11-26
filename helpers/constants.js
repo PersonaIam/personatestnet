@@ -31,7 +31,8 @@ module.exports = {
 		reward:1,
 		startrewardround:1,
 		updaterewardround:1,
-		createservice:1
+		createservice:1,
+        inactivateservice:1
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,
@@ -92,6 +93,10 @@ module.exports = {
         FACE_TO_FACE : 'FACE_TO_FACE',
         REMOTE : 'REMOTE'
     },
+	serviceStatus : {
+		ACTIVE : 'ACTIVE',
+		INACTIVE : 'INACTIVE'
+	},
 	totalAmount: 6677610400000000,
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 	VALIDATIONS_REQUIRED : 2,

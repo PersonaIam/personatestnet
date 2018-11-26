@@ -10,11 +10,11 @@ function Inserts (record, values, concat) {
 	var self = this;
 
 	if (!record || !record.table || !record.values) {
-		throw 'Inserts: Invalid record argument';
+		return;
 	}
 
 	if (!values) {
-		throw 'Inserts: Invalid values argument';
+        return;
 	}
 
 	this.namedTemplate = function () {

@@ -27,6 +27,11 @@ function Services(cb, scope) {
         transactionTypes.CREATE_SERVICE, new Service()
     );
 
+    let ServiceInactivate = require('../../logic/serviceInactivate.js');
+    __private.assetTypes[transactionTypes.INACTIVATE_SERVICE] = library.logic.transaction.attachAssetType(
+        transactionTypes.INACTIVATE_SERVICE, new ServiceInactivate()
+    );
+
     return cb(null, self);
 }
 
@@ -50,6 +55,10 @@ Services.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
+    __private.assetTypes[transactionTypes.INACTIVATE_SERVICE].bind({
+        modules: modules, library: library
+    });
+
 };
 
 // Private methods
@@ -67,7 +76,8 @@ __private.attachApi = function () {
         'post /': 'addService',
         'get /list': 'listServices',
         'get /': 'getService',
-        'get /attributetypes': 'getServiceAttributeTypes'
+        'get /attributetypes': 'getServiceAttributeTypes',
+        'put /inactivate': 'inactivateService'
     });
 
     router.use(function (req, res, next) {
@@ -147,7 +157,7 @@ Services.getServicesByFilter = function (filter, cb) {
 
 __private.listServices = function (filter, cb) {
 
-    library.db.query(sql.ServicesSql.getServicesForProvider, {provider : filter.provider}).then(function (rows) {
+    library.db.query(sql.ServicesSql.getServicesForProvider, {provider: filter.provider}).then(function (rows) {
         let count = rows.length ? rows.length : 0;
         let services = [];
 
@@ -227,11 +237,59 @@ shared.getServiceAttributeTypes = function (req, cb) {
         }
 
         __private.getServiceAttributeTypes(req.body, function (err, data) {
-            console.log(JSON.stringify(data));
-            return cb(null, {service_attribute_types : data.service_attribute_types, count: data.count});
+            return cb(null, {service_attribute_types: data.service_attribute_types, count: data.count});
         });
     });
 };
+
+shared.inactivateService = function (req, cb) {
+    library.schema.validate(req.body, schema.serviceOperation, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.service) {
+            return cb('Service is not provided. Nothing to create');
+        }
+        if (!library.logic.transaction.validateAddress(req.body.asset.service.provider)) {
+            return cb('Service provider address is incorrect');
+        }
+
+        let keypair;
+
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
+            function (err, data) {
+                if (!data || !data.services) {
+                    return cb(messages.SERVICE_NOT_FOUND)
+                }
+
+                if (data.services[0].status === constants.serviceStatus.INACTIVE) {
+                    return cb(messages.SERVICE_IS_ALREADY_INACTIVE)
+                }
+
+                attributes.buildTransaction({
+                        req: req,
+                        keypair: keypair,
+                        transactionType: transactionTypes.INACTIVATE_SERVICE
+                    },
+                    function (err, resultData) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        return cb(null, resultData);
+                    });
+            });
+    });
+}
 
 shared.addService = function (req, cb) {
     library.schema.validate(req.body, schema.serviceOperation, function (err) {
@@ -255,16 +313,24 @@ shared.addService = function (req, cb) {
                 return cb(messages.INVALID_PASSPHRASE);
             }
         }
-        attributes.buildTransaction({
-                req: req,
-                keypair: keypair,
-                transactionType: transactionTypes.CREATE_SERVICE
-            },
-            function (err, resultData) {
-                if (err) {
-                    return cb(err);
+
+        Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
+            function (err, data) {
+                if (data && data.services && data.services.length > 0) {
+                    return cb(messages.SERVICE_ALREADY_EXISTS)
                 }
-                return cb(null, resultData);
+
+                attributes.buildTransaction({
+                        req: req,
+                        keypair: keypair,
+                        transactionType: transactionTypes.CREATE_SERVICE
+                    },
+                    function (err, resultData) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        return cb(null, resultData);
+                    });
             });
     });
 };

@@ -54,7 +54,7 @@ module.exports = {
     ATTRIBUTE_VALIDATION_REQUESTS_FAIL : 'Failed to get attribute validation requests',
 
     SERVICES_LIST_FAIL :'Failed to list services',
-    SERVICE_NOT_FOUND :'Service not found',
+    SERVICE_NOT_FOUND :'No service was found for the given parameters',
 
     INVALID_PASSPHRASE : 'Invalid passphrase',
 
@@ -74,5 +74,8 @@ module.exports = {
     REASON_TOO_BIG_REJECT : 'The reason for rejecting a validation request is limited to 1024 characters',
     REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when rejecting a validation request',
     DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when declining a validation request',
+
+    SERVICE_ALREADY_EXISTS : 'Aservice already exists for this provider',
+    SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive'
 };
 
