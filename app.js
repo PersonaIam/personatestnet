@@ -85,7 +85,7 @@ var config = {
 		accounts: './modules/accounts.js',
 		attributes: './modules/business/attributes.js',
 		attributeValidations: './modules/business/attributeValidations.js',
-		attributeShares: './modules/business/attributeShares.js',
+        identityUses: './modules/business/identityUses.js',
 		services: './modules/business/services.js',
 		transactions: './modules/transactions.js',
 		blocks: './modules/blocks.js',

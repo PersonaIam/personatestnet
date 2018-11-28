@@ -208,17 +208,22 @@ module.exports = {
         required: ['type', 'owner']
     },
 
-    getRequestAttributeShare: {
-        id: 'attributes.getRequestAttributeShare',
+    getIdentityUseRequest: {
+        id: 'attributes.getIdentityUseRequest',
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 minimum: 0
             },
-            applicant: {
+            serviceId: {
+                type: 'integer',
+            },
+            serviceName: {
                 type: 'string',
-                minLength: 1,
+            },
+            serviceProvider: {
+                type: 'string',
                 format: 'address'
             },
             type: {

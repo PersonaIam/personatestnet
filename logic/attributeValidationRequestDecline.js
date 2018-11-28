@@ -203,7 +203,7 @@ AttributeValidationRequestDecline.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeValidationRequestId;
-    params.action = constants.validationRequestAction.DECLINE;
+    params.action = constants.validationRequestActions.DECLINE;
     params.status = constants.validationRequestStatus.DECLINED;
     params.reason = trs.asset.validation[0].reason;
 

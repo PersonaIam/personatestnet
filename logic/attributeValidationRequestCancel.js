@@ -198,7 +198,7 @@ AttributeValidationRequestCancel.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeValidationRequestId;
-    params.action = constants.validationRequestAction.CANCEL;
+    params.action = constants.validationRequestActions.CANCEL;
     params.status = constants.validationRequestStatus.CANCELLED;
 
     library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequest, params).then(function (err) {

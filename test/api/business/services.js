@@ -180,15 +180,6 @@ describe('Create Service', function () {
         });
     });
 
-    it('Get Services attribute types', function (done) {
-        getServiceAttributeTypes({name: SERVICE_NAME, provider : PROVIDER}, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.service_attribute_types).to.have.length(12);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(12);
-            done();
-        });
-    });
 });
 
 describe('Inactivate Service', function () {
@@ -326,17 +317,6 @@ function getServices(params, done) {
     if (params.status) {
         url += 'status=' + '' + params.status;
     }
-    node.get(url, done);
-}
-
-function getServiceAttributeTypes(params, done) {
-
-    if (!params.name || !params.provider) {
-        done();
-    }
-
-    let url = '/api/services/attributetypes';
-    url += '?name=' + '' + params.name + '&provider='+''+params.provider;
     node.get(url, done);
 }
 

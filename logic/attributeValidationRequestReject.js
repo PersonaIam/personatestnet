@@ -203,7 +203,7 @@ AttributeValidationRequestReject.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeValidationRequestId;
-    params.action = constants.validationRequestAction.REJECT;
+    params.action = constants.validationRequestActions.REJECT;
     params.status = constants.validationRequestStatus.REJECTED;
     params.reason = trs.asset.validation[0].reason;
 

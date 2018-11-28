@@ -19,7 +19,6 @@ module.exports = {
 		updateattribute: 3,
         attributesharerequest: 2,
 		attributevalidationrequest: 2,
-		attributevalidation: 1,
         attributevalidationrequestapprove: 1,
         attributevalidationrequestdecline: 1,
         attributevalidationrequestnotarize: 1,
@@ -32,7 +31,8 @@ module.exports = {
 		startrewardround:1,
 		updaterewardround:1,
 		createservice:1,
-        inactivateservice:1
+        inactivateservice:1,
+        identityuserequest : 1,
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,
@@ -73,7 +73,7 @@ module.exports = {
 		REJECTED: 'REJECTED',
         CANCELLED : 'CANCELLED'
     },
-    validationRequestAction : {
+    validationRequestActions : {
         DECLINE : 'DECLINE',
         APPROVE : 'APPROVE',
 		NOTARIZE : 'NOTARIZE',
@@ -97,6 +97,29 @@ module.exports = {
 		ACTIVE : 'ACTIVE',
 		INACTIVE : 'INACTIVE'
 	},
+
+    identityUseRequestStatus : {
+        PENDING_APPROVAL : 'PENDING_APPROVAL',
+        ACTIVE : 'ACTIVE',
+        DECLINED : 'DECLINED',
+        ENDED : 'ENDED',
+        CANCELLED : 'CANCELLED'
+    },
+    identityUseRequestActions : {
+        APPROVE : 'APPROVE',
+        DECLINE : 'DECLINE',
+        END : 'END',
+        CANCEL : 'CANCEL'
+    },
+    identityUseRequestProviderActions : {
+        APPROVE : 'APPROVE',
+        DECLINE : 'DECLINE',
+        END : 'END',
+    },
+    identityUseRequestOwnerActions : {
+        CANCEL : 'CANCEL'
+    },
+
 	totalAmount: 6677610400000000,
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 	VALIDATIONS_REQUIRED : 2,

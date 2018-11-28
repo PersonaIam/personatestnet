@@ -121,65 +121,34 @@ let AttributeValidationRequestsSql = {
             ' WHERE a.id IN ( ' + params.ids.join(' , ')  + ');'
 
         ].filter(Boolean).join(' ');
-    },
-
-    getAttributeValidationRequestsFiltered: function (params) {
-        return [
-            'SELECT * FROM attribute_validation_requests ',
-            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
-            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
-        ].filter(Boolean).join(' ');
-    },
+    }
 };
 
-let AttributeShareRequestsSql = {
+let IdentityUseRequestsSql = {
 
     sortFields: [
         'id',
         'attribute_id',
-        'applicant',
+        'service_id',
         'status',
         'timestamp'
     ],
 
-    updateShareRequest: 'UPDATE attribute_share_requests SET status = ${status} WHERE id = ${id}',
-    getAttributeShareRequest: 'SELECT * FROM attribute_share_requests WHERE "id" = ${id}',
-    getAttributeShareRequestsForAttribute: 'SELECT * FROM attribute_share_requests WHERE "attribute_id" = ${attribute_id}',
-    getAttributeShareRequestsForApplicant: 'SELECT * FROM attribute_share_requests WHERE "applicant" = ${applicant}',
-    getAttributeShareRequestsForAttributeAndApplicant:
-        'SELECT * FROM attribute_share_requests WHERE "attribute_id" = ${attribute_id} AND "applicant" = ${applicant}',
-    deleteAttributeShareRequest: 'DELETE FROM attribute_share_requests WHERE "id" = ${id}',
-    countByRowId: 'SELECT COUNT("id")::int FROM attribute_share_requests',
+    getIdentityUseRequestsByServiceId :
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'FROM identity_use_requests iur ' +
+    'JOIN attributes a ON a.id = iur.attribute_id ' +
+    'JOIN services s ON s.id = iur.service_id ' +
+    'WHERE "service_id" = ${service_id}',
 
-    getAttributeShareRequestsFiltered: function (params) {
-        return [
-            'SELECT * FROM attribute_share_requests ',
-            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
-            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
-        ].filter(Boolean).join(' ');
-    }
-};
+    getIdentityUseRequestsByServiceNameAndProvider :
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'FROM identity_use_requests iur ' +
+    'JOIN attributes a ON a.id = iur.attribute_id ' +
+    'JOIN services s ON s.id = iur.service_id ' +
+    'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
-let AttributeSharesSql = {
-
-    sortFields: [
-        'id',
-        'attribute_id',
-        'applicant',
-        'timestamp'
-    ],
-
-    getAttributeShare: 'SELECT * FROM attribute_shares WHERE "id" = ${id}',
-    getAttributeShareNoValue: 'SELECT id,attribute_id,applicant,timestamp FROM attribute_shares WHERE "id" = ${id}',
-    countByRowId: 'SELECT COUNT("id")::int FROM attribute_shares',
-
-    getAttributeSharesFiltered: function (params) {
-        return [
-            'SELECT id, attribute_id, applicant, timestamp FROM attribute_shares ',
-            (params.where.length ? 'WHERE ' + params.where.join(' AND ') : ''),
-            (params.sortField ? 'ORDER BY ' + [params.sortField, params.sortMethod].join(' ') : '')
-        ].filter(Boolean).join(' ');
-    }
+    updateValidationRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
 };
 
 let AttributeConsumptionsSql = {
@@ -251,9 +220,8 @@ module.exports = {
     AttributeValidationRequestsSql,
     AttributeTypesSql,
     AttributesSql,
-    AttributeShareRequestsSql,
-    AttributeSharesSql,
     AttributeConsumptionsSql,
     AttributeRewardsSql,
     AttributeDocumentAssociationsSql,
+    IdentityUseRequestsSql
 };

@@ -202,7 +202,7 @@ AttributeValidationRequestNotarize.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeValidationRequestId;
-    params.action = constants.validationRequestAction.NOTARIZE;
+    params.action = constants.validationRequestActions.NOTARIZE;
     params.status = constants.validationRequestStatus.COMPLETED;
     params.validationType = trs.asset.validation[0].validationType;
 

@@ -4,11 +4,10 @@ var constants = require('../helpers/constants.js');
 let sql = require('../sql/business/attributes.js');
 
 // Private fields
-var modules, library, db;
+var modules, library;
 
 // Constructor
-function AttributeShareApprove() {
-
+function AttributeShareDecline() {
 }
 
 // Public methods
@@ -16,7 +15,7 @@ function AttributeShareApprove() {
 //__API__ `bind`
 
 //
-AttributeShareApprove.prototype.bind = function (scope) {
+AttributeShareDecline.prototype.bind = function (scope) {
     modules = scope.modules;
     library = scope.library;
 };
@@ -25,14 +24,15 @@ AttributeShareApprove.prototype.bind = function (scope) {
 //__API__ `create`
 
 //
-AttributeShareApprove.prototype.create = function (data, trs) {
+AttributeShareDecline.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
     trs.asset.share = {
         type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
-        applicant : data.applicant
+        applicant : data.applicant,
+        value : data.value
     };
 
     return trs;
@@ -42,22 +42,22 @@ AttributeShareApprove.prototype.create = function (data, trs) {
 //__API__ `calculateFee`
 
 //
-AttributeShareApprove.prototype.calculateFee = function (trs) {
-    return constants.fees.attributeshareapproval;
+AttributeShareDecline.prototype.calculateFee = function (trs) {
+    return constants.fees.attributeshare;
 };
 
 //
 //__API__ `verify`
 
 //
-AttributeShareApprove.prototype.verify = function (trs, sender, cb) {
+AttributeShareDecline.prototype.verify = function (trs, sender, cb) {
 
     if (trs.amount !== 0) {
         return cb('Invalid transaction amount');
     }
 
     if (!trs.asset || !trs.asset.share) {
-        return cb('Invalid transaction asset. share is missing');
+        return cb('Invalid transaction asset. attributeShare is missing');
     }
 
     if (!trs.asset.share[0].owner) {
@@ -72,6 +72,11 @@ AttributeShareApprove.prototype.verify = function (trs, sender, cb) {
         return cb('Share attribute applicant is undefined');
     }
 
+    if (!trs.asset.share[0].value) {
+        return cb('Share attribute value is undefined');
+    }
+
+
     return cb(null, trs);
 
 };
@@ -80,7 +85,7 @@ AttributeShareApprove.prototype.verify = function (trs, sender, cb) {
 //__API__ `process`
 
 //
-AttributeShareApprove.prototype.process = function (trs, sender, cb) {
+AttributeShareDecline.prototype.process = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
@@ -88,7 +93,7 @@ AttributeShareApprove.prototype.process = function (trs, sender, cb) {
 //__API__ `getBytes`
 
 //
-AttributeShareApprove.prototype.getBytes = function (trs) {
+AttributeShareDecline.prototype.getBytes = function (trs) {
     if (!trs.asset.share) {
         return null;
     }
@@ -108,7 +113,7 @@ AttributeShareApprove.prototype.getBytes = function (trs) {
 //__API__ `apply`
 
 
-AttributeShareApprove.prototype.apply = function (trs, block, sender, cb) {
+AttributeShareDecline.prototype.apply = function (trs, block, sender, cb) {
 
     return cb(null, trs);
 };
@@ -117,7 +122,7 @@ AttributeShareApprove.prototype.apply = function (trs, block, sender, cb) {
 //__API__ `undo`
 
 //
-AttributeShareApprove.prototype.undo = function (trs, block, sender, cb) {
+AttributeShareDecline.prototype.undo = function (trs, block, sender, cb) {
 
 };
 
@@ -125,7 +130,7 @@ AttributeShareApprove.prototype.undo = function (trs, block, sender, cb) {
 //__API__ `applyUnconfirmed`
 
 //
-AttributeShareApprove.prototype.applyUnconfirmed = function (trs, sender, cb) {
+AttributeShareDecline.prototype.applyUnconfirmed = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
@@ -133,15 +138,15 @@ AttributeShareApprove.prototype.applyUnconfirmed = function (trs, sender, cb) {
 //__API__ `undoUnconfirmed`
 
 //
-AttributeShareApprove.prototype.undoUnconfirmed = function (trs, sender, cb) {
+AttributeShareDecline.prototype.undoUnconfirmed = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
-AttributeShareApprove.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.share[0], AttributeShareApprove.prototype.schema);
+AttributeShareDecline.prototype.objectNormalize = function (trs) {
+    var report = library.schema.validate(trs.asset.share[0], AttributeShareDecline.prototype.schema);
 
     if (!report) {
-        throw 'Failed to approve attribute share schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate attribute share schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -150,8 +155,8 @@ AttributeShareApprove.prototype.objectNormalize = function (trs) {
 };
 
 
-AttributeShareApprove.prototype.schema = {
-    id: 'AttributeShareApprove',
+AttributeShareDecline.prototype.schema = {
+    id: 'AttributeShareDecline',
     type: 'object',
     properties: {
         owner: {
@@ -165,11 +170,12 @@ AttributeShareApprove.prototype.schema = {
             type: 'string',
             format: 'address'
         },
-        action: {
-            type : 'boolean'
-        }
+        value: {
+            type: 'string'
+        },
+
     },
-    required: ['owner', 'type', 'applicant']
+    required: ['owner', 'type', 'applicant', 'value']
 };
 
 //
@@ -177,38 +183,41 @@ AttributeShareApprove.prototype.schema = {
 //__API__ `dbRead`
 
 //
-AttributeShareApprove.prototype.dbRead = function (raw) {
+AttributeShareDecline.prototype.dbRead = function (raw) {
     return {};
 };
 
-AttributeShareApprove.prototype.dbTable = 'attribute_share_request_approvals';
+AttributeShareDecline.prototype.dbTable = 'attribute_shares';
 
-AttributeShareApprove.prototype.dbFields = [
-    'attribute_share_request_id',
-    'timestamp',
-    'status'
+AttributeShareDecline.prototype.dbFields = [
+    'attribute_id',
+    'applicant',
+    'value',
+    'timestamp'
 ];
 
 //
 //__API__ `dbSave`
 
 //
-AttributeShareApprove.prototype.dbSave = function (trs) {
+AttributeShareDecline.prototype.dbSave = function (trs) {
 
-    let params = {};
+    var params = {};
     params.id = trs.asset.attributeShareRequestId;
-    params.status = constants.shareStatus.APPROVED;
+    params.status = constants.shareStatus.COMPLETED;
 
     library.db.query(sql.AttributeShareRequestsSql.updateShareRequest, params).then(function (err) {
     });
+
 
     return {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            attribute_share_request_id: trs.asset.attributeShareRequestId,
-            timestamp: trs.timestamp,
-            status : params.status
+            attribute_id: trs.asset.attribute_id,
+            applicant: trs.asset.share[0].applicant,
+            value: trs.asset.share[0].value,
+            timestamp: trs.timestamp
         }
     };
 };
@@ -217,9 +226,9 @@ AttributeShareApprove.prototype.dbSave = function (trs) {
 //__API__ `ready`
 
 //
-AttributeShareApprove.prototype.ready = function (trs, sender) {
+AttributeShareDecline.prototype.ready = function (trs, sender) {
     return true;
 };
 
 // Export
-module.exports = AttributeShareApprove;
+module.exports = AttributeShareDecline;

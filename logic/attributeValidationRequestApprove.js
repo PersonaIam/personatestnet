@@ -198,7 +198,7 @@ AttributeValidationRequestApprove.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.attributeValidationRequestId;
-    params.action = constants.validationRequestAction.APPROVE;
+    params.action = constants.validationRequestActions.APPROVE;
     params.status = constants.validationRequestStatus.IN_PROGRESS;
 
     library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequest, params).then(function (err) {

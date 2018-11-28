@@ -132,62 +132,6 @@ __private.attachApi = function () {
     });
 };
 
-__private.getAttributeValidationRequestsByFilter = function (filter, cb) {
-    let params = {}, where = [];
-
-    if (filter.id >= 0) {
-        where.push('"id" = ${id}');
-        params.id = filter.id;
-    }
-
-    if (filter.validator) {
-        where.push('"validator" = ${validator}');
-        params.validator = filter.validator;
-    }
-
-    if (filter.attribute_id) {
-        where.push('"attribute_id" = ${attribute_id}');
-        params.attribute_id = filter.attribute_id;
-    }
-
-    let orderBy = OrderBy(
-        filter.orderBy, {
-            sortFields: sql.AttributeValidationRequestsSql.sortFields,
-            fieldPrefix: function (sortField) {
-                if (['id', 'attribute_id', 'validator'].indexOf(sortField) > -1) {
-                    return sortField;
-                } else {
-                    return sortField;
-                }
-            }
-        }
-    );
-
-    if (orderBy.error) {
-        return cb(orderBy.error);
-    }
-
-    library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationRequestsFiltered({
-        where: where,
-    }), params).then(function (rows) {
-        let attributeValidationRequests = [];
-
-        for (let i = 0; i < rows.length; i++) {
-            attributeValidationRequests.push(rows[i]);
-        }
-        let count = rows.length ? rows.length : 0;
-        let data = {};
-        if (count > 0) {
-            data.attributeValidationRequests = attributeValidationRequests;
-        }
-        data.count = count;
-        return cb(null, data);
-    }).catch(function (err) {
-        library.logger.error("stack", err.stack);
-        return cb(err.message);
-    });
-};
-
 __private.getAttributeValidationRequests = function (filter, cb) {
 
     if (!filter.validator && !filter.owner && !filter.attributeId) {
@@ -249,14 +193,14 @@ __private.getAttributeValidationScore = function (filter, cb) {
 
 __private.checkValidationAnswer = function(params, cb) {
 
-    if (params.answer === constants.validationRequestAction.APPROVE) {
+    if (params.answer === constants.validationRequestActions.APPROVE) {
         if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
             return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
         }
 
         return cb(null, {transactionType : transactionTypes.APPROVE_ATTRIBUTE_VALIDATION_REQUEST});
     }
-    if (params.answer === constants.validationRequestAction.DECLINE) {
+    if (params.answer === constants.validationRequestActions.DECLINE) {
         if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
             return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
         }
@@ -264,21 +208,21 @@ __private.checkValidationAnswer = function(params, cb) {
         return cb(null, {transactionType : transactionTypes.DECLINE_ATTRIBUTE_VALIDATION_REQUEST});
     }
 
-    if (params.answer === constants.validationRequestAction.NOTARIZE) {
+    if (params.answer === constants.validationRequestActions.NOTARIZE) {
         if (params.status !== constants.validationRequestStatus.IN_PROGRESS) {
             return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
         }
         return cb(null, {transactionType : transactionTypes.NOTARIZE_ATTRIBUTE_VALIDATION_REQUEST});
     }
 
-    if (params.answer === constants.validationRequestAction.REJECT) {
+    if (params.answer === constants.validationRequestActions.REJECT) {
         if (params.status !== constants.validationRequestStatus.IN_PROGRESS) {
             return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
         }
         return cb(null, {transactionType : transactionTypes.REJECT_ATTRIBUTE_VALIDATION_REQUEST});
     }
 
-    if (params.answer === constants.validationRequestAction.CANCEL) {
+    if (params.answer === constants.validationRequestActions.CANCEL) {
         if (params.status !== constants.validationRequestStatus.PENDING_APPROVAL) {
             return cb(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
         }
@@ -557,7 +501,7 @@ shared.getAttributeValidationScore = function (req, cb) {
 
 shared.approveValidationRequest = function (req, cb) {
 
-    req.body.asset.validation[0].answer = constants.validationRequestAction.APPROVE;
+    req.body.asset.validation[0].answer = constants.validationRequestActions.APPROVE;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -576,7 +520,7 @@ shared.declineValidationRequest = function (req, cb) {
         return cb(messages.REASON_TOO_BIG_DECLINE)
     }
 
-    req.body.asset.validation[0].answer = constants.validationRequestAction.DECLINE;
+    req.body.asset.validation[0].answer = constants.validationRequestActions.DECLINE;
 
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
@@ -595,7 +539,7 @@ shared.notarizeValidationRequest = function (req, cb) {
         return cb(messages.INCORRECT_VALIDATION_TYPE);
     }
 
-    req.body.asset.validation[0].answer = constants.validationRequestAction.NOTARIZE;
+    req.body.asset.validation[0].answer = constants.validationRequestActions.NOTARIZE;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -615,7 +559,7 @@ shared.rejectValidationRequest = function (req, cb) {
     }
 
 
-    req.body.asset.validation[0].answer = constants.validationRequestAction.REJECT;
+    req.body.asset.validation[0].answer = constants.validationRequestActions.REJECT;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
@@ -627,7 +571,7 @@ shared.rejectValidationRequest = function (req, cb) {
 
 shared.cancelValidationRequest = function (req, cb) {
 
-    req.body.asset.validation[0].answer = constants.validationRequestAction.CANCEL;
+    req.body.asset.validation[0].answer = constants.validationRequestActions.CANCEL;
     __private.validationRequestAnswer(req, function (err, res) {
         if (err) {
             return cb(err)
