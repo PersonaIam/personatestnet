@@ -49,7 +49,9 @@ const DEFAULT_AMOUNT = 0;
 
 const PROVIDER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
 const SERVICE_NAME = 'Ada';
-const SERVICE2_NAME = 'Anabella';
+const SERVICE2_NAME = 'Amy';
+const SERVICE3_NAME = 'Anabella';
+const SERVICE4_NAME = 'Arielle';
 const DESCRIPTION = 'Modus';
 
 const REASON_FOR_DECLINE_1024_GOOD =
@@ -64,6 +66,7 @@ const ERROR = 'error';
 const COUNT = 'count';
 const TRUE = true;
 const FALSE = false;
+const STATUS = 'status';
 
 // TEST UTILS
 
@@ -487,7 +490,7 @@ describe('Create Attribute', function () {
 
 describe('Create Services', function() {
 
-    it('Create Service - First Service', function (done) {
+    it('Create Service - First Service - will store the approved request', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -512,7 +515,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Second Service', function (done) {
+    it('Create Service - Second Service - will store the declined request', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -535,6 +538,70 @@ describe('Create Services', function() {
                 node.expect(balance - balanceAfter === constants.fees.createservice);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
             });
+            done();
+        });
+    });
+
+    it('Create Service - Third Service - will store the cancelled request', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE3_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create Service - Fourth Service - will store the approved + ended request', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE4_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Get Services by provider - 4 result', function (done) {
+        getServices({provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(4);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
             done();
         });
     });
@@ -696,7 +763,7 @@ describe('Create Attribute validation request', function () {
 
 });
 
-describe('Approve/Decline/Notarize/Reject attribute validation request', function () {
+describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', function () {
 
     it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized )', function (done) {
 
@@ -1293,6 +1360,13 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
     it('Create Identity Use Request - SUCCESS -> attribute has 2 completed validations, which is enough to become active', function (done) {
 
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
         let param = {};
         param.owner = OWNER;
         param.type = IDENTITY_CARD;
@@ -1305,10 +1379,150 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
             done();
         });
     });
+
+    it('Get Identity Use Request - PENDING_APPROVAL', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name : SERVICE_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                    done();
+                });
+            });
+        });
+    });
 });
+
+describe('Approve identity use request', function () {
+
+    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestapprove);
+            });
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - ACTIVE', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ACTIVE);
+                    done();
+                });
+            });
+        })
+    })
+
+    it('Approve Identity Use Request -> Request is already ACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Decline Identity Use Request -> Request is already ACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request -> Request is already ACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+})
 
 describe('Generate Report', function () {
 
@@ -1437,6 +1651,28 @@ function createAnswerAttributeValidationRequest(param) {
     return request;
 }
 
+function createAnswerIdentityUseRequest(param) {
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.identityuse = [];
+    request.asset.identityuse[0] = {};
+    request.asset.identityuse[0].type = param.type ? param.type : FIRST_NAME;
+    request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
+    request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
+    request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
+    if (param.reason){
+        request.asset.identityuse[0].reason = param.reason;
+    }
+
+    console.log(request);
+    return request;
+}
+
 function createServiceRequest(param) {
     let request = {};
     if (!param) {
@@ -1469,6 +1705,8 @@ function inactivateServiceRequest(param) {
     return request;
 }
 
+// actions on attributes
+
 function getAttributeTypeByName(name, done) {
     node.get('/api/attributes/types?name=' + name, done);
 }
@@ -1479,6 +1717,45 @@ function postAttribute(params, done) {
 
 function putAttributeUpdate(params, done) {
     node.put('/api/attributes', params, done);
+}
+
+function getAttribute(owner, typeName, done) {
+    getAttributeTypeByName(typeName, function (err, res) {
+        let type;
+        if (res.body.attribute_type) {
+            type = '' + res.body.attribute_type.name;
+        }
+        let url = '/api/attributes?owner=' + owner;
+        if (type) {
+            url += '&type=' + '' + type;
+        }
+        node.get(url, done);
+    });
+}
+
+function getAttributesForOwner(owner, done) {
+
+    let url = '/api/attributes?owner=' + owner;
+    node.get(url, done);
+}
+
+// actions on validation requests
+
+function getAttributeValidationRequest(params, done) {
+    let url = '/api/attribute-validations/validationrequest';
+    if (params.validator || params.attributeId || params.owner) {
+        url += '?';
+    }
+    if (params.validator) {
+        url += '&validator=' + '' + params.validator;
+    }
+    if (params.attributeId) {
+        url += '&attributeId=' + '' + params.attributeId;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
+    }
+    node.get(url, done);
 }
 
 function postAttributeValidationRequest(params, done) {
@@ -1505,108 +1782,69 @@ function postCancelValidationAttributeRequest(params, done) {
     node.post('/api/attribute-validations/cancel', params, done);
 }
 
-function postService(params, done) {
-    node.post('/api/services', params, done);
+function getIdentityUseRequests(params, done) {
+    let url = '/api/identity-use/';
+    if (params.attributeId && params.serviceId) {
+        url += '?attributeId=' + '' + params.attributeId + '&serviceId=' + '' + params.serviceId;
+    } else {
+        if (params.serviceName || params.serviceProvider) {
+            url += '?';
+        }
+        if (params.serviceName) {
+            url += '&serviceName=' + '' + params.serviceName;
+        }
+        if (params.serviceProvider) {
+            url += '&serviceProvider=' + '' + params.serviceProvider;
+        }
+    }
+    node.get(url, done);
 }
 
 function postIdentityUseRequest(params, done) {
     node.post('/api/identity-use', params, done);
 }
 
-// function postApproveShareAttributeRequest(params, done) {
-//     node.post('/api/attribute-shares/approvesharerequest', params, done);
-// }
-
-function getAttribute(owner, typeName, done) {
-    getAttributeTypeByName(typeName, function (err, res) {
-        let type;
-        if (res.body.attribute_type) {
-            type = '' + res.body.attribute_type.name;
-        }
-        let url = '/api/attributes?owner=' + owner;
-        if (type) {
-            url += '&type=' + '' + type;
-        }
-        node.get(url, done);
-    });
+function postApproveIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/approve', params, done);
 }
 
-function getAttributesForOwner(owner, done) {
-
-    let url = '/api/attributes?owner=' + owner;
-    node.get(url, done);
+function postDeclineIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/decline', params, done);
 }
 
-function getAttributeValidationRequest(params, done) {
-    let url = '/api/attribute-validations/validationrequest';
-    if (params.validator || params.attributeId || params.owner) {
+function postEndIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/end', params, done);
+}
+
+function postCancelIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/cancel', params, done);
+}
+
+// actions on services
+
+function postService(params, done) {
+    node.post('/api/services', params, done);
+}
+
+function getServices(params, done) {
+
+    let url = '/api/services/';
+    if (params.name || params.provider || params.status) {
         url += '?';
     }
-    if (params.validator) {
-        url += '&validator=' + '' + params.validator;
+    if (params.name) {
+        url += 'name=' + '' + params.name;
     }
-    if (params.attributeId) {
-        url += '&attributeId=' + '' + params.attributeId;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
-    }
-    node.get(url, done);
-}
-
-function getIdentityUseRequests(params, done) {
-    let url = '/api/identity-use/';
-    if (params.serviceId || params.serviceName || params.serviceProvider) {
-        url += '?';
-    }
-    if (params.serviceId) {
-        url += '&serviceId=' + '' + params.serviceId;
-    }
-    if (params.serviceName) {
-        url += '&serviceName=' + '' + params.serviceName;
-    }
-    if (params.serviceProvider) {
-        url += '&serviceProvider=' + '' + params.serviceProvider;
-    }
-    node.get(url, done);
-}
-
-function getAttributeValidationScore(params, done) {
-    let url = '/api/attribute-validations/validationscore';
-    if (params.type || params.owner) {
-        url += '?';
-    }
-    if (params.type) {
-        url += 'type=' + '' + params.type;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
-    }
-    node.get(url, done);
-
-}
-
-function getAttributeValidationRequests(params, done) {
-
-    let url = '/api/attribute-validations/validationrequest/';
-    if (params.validator || params.type || params.owner) {
-        url += '?';
-    }
-    if (params.validator) {
-        url += '&validator=' + '' + params.validator;
-    }
-    if (params.type) {
-        url += '&type=' + '' + params.type;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
+    if (params.provider) {
+        url += '&provider=' + '' + params.provider;
     }
     if (params.status) {
         url += '&status=' + '' + params.status;
     }
     node.get(url, done);
-
 }
+
+// others
 
 function getBalance(address, done) {
     node.get('/api/accounts/getBalance?address=' + address, done);

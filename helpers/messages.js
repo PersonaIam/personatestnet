@@ -71,12 +71,21 @@ module.exports = {
     NO_ASSOCIATIONS_FOR_NON_FILE_TYPE : 'Associations are not supported for non-file attribute types',
     MISSING_VALIDATION_TYPE : 'Validation type is missing',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
-    REASON_TOO_BIG_DECLINE : 'The reason for declining a validation request is limited to 1024 characters',
-    REASON_TOO_BIG_REJECT : 'The reason for rejecting a validation request is limited to 1024 characters',
+    REASON_TOO_BIG_DECLINE : 'The reason for declining a request is limited to 1024 characters',
+    REASON_TOO_BIG_REJECT : 'The reason for rejecting a request is limited to 1024 characters',
     REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when rejecting a validation request',
     DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when declining a validation request',
 
-    SERVICE_ALREADY_EXISTS : 'Aservice already exists for this provider',
-    SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive'
+    SERVICE_ALREADY_EXISTS : 'A service already exists for this provider',
+    SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',
+
+    IDENTITY_USE_REQUEST_MISSING_FOR_ACTION : 'There is no identity use request for this action',
+    UNKNOWN_IDENTITY_USE_REQUEST_ANSWER : 'Unknown identity use request answer',
+    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_IN_PROGRESS: 'The specified identity use request must be in progress for the action to take place',
+    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be pending approval for the action to take place',
+
+    IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR : 'Only the service provider is allowed to perform this action on an identity use request',
+    IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to perform this action on an identity use request',
+    DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
 };
 

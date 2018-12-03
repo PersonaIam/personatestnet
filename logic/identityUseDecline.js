@@ -4,10 +4,11 @@ var constants = require('../helpers/constants.js');
 let sql = require('../sql/business/attributes.js');
 
 // Private fields
-var modules, library;
+var modules, library, db;
 
 // Constructor
-function AttributeShareDecline() {
+function IdentityUseDecline() {
+
 }
 
 // Public methods
@@ -15,7 +16,7 @@ function AttributeShareDecline() {
 //__API__ `bind`
 
 //
-AttributeShareDecline.prototype.bind = function (scope) {
+IdentityUseDecline.prototype.bind = function (scope) {
     modules = scope.modules;
     library = scope.library;
 };
@@ -24,15 +25,14 @@ AttributeShareDecline.prototype.bind = function (scope) {
 //__API__ `create`
 
 //
-AttributeShareDecline.prototype.create = function (data, trs) {
+IdentityUseDecline.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
-    trs.asset.share = {
+    trs.asset.identityuse = {
         type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
-        applicant : data.applicant,
-        value : data.value
+        provider : data.serviceProvider
     };
 
     return trs;
@@ -42,40 +42,39 @@ AttributeShareDecline.prototype.create = function (data, trs) {
 //__API__ `calculateFee`
 
 //
-AttributeShareDecline.prototype.calculateFee = function (trs) {
-    return constants.fees.attributeshare;
+IdentityUseDecline.prototype.calculateFee = function (trs) {
+    return constants.fees.identityuserequestdecline;
 };
 
 //
 //__API__ `verify`
 
 //
-AttributeShareDecline.prototype.verify = function (trs, sender, cb) {
+IdentityUseDecline.prototype.verify = function (trs, sender, cb) {
 
     if (trs.amount !== 0) {
         return cb('Invalid transaction amount');
     }
 
-    if (!trs.asset || !trs.asset.share) {
-        return cb('Invalid transaction asset. attributeShare is missing');
+    if (!trs.asset || !trs.asset.identityuse) {
+        return cb('Invalid transaction asset. share is missing');
     }
 
-    if (!trs.asset.share[0].owner) {
-        return cb('Share attribute owner is undefined');
+    if (!trs.asset.identityuse[0].owner) {
+        return cb('Identity use attribute owner is undefined');
     }
 
-    if (!trs.asset.share[0].type) {
-        return cb('Share attribute type is undefined');
+    if (!trs.asset.identityuse[0].type) {
+        return cb('Identity use attribute type is undefined');
     }
 
-    if (!trs.asset.share[0].applicant) {
-        return cb('Share attribute applicant is undefined');
+    if (!trs.asset.identityuse[0].serviceName) {
+        return cb('Identity use service name is undefined');
     }
 
-    if (!trs.asset.share[0].value) {
-        return cb('Share attribute value is undefined');
+    if (!trs.asset.identityuse[0].serviceProvider) {
+        return cb('Identity use service provider is undefined');
     }
-
 
     return cb(null, trs);
 
@@ -85,7 +84,7 @@ AttributeShareDecline.prototype.verify = function (trs, sender, cb) {
 //__API__ `process`
 
 //
-AttributeShareDecline.prototype.process = function (trs, sender, cb) {
+IdentityUseDecline.prototype.process = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
@@ -93,15 +92,15 @@ AttributeShareDecline.prototype.process = function (trs, sender, cb) {
 //__API__ `getBytes`
 
 //
-AttributeShareDecline.prototype.getBytes = function (trs) {
-    if (!trs.asset.share) {
+IdentityUseDecline.prototype.getBytes = function (trs) {
+    if (!trs.asset.identityuse) {
         return null;
     }
 
     var buf;
 
     try {
-        buf = new Buffer(trs.asset.share, 'utf8');
+        buf = new Buffer(trs.asset.identityuse, 'utf8');
     } catch (e) {
         throw e;
     }
@@ -113,7 +112,7 @@ AttributeShareDecline.prototype.getBytes = function (trs) {
 //__API__ `apply`
 
 
-AttributeShareDecline.prototype.apply = function (trs, block, sender, cb) {
+IdentityUseDecline.prototype.apply = function (trs, block, sender, cb) {
 
     return cb(null, trs);
 };
@@ -122,7 +121,7 @@ AttributeShareDecline.prototype.apply = function (trs, block, sender, cb) {
 //__API__ `undo`
 
 //
-AttributeShareDecline.prototype.undo = function (trs, block, sender, cb) {
+IdentityUseDecline.prototype.undo = function (trs, block, sender, cb) {
 
 };
 
@@ -130,7 +129,7 @@ AttributeShareDecline.prototype.undo = function (trs, block, sender, cb) {
 //__API__ `applyUnconfirmed`
 
 //
-AttributeShareDecline.prototype.applyUnconfirmed = function (trs, sender, cb) {
+IdentityUseDecline.prototype.applyUnconfirmed = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
@@ -138,15 +137,15 @@ AttributeShareDecline.prototype.applyUnconfirmed = function (trs, sender, cb) {
 //__API__ `undoUnconfirmed`
 
 //
-AttributeShareDecline.prototype.undoUnconfirmed = function (trs, sender, cb) {
+IdentityUseDecline.prototype.undoUnconfirmed = function (trs, sender, cb) {
     return cb(null, trs);
 };
 
-AttributeShareDecline.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.share[0], AttributeShareDecline.prototype.schema);
+IdentityUseDecline.prototype.objectNormalize = function (trs) {
+    var report = library.schema.validate(trs.asset.identityuse[0], IdentityUseDecline.prototype.schema);
 
     if (!report) {
-        throw 'Failed to validate attribute share schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate identity use decline schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -155,8 +154,8 @@ AttributeShareDecline.prototype.objectNormalize = function (trs) {
 };
 
 
-AttributeShareDecline.prototype.schema = {
-    id: 'AttributeShareDecline',
+IdentityUseDecline.prototype.schema = {
+    id: 'IdentityUseDecline',
     type: 'object',
     properties: {
         owner: {
@@ -166,16 +165,15 @@ AttributeShareDecline.prototype.schema = {
         type: {
             type: 'string',
         },
-        applicant: {
-            type: 'string',
-            format: 'address'
-        },
-        value: {
+        serviceName: {
             type: 'string'
         },
-
+        serviceProvider: {
+            type : 'string',
+            format: 'address'
+        }
     },
-    required: ['owner', 'type', 'applicant', 'value']
+    required: ['owner', 'type', 'serviceName', 'serviceProvider']
 };
 
 //
@@ -183,41 +181,39 @@ AttributeShareDecline.prototype.schema = {
 //__API__ `dbRead`
 
 //
-AttributeShareDecline.prototype.dbRead = function (raw) {
+IdentityUseDecline.prototype.dbRead = function (raw) {
     return {};
 };
 
-AttributeShareDecline.prototype.dbTable = 'attribute_shares';
+IdentityUseDecline.prototype.dbTable = 'identity_use_request_actions';
 
-AttributeShareDecline.prototype.dbFields = [
-    'attribute_id',
-    'applicant',
-    'value',
-    'timestamp'
+IdentityUseDecline.prototype.dbFields = [
+    'identity_use_request_id',
+    'timestamp',
+    'action'
 ];
 
 //
 //__API__ `dbSave`
 
 //
-AttributeShareDecline.prototype.dbSave = function (trs) {
+IdentityUseDecline.prototype.dbSave = function (trs) {
 
-    var params = {};
-    params.id = trs.asset.attributeShareRequestId;
-    params.status = constants.shareStatus.COMPLETED;
+    let params = {};
+    params.id = trs.asset.identityUseRequestId;
+    params.status = constants.identityUseRequestStatus.DECLINED;
+    params.action = constants.identityUseRequestActions.DECLINE;
 
-    library.db.query(sql.AttributeShareRequestsSql.updateShareRequest, params).then(function (err) {
+    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {
     });
-
 
     return {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            attribute_id: trs.asset.attribute_id,
-            applicant: trs.asset.share[0].applicant,
-            value: trs.asset.share[0].value,
-            timestamp: trs.timestamp
+            identity_use_request_id: trs.asset.identityUseRequestId,
+            timestamp: trs.timestamp,
+            action : params.action
         }
     };
 };
@@ -226,9 +222,9 @@ AttributeShareDecline.prototype.dbSave = function (trs) {
 //__API__ `ready`
 
 //
-AttributeShareDecline.prototype.ready = function (trs, sender) {
+IdentityUseDecline.prototype.ready = function (trs, sender) {
     return true;
 };
 
 // Export
-module.exports = AttributeShareDecline;
+module.exports = IdentityUseDecline;

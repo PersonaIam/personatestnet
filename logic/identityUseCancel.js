@@ -4,10 +4,11 @@ var constants = require('../helpers/constants.js');
 let sql = require('../sql/business/attributes.js');
 
 // Private fields
-var modules, library;
+var modules, library, db;
 
 // Constructor
 function IdentityUseCancel() {
+
 }
 
 // Public methods
@@ -27,12 +28,11 @@ IdentityUseCancel.prototype.bind = function (scope) {
 IdentityUseCancel.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
-    trs.asset.share = {
+    trs.asset.identityuse = {
         type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
-        applicant : data.applicant,
-        value : data.value
+        provider : data.serviceProvider
     };
 
     return trs;
@@ -43,7 +43,7 @@ IdentityUseCancel.prototype.create = function (data, trs) {
 
 //
 IdentityUseCancel.prototype.calculateFee = function (trs) {
-    return constants.fees.attributeshare;
+    return constants.fees.identityuserequestcancel;
 };
 
 //
@@ -56,26 +56,25 @@ IdentityUseCancel.prototype.verify = function (trs, sender, cb) {
         return cb('Invalid transaction amount');
     }
 
-    if (!trs.asset || !trs.asset.share) {
-        return cb('Invalid transaction asset. attributeShare is missing');
+    if (!trs.asset || !trs.asset.identityuse) {
+        return cb('Invalid transaction asset. share is missing');
     }
 
-    if (!trs.asset.share[0].owner) {
-        return cb('Share attribute owner is undefined');
+    if (!trs.asset.identityuse[0].owner) {
+        return cb('Identity use attribute owner is undefined');
     }
 
-    if (!trs.asset.share[0].type) {
-        return cb('Share attribute type is undefined');
+    if (!trs.asset.identityuse[0].type) {
+        return cb('Identity use attribute type is undefined');
     }
 
-    if (!trs.asset.share[0].applicant) {
-        return cb('Share attribute applicant is undefined');
+    if (!trs.asset.identityuse[0].serviceName) {
+        return cb('Identity use service name is undefined');
     }
 
-    if (!trs.asset.share[0].value) {
-        return cb('Share attribute value is undefined');
+    if (!trs.asset.identityuse[0].serviceProvider) {
+        return cb('Identity use service provider is undefined');
     }
-
 
     return cb(null, trs);
 
@@ -94,14 +93,14 @@ IdentityUseCancel.prototype.process = function (trs, sender, cb) {
 
 //
 IdentityUseCancel.prototype.getBytes = function (trs) {
-    if (!trs.asset.share) {
+    if (!trs.asset.identityuse) {
         return null;
     }
 
     var buf;
 
     try {
-        buf = new Buffer(trs.asset.share, 'utf8');
+        buf = new Buffer(trs.asset.identityuse, 'utf8');
     } catch (e) {
         throw e;
     }
@@ -143,10 +142,10 @@ IdentityUseCancel.prototype.undoUnconfirmed = function (trs, sender, cb) {
 };
 
 IdentityUseCancel.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.share[0], IdentityUseCancel.prototype.schema);
+    var report = library.schema.validate(trs.asset.identityuse[0], IdentityUseCancel.prototype.schema);
 
     if (!report) {
-        throw 'Failed to validate attribute share schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate identity use request cancel schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -166,16 +165,15 @@ IdentityUseCancel.prototype.schema = {
         type: {
             type: 'string',
         },
-        applicant: {
-            type: 'string',
-            format: 'address'
-        },
-        value: {
+        serviceName: {
             type: 'string'
         },
-
+        serviceProvider: {
+            type : 'string',
+            format: 'address'
+        }
     },
-    required: ['owner', 'type', 'applicant', 'value']
+    required: ['owner', 'type', 'serviceName', 'serviceProvider']
 };
 
 //
@@ -187,13 +185,12 @@ IdentityUseCancel.prototype.dbRead = function (raw) {
     return {};
 };
 
-IdentityUseCancel.prototype.dbTable = 'attribute_shares';
+IdentityUseCancel.prototype.dbTable = 'identity_use_request_actions';
 
 IdentityUseCancel.prototype.dbFields = [
-    'attribute_id',
-    'applicant',
-    'value',
-    'timestamp'
+    'identity_use_request_id',
+    'timestamp',
+    'action'
 ];
 
 //
@@ -202,22 +199,21 @@ IdentityUseCancel.prototype.dbFields = [
 //
 IdentityUseCancel.prototype.dbSave = function (trs) {
 
-    var params = {};
+    let params = {};
     params.id = trs.asset.identityUseRequestId;
-    params.status = constants.shareStatus.COMPLETED;
+    params.status = constants.identityUseRequestStatus.CANCELLED;
+    params.action = constants.identityUseRequestActions.CANCEL;
 
-    library.db.query(sql.IdentityUseRequestsSql.updateValidationRequest, params).then(function (err) {
+    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {
     });
-
 
     return {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            attribute_id: trs.asset.attribute_id,
-            applicant: trs.asset.share[0].applicant,
-            value: trs.asset.share[0].value,
-            timestamp: trs.timestamp
+            identity_use_request_id: trs.asset.identityUseRequestId,
+            timestamp: trs.timestamp,
+            action : params.action
         }
     };
 };

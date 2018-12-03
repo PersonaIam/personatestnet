@@ -148,7 +148,14 @@ let IdentityUseRequestsSql = {
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
-    updateValidationRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
+    getIdentityUseRequestsByServiceAndAttribute :
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'FROM identity_use_requests iur ' +
+    'JOIN attributes a ON a.id = iur.attribute_id ' +
+    'JOIN services s ON s.id = iur.service_id ' +
+    'WHERE a.id = ${attribute_id} AND s.id = ${service_id}',
+
+    updateIdentityUseRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
 };
 
 let AttributeConsumptionsSql = {

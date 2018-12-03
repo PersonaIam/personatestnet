@@ -28,11 +28,11 @@ IdentityUseApprove.prototype.bind = function (scope) {
 IdentityUseApprove.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
-    trs.asset.share = {
+    trs.asset.identityuse = {
         type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
-        applicant : data.applicant
+        provider : data.serviceProvider
     };
 
     return trs;
@@ -43,7 +43,7 @@ IdentityUseApprove.prototype.create = function (data, trs) {
 
 //
 IdentityUseApprove.prototype.calculateFee = function (trs) {
-    return constants.fees.attributeshareapproval;
+    return constants.fees.identityuserequestapprove;
 };
 
 //
@@ -56,20 +56,24 @@ IdentityUseApprove.prototype.verify = function (trs, sender, cb) {
         return cb('Invalid transaction amount');
     }
 
-    if (!trs.asset || !trs.asset.share) {
+    if (!trs.asset || !trs.asset.identityuse) {
         return cb('Invalid transaction asset. share is missing');
     }
 
-    if (!trs.asset.share[0].owner) {
-        return cb('Share attribute owner is undefined');
+    if (!trs.asset.identityuse[0].owner) {
+        return cb('Identity use attribute owner is undefined');
     }
 
-    if (!trs.asset.share[0].type) {
-        return cb('Share attribute type is undefined');
+    if (!trs.asset.identityuse[0].type) {
+        return cb('Identity use attribute type is undefined');
     }
 
-    if (!trs.asset.share[0].applicant) {
-        return cb('Share attribute applicant is undefined');
+    if (!trs.asset.identityuse[0].serviceName) {
+        return cb('Identity use service name is undefined');
+    }
+
+    if (!trs.asset.identityuse[0].serviceProvider) {
+        return cb('Identity use service provider is undefined');
     }
 
     return cb(null, trs);
@@ -89,14 +93,14 @@ IdentityUseApprove.prototype.process = function (trs, sender, cb) {
 
 //
 IdentityUseApprove.prototype.getBytes = function (trs) {
-    if (!trs.asset.share) {
+    if (!trs.asset.identityuse) {
         return null;
     }
 
     var buf;
 
     try {
-        buf = new Buffer(trs.asset.share, 'utf8');
+        buf = new Buffer(trs.asset.identityuse, 'utf8');
     } catch (e) {
         throw e;
     }
@@ -138,10 +142,10 @@ IdentityUseApprove.prototype.undoUnconfirmed = function (trs, sender, cb) {
 };
 
 IdentityUseApprove.prototype.objectNormalize = function (trs) {
-    var report = library.schema.validate(trs.asset.share[0], IdentityUseApprove.prototype.schema);
+    var report = library.schema.validate(trs.asset.identityuse[0], IdentityUseApprove.prototype.schema);
 
     if (!report) {
-        throw 'Failed to approve attribute share schema: ' + this.scope.schema.getLastErrors().map(function (err) {
+        throw 'Failed to validate identity use approve schema: ' + this.scope.schema.getLastErrors().map(function (err) {
             return err.message;
         }).join(', ');
     }
@@ -161,15 +165,15 @@ IdentityUseApprove.prototype.schema = {
         type: {
             type: 'string',
         },
-        applicant: {
-            type: 'string',
-            format: 'address'
+        serviceName: {
+            type: 'string'
         },
-        action: {
-            type : 'boolean'
+        serviceProvider: {
+            type : 'string',
+            format: 'address'
         }
     },
-    required: ['owner', 'type', 'applicant']
+    required: ['owner', 'type', 'serviceName', 'serviceProvider']
 };
 
 //
@@ -181,12 +185,12 @@ IdentityUseApprove.prototype.dbRead = function (raw) {
     return {};
 };
 
-IdentityUseApprove.prototype.dbTable = 'attribute_share_request_approvals';
+IdentityUseApprove.prototype.dbTable = 'identity_use_request_actions';
 
 IdentityUseApprove.prototype.dbFields = [
-    'attribute_share_request_id',
+    'identity_use_request_id',
     'timestamp',
-    'status'
+    'action'
 ];
 
 //
@@ -196,19 +200,20 @@ IdentityUseApprove.prototype.dbFields = [
 IdentityUseApprove.prototype.dbSave = function (trs) {
 
     let params = {};
-    params.id = trs.asset.attributeShareRequestId;
-    params.status = constants.shareStatus.APPROVED;
+    params.id = trs.asset.identityUseRequestId;
+    params.status = constants.identityUseRequestStatus.ACTIVE;
+    params.action = constants.identityUseRequestActions.APPROVE;
 
-    library.db.query(sql.AttributeShareRequestsSql.updateShareRequest, params).then(function (err) {
+    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {
     });
 
     return {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            attribute_share_request_id: trs.asset.attributeShareRequestId,
+            identity_use_request_id: trs.asset.identityUseRequestId,
             timestamp: trs.timestamp,
-            status : params.status
+            action : params.action
         }
     };
 };
