@@ -201,7 +201,7 @@ IdentityUseCancel.prototype.dbSave = function (trs) {
 
     let params = {};
     params.id = trs.asset.identityUseRequestId;
-    params.status = constants.identityUseRequestStatus.CANCELLED;
+    params.status = constants.identityUseRequestStatus.CANCELED;
     params.action = constants.identityUseRequestActions.CANCEL;
 
     library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {

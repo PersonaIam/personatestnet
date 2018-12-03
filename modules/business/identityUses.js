@@ -126,7 +126,7 @@ __private.attachApi = function () {
 };
 
 __private.getIdentityUseRequestsByFilter = function (filter, cb) {
-    if (!filter.serviceId && !(filter.serviceName && filter.serviceProvider) && !filter.attributeId && !(filter.owner && filter.type)) {
+    if (!filter.serviceProvider && !filter.serviceId && !(filter.serviceName && filter.serviceProvider) && !filter.attributeId && !filter.owner) {
         return cb(messages.INCORRECT_IDENTITY_USE_PARAMETERS);
     }
     let query, params;
@@ -139,9 +139,17 @@ __private.getIdentityUseRequestsByFilter = function (filter, cb) {
             query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceId;
             params = {service_id: filter.serviceId}
         } else {
+            if (filter.owner) {
+                query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByOwner;
+                params = {owner: filter.owner}
+            }
             if (filter.serviceName && filter.serviceProvider) {
                 query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceNameAndProvider;
                 params = {service_name: filter.serviceName, service_provider: filter.serviceProvider}
+            }
+            if (!filter.serviceName && filter.serviceProvider) {
+                query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceProvider;
+                params = {service_provider: filter.serviceProvider}
             }
         }
     }
@@ -184,154 +192,74 @@ shared.requestIdentityUse = function (req, cb) {
                 return cb(messages.INVALID_PASSPHRASE);
             }
         }
-
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.identityuse[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+            if (!account || account.address !== req.body.asset.identityuse[0].owner) {
+                return cb(messages.IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR)
             }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-            reqGetAttributesByFilter.body.type = data.attribute_type.name;
-
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, dataAttributes) {
-                if (err) {
-                    return cb(err);
+            let reqGetAttributeType = req;
+            reqGetAttributeType.body.name = req.body.asset.identityuse[0].type;
+            attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
+                if (err || !data.attribute_type) {
+                    return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
                 }
-                if (!dataAttributes.attributes || dataAttributes.attributes.length === 0) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND);
-                }
+                let reqGetAttributesByFilter = req;
+                reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
+                reqGetAttributesByFilter.body.type = data.attribute_type.name;
 
-                if (dataAttributes.attributes[0].expire_timestamp && dataAttributes.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
-                }
+                attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, dataAttributes) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    if (!dataAttributes.attributes || dataAttributes.attributes.length === 0) {
+                        return cb(messages.ATTRIBUTE_NOT_FOUND);
+                    }
 
-                if (!dataAttributes.attributes[0].active) {
-                    return cb(messages.INACTIVE_ATTRIBUTE);
-                }
+                    if (dataAttributes.attributes[0].expire_timestamp && dataAttributes.attributes[0].expire_timestamp < slots.getTime()) {
+                        return cb(messages.EXPIRED_ATTRIBUTE);
+                    }
 
-                services.getServicesByFilter(
-                    {   name : req.body.asset.identityuse[0].serviceName,
-                        provider :req.body.asset.identityuse[0].serviceProvider } , function (err, dataServices) {
+                    if (!dataAttributes.attributes[0].active) {
+                        return cb(messages.INACTIVE_ATTRIBUTE);
+                    }
 
-                    req.body.serviceId = dataServices.services[0].id;
-                    req.body.attributeId = dataAttributes.attributes[0].id;
+                    services.getServicesByFilter(
+                        {
+                            name: req.body.asset.identityuse[0].serviceName,
+                            provider: req.body.asset.identityuse[0].serviceProvider
+                        }, function (err, dataServices) {
 
-                    __private.getIdentityUseRequestsByFilter(req.body, function (err, identityUseRequests) {
-                        if (err) {
-                            return cb(err);
-                        }
+                            if (dataServices.services[0].status === constants.serviceStatus.INACTIVE) {
+                                return cb (messages.IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE)
+                            }
 
-                        if (identityUseRequests && identityUseRequests.length === 0) {
-                            return cb(messages.IDENTITY_USE_ALREADY_EXISTS);
-                        }
+                            req.body.serviceId = dataServices.services[0].id;
+                            req.body.attributeId = dataAttributes.attributes[0].id;
 
-                        req.body.asset.identityuse[0].serviceId = dataServices.services[0].id;
-                        req.body.asset.identityuse[0].attributeId = dataAttributes.attributes[0].id;
-
-                        attributes.buildTransaction({
-                                req: req,
-                                keypair: keypair,
-                                transactionType: transactionTypes.REQUEST_IDENTITY_USE
-                            },
-                            function (err, resultData) {
+                            __private.getIdentityUseRequestsByFilter(req.body, function (err, identityUseRequests) {
                                 if (err) {
                                     return cb(err);
                                 }
-                                return cb(null, resultData);
+
+                                if (identityUseRequests && identityUseRequests.length === 0) {
+                                    return cb(messages.IDENTITY_USE_ALREADY_EXISTS);
+                                }
+
+                                req.body.asset.identityuse[0].serviceId = dataServices.services[0].id;
+                                req.body.asset.identityuse[0].attributeId = dataAttributes.attributes[0].id;
+
+                                attributes.buildTransaction({
+                                        req: req,
+                                        keypair: keypair,
+                                        transactionType: transactionTypes.REQUEST_IDENTITY_USE
+                                    },
+                                    function (err, resultData) {
+                                        if (err) {
+                                            return cb(err);
+                                        }
+                                        return cb(null, resultData);
+                                    });
                             });
-                    });
-                })
-            });
-        });
-    });
-};
-
-shared.approveShareRequest = function (req, cb) {
-    library.schema.validate(req.body, schema.attributeOperation, function (err) {
-        if (err) {
-            return cb(err[0].message);
-        }
-
-        if (!req.body.asset || !req.body.asset.identityuse) {
-            return cb('identityuse is not provided');
-        }
-
-        if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].owner)) {
-            return cb('Owner address is incorrect');
-        }
-
-        if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].applicant)) {
-            return cb('Applicant address is incorrect');
-        }
-
-        let keypair;
-        if (!req.body.signature) {
-            keypair = library.crypto.makeKeypair(req.body.secret);
-        }
-        if (keypair && req.body.publicKey) {
-            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
-                return cb(messages.INVALID_PASSPHRASE);
-            }
-        }
-
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.identityuse[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-            reqGetAttributesByFilter.body.type = req.body.asset.identityuse[0].type;
-
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
-                    return cb('Cannot approve identityuse attribute request : ' + messages.ATTRIBUTE_NOT_FOUND);
-                }
-
-                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
-                }
-                if (!data.attributes[0].active) {
-                    return cb(messages.INACTIVE_ATTRIBUTE);
-                }
-
-                req.body.attribute_id = data.attributes[0].id;
-                req.body.service_id = req.body.asset.identityuse[0].service_id;
-
-                __private.getIdentityUseRequestsByFilter(req.body, function (err, attributeShareRequests) {
-
-                    if (err || !attributeShareRequests) {
-                        return cb(messages.ATTRIBUTE_APPROVAL_SHARE_WITH_NO_SHARE_REQUEST);
-                    }
-
-                    // if (req.body.asset.identityuse[0].action && attributeShareRequests[0].status === constants.shareStatus.APPROVED) {
-                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_APPROVED);
-                    // }
-                    //
-                    // if (req.body.asset.identityuse[0].action && attributeShareRequests[0].status === constants.shareStatus.COMPLETED) {
-                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_COMPLETED);
-                    // }
-                    //
-                    // if (!req.body.asset.identityuse[0].action && attributeShareRequests[0].status === constants.shareStatus.UNAPPROVED) {
-                    //     return cb(messages.ATTRIBUTE_APPROVAL_SHARE_ALREADY_UNAPPROVED);
-                    // }
-
-                    req.body.asset.attributeShareRequestId = attributeShareRequests[0].id;
-
-                    attributes.buildTransaction({
-                            req: req,
-                            keypair: keypair,
-                            transactionType: transactionTypes.APPROVE_IDENTITY_USE
-                        },
-                        function (err, resultData) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            return cb(null, resultData);
-                        });
+                        })
                 });
             });
         });
@@ -416,7 +344,10 @@ __private.identityUseAnswer = function (req, cb) {
                     }
 
                     req.body.serviceId = data.services[0].id;
-                    console.log('zzz + ' + JSON.stringify(req.body))
+                    if (data.services[0].status === constants.serviceStatus.INACTIVE) {
+                        return cb (messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE)
+                    }
+
                     __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
                         console.log(' --- ' + JSON.stringify(data))
                         if (err || !data.identityUseRequests) {
@@ -489,13 +420,13 @@ __private.checkIdentityUseAnswer = function(params, cb) {
     }
 
     if (params.answer === constants.identityUseRequestActions.END) {
-        if (params.status !== constants.identityUseRequestStatus.IN_PROGRESS) {
-            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_IN_PROGRESS);
+        if (params.status !== constants.identityUseRequestStatus.ACTIVE) {
+            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
         }
         return cb(null, {transactionType : transactionTypes.END_IDENTITY_USE_REQUEST});
     }
 
-    if (params.answer === constants.identityUseRequestStatus.CANCEL) {
+    if (params.answer === constants.identityUseRequestActions.CANCEL) {
         if (params.status !== constants.identityUseRequestStatus.PENDING_APPROVAL) {
             return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
         }
@@ -508,8 +439,6 @@ __private.checkIdentityUseAnswer = function(params, cb) {
 
 __private.checkIdentityUseAnswerSender = function (params, cb) {
 
-    console.log(JSON.stringify(params))
-
     // only providers can answer with an identityUseRequestProviderAction
     if (params.answer in constants.identityUseRequestProviderActions){
         if (!params.account || params.account.address !== params.provider) {
@@ -518,7 +447,7 @@ __private.checkIdentityUseAnswerSender = function (params, cb) {
     }
 
     // only owners can answer with an identityUseRequestOwnerAction
-    if (params.answer in constants.identityUseRequestProviderActions){
+    if (params.answer in constants.identityUseRequestOwnerActions){
         if (!params.account || params.account.address !== params.owner) {
             return cb(messages.IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR)
         }

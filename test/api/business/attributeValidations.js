@@ -1612,7 +1612,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -2559,7 +2559,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -2603,7 +2603,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -2647,7 +2647,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -2691,7 +2691,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -2734,7 +2734,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);

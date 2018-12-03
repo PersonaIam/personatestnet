@@ -17,7 +17,6 @@ module.exports = {
 		verify: 10000000,
 		createattribute: 4,
 		updateattribute: 3,
-        attributesharerequest: 2,
 		attributevalidationrequest: 2,
         attributevalidationrequestapprove: 1,
         attributevalidationrequestdecline: 1,
@@ -75,7 +74,7 @@ module.exports = {
         DECLINED : 'DECLINED',
         COMPLETED : 'COMPLETED',
 		REJECTED: 'REJECTED',
-        CANCELLED : 'CANCELLED'
+        CANCELED : 'CANCELED'
     },
     validationRequestActions : {
         DECLINE : 'DECLINE',
@@ -107,7 +106,7 @@ module.exports = {
         ACTIVE : 'ACTIVE',
         DECLINED : 'DECLINED',
         ENDED : 'ENDED',
-        CANCELLED : 'CANCELLED'
+        CANCELED : 'CANCELED'
     },
     identityUseRequestActions : {
         APPROVE : 'APPROVE',
@@ -117,10 +116,10 @@ module.exports = {
     },
     identityUseRequestProviderActions : {
         APPROVE : 'APPROVE',
-        DECLINE : 'DECLINE',
-        END : 'END',
+        DECLINE : 'DECLINE'
     },
     identityUseRequestOwnerActions : {
+        END : 'END',
         CANCEL : 'CANCEL'
     },
 

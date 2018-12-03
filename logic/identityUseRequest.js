@@ -57,8 +57,6 @@ IdentityUseRequest.prototype.verify = function (trs, sender, cb) {
         return cb('Invalid transaction asset. identityuse is missing');
     }
 
-    console.log(JSON.stringify(trs.asset))
-
     if (!trs.asset.identityuse[0].serviceId) {
         return cb('Invalid serviceId');
     }

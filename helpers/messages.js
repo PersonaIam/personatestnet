@@ -81,11 +81,14 @@ module.exports = {
 
     IDENTITY_USE_REQUEST_MISSING_FOR_ACTION : 'There is no identity use request for this action',
     UNKNOWN_IDENTITY_USE_REQUEST_ANSWER : 'Unknown identity use request answer',
-    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_IN_PROGRESS: 'The specified identity use request must be in progress for the action to take place',
+    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE: 'The specified identity use request must be active for the action to take place',
     ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be pending approval for the action to take place',
 
     IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR : 'Only the service provider is allowed to perform this action on an identity use request',
     IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to perform this action on an identity use request',
+    IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to create an identity use request',
+    IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE : 'An identity use request cannot be created for an inactive service',
+    IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE : 'No action can be performed on an identity use request which belongs to an inactive service',
     DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
 };
 

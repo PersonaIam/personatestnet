@@ -47,17 +47,29 @@ const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
 const DEFAULT_AMOUNT = 0;
 
-const PROVIDER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-const SERVICE_NAME = 'Ada';
-const SERVICE2_NAME = 'Amy';
-const SERVICE3_NAME = 'Anabella';
-const SERVICE4_NAME = 'Arielle';
+const PROVIDER = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
+const PROVIDER_SECRET = "isolate spoil weekend protect swallow trap brown cross message patient public reward";
+const PROVIDER_PUBLIC_KEY = '032699280d1527ed944131ac488fe264a80617b0acc9305fe0d40c61b9a1b924f9';
+const SERVICE_NAME = 'Ada';             // to be used by Approve Identity Use Request
+const SERVICE2_NAME = 'Anabella';       // to be used by End Identity Use Request
+const SERVICE3_NAME = 'Amy';            // to be used by Decline Identity Use Request
+const SERVICE4_NAME = 'Arielle';        // to be used by Cancel Identity Use Request
+
+const SERVICE5_NAME = 'Ali';            // to be used by Create Identity Use Request on Inactive Service
+const SERVICE6_NAME = 'Aria';           // to be used by Approve Identity Use Request on Inactive Service
+const SERVICE7_NAME = 'Akiane';         // to be used by End Identity Use Request on Inactive Service
+const SERVICE8_NAME = 'Anne';           // to be used by Decline Identity Use Request on Inactive Service
+const SERVICE9_NAME = 'Astrid';         // to be used by Cancel Identity Use Request on Inactive Service
+
 const DESCRIPTION = 'Modus';
 
 const REASON_FOR_DECLINE_1024_GOOD =
     '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
 const REASON_FOR_REJECT_1024_GOOD =
     '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
+
+const REASON_FOR_DECLINE_1025_TOO_LONG =
+    '10000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
 
 // RESULTS
 
@@ -515,7 +527,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Second Service - will store the declined request', function (done) {
+    it('Create Service - Second Service - will store the approved + ended request', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -569,7 +581,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Fourth Service - will store the approved + ended request', function (done) {
+    it('Create Service - Fourth Service - will store the denied request', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -596,12 +608,147 @@ describe('Create Services', function() {
         });
     });
 
-    it('Get Services by provider - 4 result', function (done) {
+    it('Create Service - Fifth Service - will be used to create requests on an inactive service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE5_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create Service - Sixth Service - will be used to approve requests on an inactive service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE6_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create Service - Seventh Service - will be used to end requests on an inactive service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE7_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create Service - Eighth Service - will be used to decline requests on an inactive service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE8_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create Service - Ninth Service - will be used to cancel requests on an inactive service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE9_NAME;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Get Services by provider - 9 results', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(4);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body.services).to.have.length(9);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(9);
             done();
         });
     });
@@ -992,7 +1139,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELLED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.CANCELED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -1292,6 +1439,23 @@ describe('Create Identity Use Requests - negative scenarios', function() {
         });
     });
 
+    it('Create Identity Use Request - action is made by the provider', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR);
+            done();
+        });
+    });
+
 })
 
 describe('Create Identity Use Requests - SUCCESS', function () {
@@ -1390,7 +1554,103 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Request - PENDING_APPROVAL', function (done) {
+    it('Create Identity Use Request - SUCCESS -> For the second service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Create Identity Use Request - SUCCESS -> For the third service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Create Identity Use Request - SUCCESS -> For the fourth service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - Using the attributeId and serviceId', function (done) {
 
         let param = {};
 
@@ -1409,9 +1669,56 @@ describe('Create Identity Use Requests - SUCCESS', function () {
             });
         });
     });
+
+    it('Get Identity Use Request - Using the service provider', function (done) {
+
+        let param = {serviceProvider : PROVIDER};
+
+        getIdentityUseRequests(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(4);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - Using the owner', function (done) {
+
+        let param = {owner : OWNER};
+
+        getIdentityUseRequests(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(4);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+            done();
+        });
+    });
 });
 
-describe('Approve identity use request', function () {
+describe('Approve Identity Use Request', function () {
+
+    it('Approve Identity Use Request -> Request is PENDING APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR);
+            done();
+        });
+    });
 
     it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
 
@@ -1425,8 +1732,8 @@ describe('Approve identity use request', function () {
         let param = {};
         param.owner = OWNER;
         param.type = IDENTITY_CARD;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
 
@@ -1470,8 +1777,8 @@ describe('Approve identity use request', function () {
         let param = {};
         param.owner = OWNER;
         param.type = IDENTITY_CARD;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
 
@@ -1489,8 +1796,8 @@ describe('Approve identity use request', function () {
         let param = {};
         param.owner = OWNER;
         param.type = IDENTITY_CARD;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
         param.reason = REASON_FOR_DECLINE_1024_GOOD;
@@ -1522,6 +1829,1056 @@ describe('Approve identity use request', function () {
             done();
         });
     });
+})
+
+describe('End Identity Use Request', function () {
+
+    it('End Identity Use Request -> Request is still PENDING_APPROVAL', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            done();
+        });
+    });
+
+    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestapprove);
+            });
+            done();
+        });
+    });
+
+    it('End Identity Use Request -> Request is ACTIVE, action is made by the PROVIDER instead of the OWNER', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR);
+            done();
+        });
+    });
+
+    it('End Identity Use Request - SUCCESS -> Request goes from ACTIVE to ENDED', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestend);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestend);
+            });
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - ENDED', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE2_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ENDED);
+                    done();
+                });
+            });
+        })
+    })
+
+    it('Approve Identity Use Request -> Request is already ENDED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Decline Identity Use Request -> Request is already ENDED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request -> Request is already ENDED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('End Identity Use Request -> Request is already ENDED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            done();
+        });
+    });
+})
+
+describe('Decline Identity Use Request', function () {
+
+    it('Decline Identity Use Request -> Request is PENDING_APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR);
+            done();
+        });
+    });
+
+    it('Decline Identity Use Request - no reason is provided for declining the identity use request', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.DECLINE_IDENTITY_USE_REQUEST_NO_REASON);
+            done();
+        });
+    });
+
+    it('Decline Identity Use Request - Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = PROVIDER_SECRET;
+        params.publicKey = PROVIDER_PUBLIC_KEY;
+        params.serviceName = SERVICE3_NAME;
+        params.serviceProvider = PROVIDER;
+        params.reason = REASON_FOR_DECLINE_1025_TOO_LONG;
+
+        let request = createAnswerIdentityUseRequest(params);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REASON_TOO_BIG_DECLINE);
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - Still PENDING_APPROVAL after the incorrect declinings', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE3_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                    done();
+                });
+            });
+        })
+    })
+
+    it('Decline Identity Use Request - SUCCESS -> Request goes from PENDING_APPROVAL to DECLINED', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestdecline);
+            });
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - DECLINED', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE3_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.DECLINED);
+                    done();
+                });
+            });
+        })
+    })
+
+    it('Decline Identity Use Request -> Request is already DECLINED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Approve Identity Use Request -> Request is already DECLINED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request -> Request is already DECLINED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('End Identity Use Request -> Request is already DECLINED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            done();
+        });
+    });
+})
+
+describe('Cancel Identity Use Request', function () {
+
+    it('Cancel Identity Use Request -> Request is PENDING_APPROVAL, action is made by the PROVIDER instead of the OWNER', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request - SUCCESS -> Request goes from PENDING_APPROVAL to CANCELED', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestcancel);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestcancel);
+            });
+            done();
+        });
+    });
+
+    it('Get Identity Use Request - CANCELED', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE4_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+                param.attributeId = res.body.attributes[0].id;
+                getIdentityUseRequests(param, function (err, res) {
+                    console.log(res.body);
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.CANCELED);
+                    done();
+                });
+            });
+        })
+    })
+
+    it('Decline Identity Use Request -> Request is already CANCELED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Approve Identity Use Request -> Request is already CANCELED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request -> Request is already CANCELED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('End Identity Use Request -> Request is already CANCELED', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE4_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            done();
+        });
+    });
+})
+
+describe('Actions on an inactive service', function () {
+
+    // Inactivate Fifth Service ( for CREATE action )
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE5_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE5_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('Create Identity Use Request - Service is INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE5_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
+    // Inactivate Sixth Service ( for APPROVE action )
+
+    it('Create Identity Use Request - SUCCESS -> For the sixth service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE6_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE6_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE6_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('Approve Identity Use Request -> Service is INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE6_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
+    // Inactivate Seventh Service ( for END action )
+
+    it('Create Identity Use Request - SUCCESS -> For the seventh service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE7_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE7_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestapprove);
+            });
+            done();
+        });
+    });
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE7_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE7_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('End Identity Use Request -> Service is INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE7_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
+    // Inactivate Eighth Service ( for DECLINE action )
+
+    it('Create Identity Use Request - SUCCESS -> For the eighth service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE8_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE8_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE8_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('Decline Identity Use Request - Service is INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE8_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
+    // Inactivate Ninth Service ( for CANCEL action )
+
+    it('Create Identity Use Request - SUCCESS -> For the ninth service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE9_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('Inactivate Service', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE9_NAME;
+        params.provider = PROVIDER;
+
+        let request = inactivateServiceRequest(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.inactivateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.inactivateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get Service - After Inactivation' , function (done) {
+        getServices({name: SERVICE9_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.INACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('Cancel Identity Use Request - Service is INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.type = IDENTITY_CARD;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE9_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
 })
 
 describe('Generate Report', function () {
@@ -1783,11 +3140,11 @@ function postCancelValidationAttributeRequest(params, done) {
 }
 
 function getIdentityUseRequests(params, done) {
-    let url = '/api/identity-use/';
+    let url = '/api/identity-use';
     if (params.attributeId && params.serviceId) {
         url += '?attributeId=' + '' + params.attributeId + '&serviceId=' + '' + params.serviceId;
     } else {
-        if (params.serviceName || params.serviceProvider) {
+        if (params.serviceName || params.serviceProvider || params.owner) {
             url += '?';
         }
         if (params.serviceName) {
@@ -1795,6 +3152,9 @@ function getIdentityUseRequests(params, done) {
         }
         if (params.serviceProvider) {
             url += '&serviceProvider=' + '' + params.serviceProvider;
+        }
+        if (params.owner) {
+            url += '&owner=' + '' + params.owner;
         }
     }
     node.get(url, done);
@@ -1826,24 +3186,6 @@ function postService(params, done) {
     node.post('/api/services', params, done);
 }
 
-function getServices(params, done) {
-
-    let url = '/api/services/';
-    if (params.name || params.provider || params.status) {
-        url += '?';
-    }
-    if (params.name) {
-        url += 'name=' + '' + params.name;
-    }
-    if (params.provider) {
-        url += '&provider=' + '' + params.provider;
-    }
-    if (params.status) {
-        url += '&status=' + '' + params.status;
-    }
-    node.get(url, done);
-}
-
 // others
 
 function getBalance(address, done) {
@@ -1856,6 +3198,28 @@ function putTransaction(params, done) {
 
 function getTransaction(params, done) {
     node.get(`/api/transactions/get?id=${params.id}`, done);
+}
+
+function getServices(params, done) {
+
+    let url = '/api/services';
+    if (params.name || params.provider || params.status) {
+        url += '?';
+    }
+    if (params.name) {
+        url += '&name=' + '' + params.name;
+    }
+    if (params.provider) {
+        url += '&provider=' + '' + params.provider;
+    }
+    if (params.status) {
+        url += '&status=' + '' + params.status;
+    }
+    node.get(url, done);
+}
+
+function putInactivateService(params, done) {
+    node.put('/api/services/inactivate', params, done);
 }
 
 function createReport(reportName, cb) {

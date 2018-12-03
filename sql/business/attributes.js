@@ -148,6 +148,20 @@ let IdentityUseRequestsSql = {
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
+    getIdentityUseRequestsByServiceProvider :
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'FROM identity_use_requests iur ' +
+    'JOIN attributes a ON a.id = iur.attribute_id ' +
+    'JOIN services s ON s.id = iur.service_id ' +
+    'WHERE s.provider = ${service_provider}',
+
+    getIdentityUseRequestsByOwner :
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'FROM identity_use_requests iur ' +
+    'JOIN attributes a ON a.id = iur.attribute_id ' +
+    'JOIN services s ON s.id = iur.service_id ' +
+    'WHERE a.owner = ${owner}',
+
     getIdentityUseRequestsByServiceAndAttribute :
     'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
     'FROM identity_use_requests iur ' +
