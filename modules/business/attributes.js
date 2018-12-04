@@ -200,7 +200,6 @@ Attributes.getAttributesByFilter = function (filter, cb) {
                     status : constants.validationRequestStatus.COMPLETED
                 })
                     .then(function (activeAttributes) {
-                        console.log(JSON.stringify(activeAttributes));
                         let activeAttributesIds = activeAttributes.map(row => row.id);
                         attributes.forEach(attribute => {
                             attribute.active = activeAttributesIds.includes(attribute.id);

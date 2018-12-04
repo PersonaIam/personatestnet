@@ -205,7 +205,6 @@ AttributeValidationRequest.prototype.dbFields = [
 
 //
 AttributeValidationRequest.prototype.dbSave = function (trs) {
-    console.log('HERE')
     return {
         table: this.dbTable,
         fields: this.dbFields,

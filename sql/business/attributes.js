@@ -131,45 +131,47 @@ let IdentityUseRequestsSql = {
         'attribute_id',
         'service_id',
         'status',
+        'reason',
         'timestamp'
     ],
 
     getIdentityUseRequestsByServiceId :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
     'FROM identity_use_requests iur ' +
     'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE "service_id" = ${service_id}',
 
     getIdentityUseRequestsByServiceNameAndProvider :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
     'FROM identity_use_requests iur ' +
     'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
     getIdentityUseRequestsByServiceProvider :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
     'FROM identity_use_requests iur ' +
     'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.provider = ${service_provider}',
 
     getIdentityUseRequestsByOwner :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
     'FROM identity_use_requests iur ' +
     'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE a.owner = ${owner}',
 
     getIdentityUseRequestsByServiceAndAttribute :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status ' +
+    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
     'FROM identity_use_requests iur ' +
     'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE a.id = ${attribute_id} AND s.id = ${service_id}',
 
     updateIdentityUseRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
+    updateIdentityUseWithReason : 'UPDATE identity_use_requests SET status = ${status}, reason = ${reason} WHERE id = ${id}',
 };
 
 let AttributeConsumptionsSql = {

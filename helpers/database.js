@@ -107,7 +107,6 @@ function Migrator (pgp, db) {
 		db.query(sql).then(function () {
 			return waterCb();
 		}).catch(function (err) {
-			console.log(JSON.stringify(err))
 			return waterCb(err);
 		});
 	};

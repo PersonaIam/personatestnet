@@ -79,6 +79,7 @@ const COUNT = 'count';
 const TRUE = true;
 const FALSE = false;
 const STATUS = 'status';
+const REASON = 'reason';
 
 // TEST UTILS
 
@@ -2161,6 +2162,7 @@ describe('Decline Identity Use Request', function () {
                     node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
                     node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.DECLINED);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(REASON_FOR_DECLINE_1024_GOOD);
                     done();
                 });
             });

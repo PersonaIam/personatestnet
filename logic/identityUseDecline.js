@@ -76,6 +76,10 @@ IdentityUseDecline.prototype.verify = function (trs, sender, cb) {
         return cb('Identity use service provider is undefined');
     }
 
+    if (!trs.asset.identityuse[0].reason) {
+        return cb('Identity use service provider is undefined');
+    }
+
     return cb(null, trs);
 
 };
@@ -203,8 +207,9 @@ IdentityUseDecline.prototype.dbSave = function (trs) {
     params.id = trs.asset.identityUseRequestId;
     params.status = constants.identityUseRequestStatus.DECLINED;
     params.action = constants.identityUseRequestActions.DECLINE;
+    params.reason = trs.asset.identityuse[0].reason;
 
-    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {
+    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseWithReason, params).then(function (err) {
     });
 
     return {

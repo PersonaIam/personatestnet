@@ -349,7 +349,6 @@ __private.identityUseAnswer = function (req, cb) {
                     }
 
                     __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
-                        console.log(' --- ' + JSON.stringify(data))
                         if (err || !data.identityUseRequests) {
                             return cb(messages.IDENTITY_USE_REQUEST_MISSING_FOR_ACTION);
                         }

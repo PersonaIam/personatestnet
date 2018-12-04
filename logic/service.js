@@ -205,9 +205,6 @@ Service.prototype.dbSave = function (trs) {
     params.service_name = trs.asset.service.name;
     params.service_provider = trs.asset.service.provider;
 
-    library.db.query(sql.ServicesSql.insertAttributesForService, params).then(function (err) {
-    });
-
     let values = {
         table: this.dbTable,
         fields: this.dbFields,
