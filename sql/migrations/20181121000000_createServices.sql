@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS "services"(
   "provider" VARCHAR(36) NOT NULL,
   "description" VARCHAR(36) NOT NULL,
   "status" VARCHAR(36) NOT NULL,
-  "timestamp" INT NOT NULL
+  "timestamp" INT NOT NULL,
+  "attribute_types" TEXT NOT NULL
 );
 
 /* Unique Indexes */

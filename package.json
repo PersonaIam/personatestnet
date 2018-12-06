@@ -81,8 +81,10 @@
     "grunt-jsdox": "=0.1.7",
     "grunt-obfuscator": "=0.1.0",
     "jsdox": "=0.4.10",
+    "jsencrypt": "^3.0.0-rc.1",
     "jshint": "=2.9.3",
     "mocha": "=3.1.0",
+    "mochawesome": "^3.1.1",
     "moment": "=2.15.1",
     "sleep": "=5.2.3",
     "supertest": "=2.0.0"

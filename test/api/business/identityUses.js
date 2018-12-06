@@ -79,6 +79,7 @@ const COUNT = 'count';
 const TRUE = true;
 const FALSE = false;
 const STATUS = 'status';
+const ATTRIBUTES = 'attributes';
 const REASON = 'reason';
 
 // TEST UTILS
@@ -1286,165 +1287,10 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
 
 describe('Create Identity Use Requests - negative scenarios', function() {
 
-    it('Create Attribute - success (Timestamp in the past, but not expirable)', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(OWNER, function (err, res) {
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-            balance = parseInt(res.body.balance);
-        });
-
-        let param = {};
-        time = slots.getTime() - 20000;
-        param.expire_timestamp = time;
-        param.type = EMAIL;
-        param.value = EMAIL_VALUE;
-        let request = createAttributeRequest(param);
-
-        postAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.createattribute);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
-            });
-            done();
-        });
-    });
-
-    it('Create Identity Use Request - expired attribute', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.type = 'email';
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EXPIRED_ATTRIBUTE);
-            done();
-        });
-    });
-
-    it('Update Attribute - Only expire timestamp ( EMAIL, make it not expired )', function (done) {
-
-        getAttribute(OWNER, 'email', function (err, res) {
-
-            let attributeId = res.body.attributes[0].id;
-            let unconfirmedBalance = 0;
-            let balance = 0;
-            getBalance(OWNER, function (err, res) {
-                unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-                balance = parseInt(res.body.balance);
-            });
-
-            let param = {};
-            param.attributeId = attributeId;
-            param.owner = OWNER;
-            param.secret = SECRET;
-            param.publicKey = PUBLIC_KEY;
-            param.value = EMAIL_VALUE2;
-            time = slots.getTime();
-            param.expire_timestamp = time + 200000;
-            let request = updateAttributeRequest(param);
-
-            putAttributeUpdate(request, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
-                sleep.msleep(SLEEP_TIME);
-                getBalance(OTHER_OWNER, function (err, res) {
-                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                    let balanceAfter = parseInt(res.body.balance);
-                    node.expect(balance - balanceAfter === constants.fees.updateattribute);
-                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.updateattribute);
-                });
-                done();
-            });
-        });
-    });
-
-    it('Create Identity Use Request - inactive attribute', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.type = 'email';
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
-            done();
-        });
-    });
-
-    it('Create Identity Use Request - attribute does not exist', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.type = ALIAS;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
-            done();
-        });
-    });
-
-    it('Create Identity Use Request - attribute type does not exist', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.type = INCORRECT_ATTRIBUTE_TYPE;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            done();
-        });
-    });
-
-    it('Create Identity Use Request - attribute has just one completed validation, which is insufficient to become active', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.type = IDENTITY_CARD;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INACTIVE_ATTRIBUTE);
-            done();
-        });
-    });
-
     it('Create Identity Use Request - action is made by the provider', function (done) {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
 
@@ -1457,6 +1303,21 @@ describe('Create Identity Use Requests - negative scenarios', function() {
         });
     });
 
+    it('Create Identity Use Request - IDENTITY_CARD attribute has just one completed validation, which is insufficient to become active', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE);
+            done();
+        });
+    });
 })
 
 describe('Create Identity Use Requests - SUCCESS', function () {
@@ -1534,7 +1395,6 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1566,7 +1426,6 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1598,7 +1457,6 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -1630,7 +1488,6 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -1665,6 +1522,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
                     node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
                     node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(ATTRIBUTES);
                     done();
                 });
             });
@@ -1706,7 +1564,6 @@ describe('Approve Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1732,7 +1589,6 @@ describe('Approve Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1777,7 +1633,6 @@ describe('Approve Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1796,7 +1651,6 @@ describe('Approve Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1816,7 +1670,6 @@ describe('Approve Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
@@ -1838,7 +1691,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1864,7 +1716,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1889,7 +1740,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1915,7 +1765,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1960,7 +1809,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1979,7 +1827,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -1999,7 +1846,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -2018,7 +1864,6 @@ describe('End Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
@@ -2040,7 +1885,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2060,7 +1904,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2126,7 +1969,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2173,7 +2015,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2193,7 +2034,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2212,7 +2052,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2231,7 +2070,6 @@ describe('Decline Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
@@ -2253,7 +2091,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2279,7 +2116,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2324,7 +2160,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2344,7 +2179,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2363,7 +2197,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2382,7 +2215,6 @@ describe('Cancel Identity Use Request', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
@@ -2449,7 +2281,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE5_NAME;
@@ -2477,7 +2308,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE6_NAME;
@@ -2545,7 +2375,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE6_NAME;
@@ -2573,7 +2402,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
@@ -2605,7 +2433,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
@@ -2673,7 +2500,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
@@ -2701,7 +2527,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
@@ -2769,7 +2594,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = PROVIDER_SECRET;
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
@@ -2798,7 +2622,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE9_NAME;
@@ -2866,7 +2689,6 @@ describe('Actions on an inactive service', function () {
 
         let param = {};
         param.owner = OWNER;
-        param.type = IDENTITY_CARD;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE9_NAME;
@@ -2977,10 +2799,10 @@ function createIdentityUseRequest(param) {
     request.asset = {};
     request.asset.identityuse = [];
     request.asset.identityuse[0] = {};
-    request.asset.identityuse[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
     request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
     request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
+    request.asset.identityuse[0].attributes = [{identity_card : 'HHH'}]
 
     console.log(request);
     return request;
@@ -3044,6 +2866,7 @@ function createServiceRequest(param) {
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
     request.asset.service.description = param.description ? param.description : DESCRIPTION;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
+    request.asset.service.attributeTypes = ['identity_card'];
 
     console.log(JSON.stringify(request));
     return request;

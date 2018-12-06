@@ -72,6 +72,10 @@ Service.prototype.verify = function (trs, sender, cb) {
         return cb('Service description is undefined');
     }
 
+    if (!trs.asset.service.attributeTypes) {
+        return cb('Attribute Types are undefined');
+    }
+
     return cb(null, trs);
 };
 
@@ -157,9 +161,12 @@ Service.prototype.schema = {
         description: {
             type: 'string'
         },
+        attributeTypes : {
+            type : 'array'
+        }
 
     },
-    required: ['provider', 'name', 'description']
+    required: ['provider', 'name', 'description', 'attributeTypes']
 };
 
 //
@@ -193,7 +200,8 @@ Service.prototype.dbFields = [
     'name',
     'description',
     'status',
-    'timestamp'
+    'timestamp',
+    'attribute_types'
 ];
 
 //
@@ -204,6 +212,7 @@ Service.prototype.dbSave = function (trs) {
     let params = {};
     params.service_name = trs.asset.service.name;
     params.service_provider = trs.asset.service.provider;
+    params.attribute_types = trs.asset.service.attributeTypes;
 
     let values = {
         table: this.dbTable,
@@ -213,7 +222,8 @@ Service.prototype.dbSave = function (trs) {
             name: trs.asset.service.name,
             description : trs.asset.service.description,
             status: constants.serviceStatus.ACTIVE,
-            timestamp: trs.timestamp
+            timestamp: trs.timestamp,
+            attribute_types: JSON.stringify(trs.asset.service.attributeTypes)
         }
     };
     return values;

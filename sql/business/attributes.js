@@ -136,39 +136,34 @@ let IdentityUseRequestsSql = {
     ],
 
     getIdentityUseRequestsByServiceId :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
     'FROM identity_use_requests iur ' +
-    'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE "service_id" = ${service_id}',
 
     getIdentityUseRequestsByServiceNameAndProvider :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
     'FROM identity_use_requests iur ' +
-    'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
     getIdentityUseRequestsByServiceProvider :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
     'FROM identity_use_requests iur ' +
-    'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.provider = ${service_provider}',
 
     getIdentityUseRequestsByOwner :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
     'FROM identity_use_requests iur ' +
-    'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
-    'WHERE a.owner = ${owner}',
+    'WHERE iur.owner = ${owner}',
 
-    getIdentityUseRequestsByServiceAndAttribute :
-    'SELECT a.owner,a.type,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason ' +
+    getIdentityUseRequestsByServiceAndOwner :
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
     'FROM identity_use_requests iur ' +
-    'JOIN attributes a ON a.id = iur.attribute_id ' +
     'JOIN services s ON s.id = iur.service_id ' +
-    'WHERE a.id = ${attribute_id} AND s.id = ${service_id}',
+    'WHERE iur.owner = ${owner} AND s.id = ${service_id}',
 
     updateIdentityUseRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
     updateIdentityUseWithReason : 'UPDATE identity_use_requests SET status = ${status}, reason = ${reason} WHERE id = ${id}',

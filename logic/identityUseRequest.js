@@ -27,7 +27,7 @@ IdentityUseRequest.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
     trs.asset.identityuse = {
-        attribute_id : data.attributeId,
+        attributes : data.attributes,
         serviceId : data.serviceId,
         publicKey : data.sender.publicKey,
     };
@@ -61,8 +61,8 @@ IdentityUseRequest.prototype.verify = function (trs, sender, cb) {
         return cb('Invalid serviceId');
     }
 
-    if (!trs.asset.identityuse[0].attributeId) {
-        return cb('Invalid attributeId');
+    if (!trs.asset.identityuse[0].attributes) {
+        return cb('Invalid attributes');
     }
 
     return cb(null, trs);
@@ -150,8 +150,8 @@ IdentityUseRequest.prototype.schema = {
             type: 'string',
             format: 'address'
         },
-        type: {
-            type: 'string',
+        attributes: {
+            type: 'array',
         },
         serviceProvider: {
             type: 'string',
@@ -161,7 +161,7 @@ IdentityUseRequest.prototype.schema = {
             type: 'string',
         }
     },
-    required: ['owner', 'type', 'serviceProvider', 'serviceName']
+    required: ['owner', 'attributes', 'serviceProvider', 'serviceName']
 };
 
 //
@@ -176,10 +176,11 @@ IdentityUseRequest.prototype.dbRead = function (raw) {
 IdentityUseRequest.prototype.dbTable = 'identity_use_requests';
 
 IdentityUseRequest.prototype.dbFields = [
-    'attribute_id',
     'service_id',
     'status',
-    'timestamp'
+    'owner',
+    'timestamp',
+    'attributes'
 ];
 
 //
@@ -191,9 +192,10 @@ IdentityUseRequest.prototype.dbSave = function (trs) {
         table: this.dbTable,
         fields: this.dbFields,
         values: {
-            attribute_id: trs.asset.identityuse[0].attributeId,
             service_id: trs.asset.identityuse[0].serviceId,
+            owner: trs.asset.identityuse[0].owner,
             timestamp: trs.timestamp,
+            attributes: JSON.stringify(trs.asset.identityuse[0].attributes),
             status: constants.identityUseRequestStatus.PENDING_APPROVAL
         }
     };

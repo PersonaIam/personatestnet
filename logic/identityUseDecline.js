@@ -29,7 +29,6 @@ IdentityUseDecline.prototype.create = function (data, trs) {
     trs.recipientId = null;
     trs.amount = 0;
     trs.asset.identityuse = {
-        type: data.type,
         owner: data.owner,
         publicKey: data.sender.publicKey,
         provider : data.serviceProvider
@@ -62,10 +61,6 @@ IdentityUseDecline.prototype.verify = function (trs, sender, cb) {
 
     if (!trs.asset.identityuse[0].owner) {
         return cb('Identity use attribute owner is undefined');
-    }
-
-    if (!trs.asset.identityuse[0].type) {
-        return cb('Identity use attribute type is undefined');
     }
 
     if (!trs.asset.identityuse[0].serviceName) {
@@ -166,9 +161,6 @@ IdentityUseDecline.prototype.schema = {
             type: 'string',
             format: 'address'
         },
-        type: {
-            type: 'string',
-        },
         serviceName: {
             type: 'string'
         },
@@ -177,7 +169,7 @@ IdentityUseDecline.prototype.schema = {
             format: 'address'
         }
     },
-    required: ['owner', 'type', 'serviceName', 'serviceProvider']
+    required: ['owner', 'serviceName', 'serviceProvider']
 };
 
 //

@@ -131,9 +131,9 @@ __private.getIdentityUseRequestsByFilter = function (filter, cb) {
     }
     let query, params;
 
-    if (filter.serviceId && filter.attributeId) {
-        query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceAndAttribute;
-        params = {service_id: filter.serviceId, attribute_id : filter.attributeId}
+    if (filter.serviceId && filter.owner) {
+        query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceAndOwner;
+        params = {service_id: filter.serviceId, owner : filter.owner}
     } else {
         if (filter.serviceId) {
             query = sql.IdentityUseRequestsSql.getIdentityUseRequestsByServiceId;
@@ -179,6 +179,10 @@ shared.requestIdentityUse = function (req, cb) {
         if (!req.body.asset || !req.body.asset.identityuse) {
             return cb('Identity use information is not provided');
         }
+
+        if (req.body.asset.identityuse.length === 0 || !req.body.asset.identityuse[0].attributes) {
+            return cb('Identity use attributes are not provided');
+        }
         if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].owner)) {
             return cb('Owner address is incorrect');
         }
@@ -196,72 +200,67 @@ shared.requestIdentityUse = function (req, cb) {
             if (!account || account.address !== req.body.asset.identityuse[0].owner) {
                 return cb(messages.IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR)
             }
-            let reqGetAttributeType = req;
-            reqGetAttributeType.body.name = req.body.asset.identityuse[0].type;
-            attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-                if (err || !data.attribute_type) {
-                    return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-                }
-                let reqGetAttributesByFilter = req;
-                reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-                reqGetAttributesByFilter.body.type = data.attribute_type.name;
+            services.getServicesByFilter(
+                {
+                    name: req.body.asset.identityuse[0].serviceName,
+                    provider: req.body.asset.identityuse[0].serviceProvider
+                }, function (err, serviceResult) {
+                        let serviceAttributes = JSON.parse(serviceResult.services[0].attribute_types);
+                        let reqGetAttributesByFilter = req;
+                        reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
 
-                attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, dataAttributes) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    if (!dataAttributes.attributes || dataAttributes.attributes.length === 0) {
-                        return cb(messages.ATTRIBUTE_NOT_FOUND);
-                    }
+                        attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, ownerAttributes) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            let ownerAttributesActiveAndNotExpired = ownerAttributes.attributes.filter( attribute =>
 
-                    if (dataAttributes.attributes[0].expire_timestamp && dataAttributes.attributes[0].expire_timestamp < slots.getTime()) {
-                        return cb(messages.EXPIRED_ATTRIBUTE);
-                    }
+                                attribute.active && (!attribute.expire_timestamp || attribute.expire_timestamp > slots.getTime()));
 
-                    if (!dataAttributes.attributes[0].active) {
-                        return cb(messages.INACTIVE_ATTRIBUTE);
-                    }
+                            let ownerAttributesActiveAndNotExpiredTypes = ownerAttributesActiveAndNotExpired.map(attribute => attribute.type);
 
-                    services.getServicesByFilter(
-                        {
-                            name: req.body.asset.identityuse[0].serviceName,
-                            provider: req.body.asset.identityuse[0].serviceProvider
-                        }, function (err, dataServices) {
+                            let ownerAttributeTypes = ownerAttributes.attributes.map(attribute => attribute.type);
 
-                            if (dataServices.services[0].status === constants.serviceStatus.INACTIVE) {
-                                return cb (messages.IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE)
+                            if (_.intersection(ownerAttributeTypes, serviceAttributes).length !== serviceAttributes.length) {
+                                return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES);
                             }
 
-                            req.body.serviceId = dataServices.services[0].id;
-                            req.body.attributeId = dataAttributes.attributes[0].id;
+                            if (_.intersection(ownerAttributesActiveAndNotExpiredTypes, serviceAttributes).length !== serviceAttributes.length) {
+                                return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE);
+                            }
 
-                            __private.getIdentityUseRequestsByFilter(req.body, function (err, identityUseRequests) {
-                                if (err) {
-                                    return cb(err);
+                                if (serviceResult.services[0].status === constants.serviceStatus.INACTIVE) {
+                                    return cb(messages.IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE)
                                 }
 
-                                if (identityUseRequests && identityUseRequests.length === 0) {
-                                    return cb(messages.IDENTITY_USE_ALREADY_EXISTS);
-                                }
+                                req.body.serviceId = serviceResult.services[0].id;
+                                req.body.owner = req.body.asset.identityuse[0].owner;
 
-                                req.body.asset.identityuse[0].serviceId = dataServices.services[0].id;
-                                req.body.asset.identityuse[0].attributeId = dataAttributes.attributes[0].id;
+                                __private.getIdentityUseRequestsByFilter(req.body, function (err, identityUseRequests) {
+                                    if (err) {
+                                        return cb(err);
+                                    }
 
-                                attributes.buildTransaction({
-                                        req: req,
-                                        keypair: keypair,
-                                        transactionType: transactionTypes.REQUEST_IDENTITY_USE
-                                    },
-                                    function (err, resultData) {
-                                        if (err) {
-                                            return cb(err);
-                                        }
-                                        return cb(null, resultData);
-                                    });
+                                    if (identityUseRequests && identityUseRequests.length === 0) {
+                                        return cb(messages.IDENTITY_USE_ALREADY_EXISTS);
+                                    }
+
+                                    req.body.asset.identityuse[0].serviceId = serviceResult.services[0].id;
+
+                                    attributes.buildTransaction({
+                                            req: req,
+                                            keypair: keypair,
+                                            transactionType: transactionTypes.REQUEST_IDENTITY_USE
+                                        },
+                                        function (err, resultData) {
+                                            if (err) {
+                                                return cb(err);
+                                            }
+                                            return cb(null, resultData);
+                                        });
+                                });
                             });
                         })
-                });
-            });
         });
     });
 };
@@ -349,7 +348,7 @@ __private.identityUseAnswer = function (req, cb) {
                     }
 
                     __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
-                        if (err || !data.identityUseRequests) {
+                        if (err || !data.identityUseRequests || data.identityUseRequests.length === 0) {
                             return cb(messages.IDENTITY_USE_REQUEST_MISSING_FOR_ACTION);
                         }
                         let paramsCheckAnswer = {};

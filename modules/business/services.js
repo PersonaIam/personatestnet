@@ -176,22 +176,17 @@ __private.listServices = function (filter, cb) {
     })
 };
 
-__private.getServiceAttributeTypes = function (filter, cb) {
+Services.getServiceAttributeTypes = function (filter, cb) {
 
     if (!(filter.name && filter.provider)) {
-        return cb('The attribute (name and provider information) must be provided');
+        return cb('The service (name and provider information) must be provided');
     }
 
     library.db.query(sql.ServicesSql.getServiceAttributeTypes, {
         name: filter.name,
         provider: filter.provider
     }).then(function (rows) {
-        let data = {
-            service_attribute_types: rows.map(row => row.attribute_type),
-            count: rows.length
-        };
-
-        return cb(null, data);
+        return cb(null, rows[0].attribute_types);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
         return cb(err.message);
@@ -236,7 +231,7 @@ shared.getServiceAttributeTypes = function (req, cb) {
             return cb(err[0].message);
         }
 
-        __private.getServiceAttributeTypes(req.body, function (err, data) {
+        Services.getServiceAttributeTypes(req.body, function (err, data) {
             return cb(null, {service_attribute_types: data.service_attribute_types, count: data.count});
         });
     });
