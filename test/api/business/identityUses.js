@@ -2859,7 +2859,6 @@ function createAnswerIdentityUseRequest(param) {
     request.asset = {};
     request.asset.identityuse = [];
     request.asset.identityuse[0] = {};
-    request.asset.identityuse[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
     request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
     request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;

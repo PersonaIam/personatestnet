@@ -321,26 +321,6 @@ __private.identityUseAnswer = function (req, cb) {
             }
         }
 
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.identityuse[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
-            }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-            reqGetAttributesByFilter.body.type = req.body.asset.identityuse[0].type;
-
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND);
-                }
-
-                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
-                }
-
-                req.body.attributeId = data.attributes[0].id;
                 let reqGetServicesByFilter = req;
 
                 reqGetServicesByFilter.body.name = req.body.asset.identityuse[0].serviceName;
@@ -351,10 +331,12 @@ __private.identityUseAnswer = function (req, cb) {
                         return cb(messages.SERVICE_NOT_FOUND);
                     }
 
-                    req.body.serviceId = data.services[0].id;
                     if (data.services[0].status === constants.serviceStatus.INACTIVE) {
                         return cb (messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE)
                     }
+
+                    req.body.serviceId = data.services[0].id;
+                    req.body.owner = req.body.asset.identityuse[0].owner;
 
                     __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
                         if (err || !data.identityUseRequests || data.identityUseRequests.length === 0) {
@@ -405,8 +387,6 @@ __private.identityUseAnswer = function (req, cb) {
                     });
                 });
             });
-        });
-    });
 };
 
 __private.checkIdentityUseAnswer = function(params, cb) {
