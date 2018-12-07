@@ -136,31 +136,31 @@ let IdentityUseRequestsSql = {
     ],
 
     getIdentityUseRequestsByServiceId :
-    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,s.description,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes,s.status as service_status ' +
     'FROM identity_use_requests iur ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE "service_id" = ${service_id}',
 
     getIdentityUseRequestsByServiceNameAndProvider :
-    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,s.description,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes,s.status as service_status ' +
     'FROM identity_use_requests iur ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.name = ${service_name} AND s.provider = ${service_provider}',
 
     getIdentityUseRequestsByServiceProvider :
-    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,s.description,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes,s.status as service_status ' +
     'FROM identity_use_requests iur ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE s.provider = ${service_provider}',
 
     getIdentityUseRequestsByOwner :
-    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,s.description,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes,s.status as service_status ' +
     'FROM identity_use_requests iur ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE iur.owner = ${owner}',
 
     getIdentityUseRequestsByServiceAndOwner :
-    'SELECT iur.owner,s.attribute_types,s.name,s.provider,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes ' +
+    'SELECT iur.owner,s.attribute_types,s.name,s.provider,s.description,iur.timestamp,iur.id,iur.status,iur.reason,iur.attributes,s.status as service_status ' +
     'FROM identity_use_requests iur ' +
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE iur.owner = ${owner} AND s.id = ${service_id}',

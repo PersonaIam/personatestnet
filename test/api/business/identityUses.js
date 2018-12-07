@@ -61,7 +61,7 @@ const SERVICE7_NAME = 'Akiane';         // to be used by End Identity Use Reques
 const SERVICE8_NAME = 'Anne';           // to be used by Decline Identity Use Request on Inactive Service
 const SERVICE9_NAME = 'Astrid';         // to be used by Cancel Identity Use Request on Inactive Service
 
-const DESCRIPTION = 'Modus';
+const DESCRIPTION_VALUE = 'Modus';
 
 const REASON_FOR_DECLINE_1024_GOOD =
     '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
@@ -80,6 +80,8 @@ const TRUE = true;
 const FALSE = false;
 const STATUS = 'status';
 const ATTRIBUTES = 'attributes';
+const DESCRIPTION = 'description';
+const SERVICE_STATUS = 'service_status';
 const REASON = 'reason';
 
 // TEST UTILS
@@ -1540,6 +1542,8 @@ describe('Create Identity Use Requests - SUCCESS', function () {
                     node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(ATTRIBUTES);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(SERVICE_STATUS);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(DESCRIPTION);
                     done();
                 });
             });
@@ -2880,7 +2884,7 @@ function createServiceRequest(param) {
     request.asset = {};
     request.asset.service = {};
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
-    request.asset.service.description = param.description ? param.description : DESCRIPTION;
+    request.asset.service.description = param.description ? param.description : DESCRIPTION_VALUE;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
     request.asset.service.attributeTypes = ['identity_card'];
 
