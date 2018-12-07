@@ -92,7 +92,8 @@ module.exports = {
     DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
 
     CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES : 'Cannot create identity use request : missing required service attributes',
-    CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some required attributes are expired or inactive'
+    CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some required attributes are expired or inactive',
+    CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES : 'Cannot create identity use request : some required attribute values are not provided in the request'
 
 };
 

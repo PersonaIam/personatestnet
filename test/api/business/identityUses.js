@@ -1384,6 +1384,23 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
+    it('Create Identity Use Request - IDENTITY_CARD attribute is active, but the request contains a different attribute value', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.values = [{type : 'first_name', value:'HHH'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES);
+            done();
+        });
+    });
+
     it('Create Identity Use Request - SUCCESS -> attribute has 2 completed validations, which is enough to become active', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2802,7 +2819,7 @@ function createIdentityUseRequest(param) {
     request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
     request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
     request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
-    request.asset.identityuse[0].attributes = [{identity_card : 'HHH'}]
+    request.asset.identityuse[0].attributes = param.values ? param.values : [{type : 'identity_card', value:'HHH'}];
 
     console.log(request);
     return request;
