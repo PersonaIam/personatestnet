@@ -526,6 +526,46 @@ __private.addAttributeToIpfs = function (data, callback) {
     });
 };
 
+Attributes.addAttributeToIpfs = function (data, callback) {
+
+    /**
+     * Check if the desired attribute needs to be uploaded to IPFS; if so, add it to the
+     * IPFS network, and on the IPFS pin queue. Once the newly created transaction is forged,
+     * we'll need to remove the associated element from the IPFS pin queue
+     * */
+    async.auto({
+        isIPFSUploadRequired: function (callback) {
+            const result = attributedHelper.isIPFSUploadRequired(data.attributeDataType);
+            callback(null, result);
+        },
+        uploadToIpfs: ['isIPFSUploadRequired', function (results, callback) {
+
+            const isIPFSUploadRequired = results.isIPFSUploadRequired;
+            if (isIPFSUploadRequired) {
+                const files = {
+                    path: `${data.attributeDataName}-${data.publicKey}`,
+                    content: data.value,
+                };
+                __private.uploadToIpfs(files, function (err, res) {
+
+                    if (err) return callback(err, null);
+                    let {hash} = res;
+                    return callback(null, {hash});
+                });
+            }
+            else {
+                callback(null, 'No Upload Required');
+            }
+        }],
+    }, function (err, result) {
+        if (err) {
+            return callback(err);
+        }
+        return callback(null, result.uploadToIpfs.hash);
+    });
+};
+
+
 /**
  * Add attribute data to IPFS
  *
@@ -636,19 +676,13 @@ Attributes.buildTransaction = function (params, cb) {
     });
 };
 
-shared.listAttributeTypes = function (req, cb) {
-    library.schema.validate(req.body, schema.listAttributeTypes, function (err) {
+Attributes.listAttributeTypes = function (req, cb) {
+
+    __private.listAttributeTypes({}, function (err, data) {
         if (err) {
-            return cb(err[0].message);
+            return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
         }
-
-        __private.listAttributeTypes({}, function (err, data) {
-            if (err) {
-                return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
-            }
-
-            return cb(null, {attribute_types: data.attribute_types, count: data.count});
-        });
+        return cb(null, {attribute_types: data.attribute_types, count: data.count});
     });
 };
 

@@ -159,6 +159,10 @@ __private.addHashToQueue = function (ipfsHash, cb) {
                 data = {
                     queuedHash: rows[0].ipfs_hash,
                 };
+            } else {
+                data = {
+                    queuedHash: ipfsHash,
+                };
             }
 
             return cb(null, data);

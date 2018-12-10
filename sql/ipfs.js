@@ -6,7 +6,7 @@ var IpfsSql = {
     insert: 'INSERT INTO ipfs_pin_queue ' +
     '("ipfs_hash", "timestamp") ' +
     'VALUES ' +
-    '(${ipfsHash},  ${timestamp}) RETURNING id,ipfs_hash',
+    '(${ipfsHash},  ${timestamp}) ON CONFLICT DO NOTHING RETURNING id,ipfs_hash ',
 
     getHashFromQueue: 'SELECT id,ipfs_hash FROM ipfs_pin_queue WHERE "ipfs_hash" = ${ipfsHash}',
 };

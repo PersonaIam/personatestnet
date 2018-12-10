@@ -1418,6 +1418,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1449,6 +1450,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1480,6 +1482,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH3'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1511,6 +1514,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH4'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1544,6 +1548,8 @@ describe('Create Identity Use Requests - SUCCESS', function () {
                     node.expect(res.body.identity_use_requests[0]).to.have.property(ATTRIBUTES);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(SERVICE_STATUS);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(DESCRIPTION);
+                    node.expect(JSON.parse(res.body.identity_use_requests[0].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
+                    node.expect(JSON.parse(res.body.identity_use_requests[1].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
                     done();
                 });
             });
@@ -2333,6 +2339,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE6_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH5'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -2427,6 +2434,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH7'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -2552,6 +2560,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
         param.serviceProvider = PROVIDER;
+        param.values = [{type : 'identity_card', value:'HHH8'}]
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {

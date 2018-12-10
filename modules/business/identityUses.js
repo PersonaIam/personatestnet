@@ -12,6 +12,7 @@ let constants = require('../../helpers/constants.js');
 let _ = require('lodash');
 let attributes = require('./attributes.js');
 let services = require('./services.js');
+let async = require('async')
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -240,8 +241,6 @@ shared.requestIdentityUse = function (req, cb) {
                             return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES);
                         }
 
-
-
                         req.body.serviceId = serviceResult.services[0].id;
                         req.body.owner = req.body.asset.identityuse[0].owner;
 
@@ -255,21 +254,49 @@ shared.requestIdentityUse = function (req, cb) {
                             }
 
                             req.body.asset.identityuse[0].serviceId = serviceResult.services[0].id;
+                            attributes.listAttributeTypes({}, function (err, attributeTypes) {
+                                let x = attributeTypes.attribute_types;
+                                let attributeFileTypesNames = x.filter(i => i.data_type === 'file').map(o => o.name);
 
-                            attributes.buildTransaction({
-                                    req: req,
-                                    keypair: keypair,
-                                    transactionType: transactionTypes.REQUEST_IDENTITY_USE
-                                },
-                                function (err, resultData) {
-                                    if (err) {
-                                        return cb(err);
-                                    }
-                                    return cb(null, resultData);
+                                const fileAttributes = identityRequestAttributes.filter(attribute => attributeFileTypesNames.includes(attribute.type));
+
+                                async.eachSeries(fileAttributes, function (fileAttribute, eachCb) {
+                                    attributes.addAttributeToIpfs({
+                                            attributeDataType: 'file', attributeDataName: fileAttribute.type,
+                                            value: fileAttribute.value, publicKey: req.body.publicKey
+                                        },
+                                        function (err, hash) {
+                                            if (err) {
+                                                return cb('Not all attributes were uploaded to IPFS')
+                                            }
+                                            console.log('hash = ' + hash)
+
+                                            console.log(JSON.stringify(req.body.asset.identityuse[0].attributes))
+                                            req.body.asset.identityuse[0].attributes.map(attribute => { if (attribute.type === fileAttribute.type) {
+                                                attribute.value = hash;
+                                            }});
+                                            console.log(JSON.stringify(req.body.asset.identityuse[0].attributes))
+                                            return eachCb();
+                                        })
+                                },function(err) {
+
+
+                                    attributes.buildTransaction({
+                                            req: req,
+                                            keypair: keypair,
+                                            transactionType: transactionTypes.REQUEST_IDENTITY_USE
+                                        },
+                                        function (err, resultData) {
+                                            if (err) {
+                                                return cb(err);
+                                            }
+                                            return cb(null, resultData);
+                                        });
                                 });
+                            });
                         });
-                    });
-                })
+                    })
+                });
         });
     });
 };
