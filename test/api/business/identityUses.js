@@ -1531,31 +1531,6 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Request - Using the attributeId and serviceId', function (done) {
-
-        let param = {};
-
-        getServices({provider: PROVIDER, name : SERVICE_NAME}, function (err, res) {
-            param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
-                getIdentityUseRequests(param, function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(ATTRIBUTES);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(SERVICE_STATUS);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(DESCRIPTION);
-                    node.expect(JSON.parse(res.body.identity_use_requests[0].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
-                    node.expect(JSON.parse(res.body.identity_use_requests[1].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
-                    done();
-                });
-            });
-        });
-    });
-
     it('Get Identity Use Request - Using the service provider', function (done) {
 
         let param = {serviceProvider : PROVIDER};
@@ -1566,6 +1541,8 @@ describe('Create Identity Use Requests - SUCCESS', function () {
             node.expect(res.body).to.have.property('identity_use_requests').to.have.length(4);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
             node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+            node.expect(JSON.parse(res.body.identity_use_requests[0].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
+            node.expect(JSON.parse(res.body.identity_use_requests[1].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
             done();
         });
     });

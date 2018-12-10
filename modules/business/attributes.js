@@ -676,14 +676,30 @@ Attributes.buildTransaction = function (params, cb) {
     });
 };
 
+
+shared.listAttributeTypes = function (req, cb) {
+
+    library.schema.validate(req.body, schema.listAttributeTypes, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+        __private.listAttributeTypes({}, function (err, data) {
+            if (err) {
+                return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
+            }
+            return cb(null, {attribute_types: data.attribute_types, count: data.count});
+        });
+    });
+};
+
 Attributes.listAttributeTypes = function (req, cb) {
 
-    __private.listAttributeTypes({}, function (err, data) {
-        if (err) {
-            return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
-        }
-        return cb(null, {attribute_types: data.attribute_types, count: data.count});
-    });
+        __private.listAttributeTypes({}, function (err, data) {
+            if (err) {
+                return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
+            }
+            return cb(null, {attribute_types: data.attribute_types, count: data.count});
+        });
 };
 
 // not exposed as API
