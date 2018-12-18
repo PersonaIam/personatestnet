@@ -209,10 +209,10 @@ shared.requestIdentityUse = function (req, cb) {
                     if (serviceResult.services[0].status === constants.serviceStatus.INACTIVE) {
                         return cb(messages.IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE)
                     }
-
                     let serviceAttributes = JSON.parse(serviceResult.services[0].attribute_types);
                     let reqGetAttributesByFilter = req;
                     reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
+                    reqGetAttributesByFilter.body.validationsRequired = serviceResult.services[0].nr_validations;
 
                     attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, ownerAttributes) {
                         if (err) {
@@ -269,17 +269,12 @@ shared.requestIdentityUse = function (req, cb) {
                                             if (err) {
                                                 return cb('Not all attributes were uploaded to IPFS')
                                             }
-                                            console.log('hash = ' + hash)
-
-                                            console.log(JSON.stringify(req.body.asset.identityuse[0].attributes))
                                             req.body.asset.identityuse[0].attributes.map(attribute => { if (attribute.type === fileAttribute.type) {
                                                 attribute.value = hash;
                                             }});
-                                            console.log(JSON.stringify(req.body.asset.identityuse[0].attributes))
                                             return eachCb();
                                         })
                                 },function(err) {
-
 
                                     attributes.buildTransaction({
                                             req: req,
@@ -317,7 +312,6 @@ shared.getIdentityUseRequests = function (req, cb) {
             return cb(null, resultData);
         });
     });
-
 };
 
 __private.identityUseAnswer = function (req, cb) {

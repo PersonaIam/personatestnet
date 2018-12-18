@@ -60,6 +60,7 @@ const SERVICE6_NAME = 'Aria';           // to be used by Approve Identity Use Re
 const SERVICE7_NAME = 'Akiane';         // to be used by End Identity Use Request on Inactive Service
 const SERVICE8_NAME = 'Anne';           // to be used by Decline Identity Use Request on Inactive Service
 const SERVICE9_NAME = 'Astrid';         // to be used by Cancel Identity Use Request on Inactive Service
+const SERVICE10_NAME = 'Amelie';        // to be used by Create Identity Use Request with insufficient validation
 
 const DESCRIPTION_VALUE = 'Modus';
 
@@ -83,6 +84,8 @@ const ATTRIBUTES = 'attributes';
 const DESCRIPTION = 'description';
 const SERVICE_STATUS = 'service_status';
 const REASON = 'reason';
+const CUSTOM_VALIDATIONS = 2;
+const ONE_VALIDATION = 1;
 
 // TEST UTILS
 
@@ -747,12 +750,52 @@ describe('Create Services', function() {
         });
     });
 
-    it('Get Services by provider - 9 results', function (done) {
+    it('Create Service - Tenth Service - will have a requirement of just 1 validations per attribute', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE10_NAME;
+        param.validations = ONE_VALIDATION;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('transactionId');
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Get Services by provider - 10 results', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(9);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(9);
+            node.expect(res.body.services).to.have.length(10);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(10);
+            done();
+        });
+    });
+
+    it('Get Services by provider - Check number of validations is correct', function (done) {
+        getServices({provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(10);
+            node.expect(res.body.services[0].nr_validations).to.be.eq(CUSTOM_VALIDATIONS);
+            node.expect(res.body.services[1].nr_validations).to.be.eq(CUSTOM_VALIDATIONS);
+            node.expect(res.body.services[9].nr_validations).to.be.eq(ONE_VALIDATION);
             done();
         });
     });
@@ -1185,20 +1228,6 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Get Attribute - Before last notarization - still inactive ( IDENTITY_CARD )', function (done) {
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
-            done();
-        });
-    });
-
     it('Get Attribute validation request - verify the status is COMPLETED after a IN_PROGRESS request is NOTARIZED', function (done) {
 
         let param = {};
@@ -1305,7 +1334,7 @@ describe('Create Identity Use Requests - negative scenarios', function() {
         });
     });
 
-    it('Create Identity Use Request - IDENTITY_CARD attribute has just one completed validation, which is insufficient to become active', function (done) {
+    it('Create Identity Use Request - IDENTITY_CARD attribute has just one completed validation, which is insufficient for the given service', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1323,6 +1352,37 @@ describe('Create Identity Use Requests - negative scenarios', function() {
 })
 
 describe('Create Identity Use Requests - SUCCESS', function () {
+
+    it('Create Identity Use Request - SUCCESS -> For a service which requires a single validation', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE10_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
 
     it('Get Identity Use Requests - no results', function (done) {
 
@@ -1538,8 +1598,8 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         getIdentityUseRequests(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(4);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(5);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
             node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
             node.expect(JSON.parse(res.body.identity_use_requests[0].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
             node.expect(JSON.parse(res.body.identity_use_requests[1].attributes)[0].value).to.be.eq('QmXaErkZBhwTNSLcesqgmtA3shYqpvqxhdWEydtjo9SEb8');
@@ -1554,8 +1614,8 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         getIdentityUseRequests(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(4);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(5);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
             node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
             done();
         });
@@ -2873,6 +2933,7 @@ function createServiceRequest(param) {
     request.asset.service.description = param.description ? param.description : DESCRIPTION_VALUE;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
     request.asset.service.attributeTypes = ['identity_card'];
+    request.asset.service.validations = param.validations ? param.validations : CUSTOM_VALIDATIONS;
 
     console.log(JSON.stringify(request));
     return request;

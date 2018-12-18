@@ -19,6 +19,7 @@ const NON_EXISTING_SERVICE_NAME = 'gonzo';
 const SERVICE_NAME = 'firstService';
 const SERVICE2_NAME = 'secondService';
 const DESCRIPTION = 'description';
+const CUSTOM_VALIDATIONS = 2;
 
 // RESULTS
 
@@ -95,8 +96,9 @@ describe('Create Service', function () {
             balance = parseInt(res.body.balance);
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
-
-        let request = createServiceRequest();
+        let param = {}
+        param.validations = CUSTOM_VALIDATIONS;
+        let request = createServiceRequest(param);
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -127,8 +129,9 @@ describe('Create Service', function () {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(1);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].nr_validations).to.be.eq(CUSTOM_VALIDATIONS)
             done();
         });
     });
@@ -258,7 +261,6 @@ describe('Inactivate Service', function () {
             done();
         });
     });
-
 });
 
 // Utilities
@@ -275,6 +277,8 @@ function createServiceRequest(param) {
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
     request.asset.service.description = param.description ? param.description : DESCRIPTION;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
+    request.asset.service.validations = param.validations ? param.validations : 1;
+    request.asset.service.attributeTypes = ['identity_card'];
 
     console.log(JSON.stringify(request));
     return request;

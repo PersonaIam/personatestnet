@@ -196,7 +196,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
                     after: slots.getTime(moment().subtract(1, 'year')),
                     expirationAfter: slots.getTime(),
                     owner: filter.owner,
-                    validations_required: constants.VALIDATIONS_REQUIRED,
+                    validations_required: filter.validationsRequired ? filter.validationsRequired : constants.VALIDATIONS_REQUIRED,
                     status : constants.validationRequestStatus.COMPLETED
                 })
                     .then(function (activeAttributes) {

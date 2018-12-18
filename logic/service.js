@@ -32,7 +32,8 @@ Service.prototype.create = function (data, trs) {
     trs.asset.service = {
         name: data.name,
         description: data.description,
-        provider: data.provider
+        provider: data.provider,
+        validations: data.validations
     };
 
     return trs;
@@ -163,6 +164,10 @@ Service.prototype.schema = {
         },
         attributeTypes : {
             type : 'array'
+        },
+        validations: {
+            type: 'integer',
+            minimum: 1
         }
 
     },
@@ -201,7 +206,8 @@ Service.prototype.dbFields = [
     'description',
     'status',
     'timestamp',
-    'attribute_types'
+    'attribute_types',
+    'nr_validations'
 ];
 
 //
@@ -223,7 +229,8 @@ Service.prototype.dbSave = function (trs) {
             description : trs.asset.service.description,
             status: constants.serviceStatus.ACTIVE,
             timestamp: trs.timestamp,
-            attribute_types: JSON.stringify(trs.asset.service.attributeTypes)
+            attribute_types: JSON.stringify(trs.asset.service.attributeTypes),
+            nr_validations: trs.asset.service.validations
         }
     };
     return values;
