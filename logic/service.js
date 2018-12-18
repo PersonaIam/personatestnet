@@ -207,7 +207,7 @@ Service.prototype.dbFields = [
     'status',
     'timestamp',
     'attribute_types',
-    'nr_validations'
+    'validations_required'
 ];
 
 //
@@ -230,7 +230,7 @@ Service.prototype.dbSave = function (trs) {
             status: constants.serviceStatus.ACTIVE,
             timestamp: trs.timestamp,
             attribute_types: JSON.stringify(trs.asset.service.attributeTypes),
-            nr_validations: trs.asset.service.validations
+            validations_required: trs.asset.service.validations_required
         }
     };
     return values;

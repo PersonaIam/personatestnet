@@ -131,7 +131,7 @@ describe('Create Service', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             node.expect(res.body.services).to.have.length(1);
-            node.expect(res.body.services[0].nr_validations).to.be.eq(CUSTOM_VALIDATIONS)
+            node.expect(res.body.services[0].validations_required).to.be.eq(CUSTOM_VALIDATIONS)
             done();
         });
     });
@@ -277,7 +277,7 @@ function createServiceRequest(param) {
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
     request.asset.service.description = param.description ? param.description : DESCRIPTION;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
-    request.asset.service.validations = param.validations ? param.validations : 1;
+    request.asset.service.validations_required = param.validations ? param.validations : 1;
     request.asset.service.attributeTypes = ['identity_card'];
 
     console.log(JSON.stringify(request));

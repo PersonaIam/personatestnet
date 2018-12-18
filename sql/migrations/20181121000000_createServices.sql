@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "services"(
   "status" VARCHAR(36) NOT NULL,
   "timestamp" INT NOT NULL,
   "attribute_types" TEXT NOT NULL,
-  "nr_validations" INT NOT NULL
+  "validations_required" INT NOT NULL
 );
 
 /* Unique Indexes */

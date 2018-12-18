@@ -212,7 +212,7 @@ shared.requestIdentityUse = function (req, cb) {
                     let serviceAttributes = JSON.parse(serviceResult.services[0].attribute_types);
                     let reqGetAttributesByFilter = req;
                     reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-                    reqGetAttributesByFilter.body.validationsRequired = serviceResult.services[0].nr_validations;
+                    reqGetAttributesByFilter.body.validationsRequired = serviceResult.services[0].validations_required;
 
                     attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, ownerAttributes) {
                         if (err) {

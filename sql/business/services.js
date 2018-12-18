@@ -8,7 +8,7 @@ let ServicesSql = {
         'description',
         'timestamp',
         'attribute_types',
-        'nr_validations'
+        'validations_required'
     ],
 
     updateServiceStatus:'UPDATE services SET "status" = ${status} WHERE "provider" = ${provider} AND name = ${name}',
