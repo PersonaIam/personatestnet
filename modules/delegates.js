@@ -313,18 +313,19 @@ __private.forge = function (cb) {
 							return cb();
 						}
 						// PBFT: most nodes are on same branch, no other block have been forged and we are on forgeable currentSlot
-						if(quorum/(quorum+noquorum) > 0.00){ // TODO temporary
+						if(quorum/(quorum+noquorum) > 0.66){
 							letsforge = true;
 						}
 						else{
 							//We are forked!
-							library.logger.info("Forked from network",[
+							library.logger.info("Not enough quorum to forge next block",[
 								"network:", JSON.stringify(network.height),
+								"requiredQuorum:", '0.66',
 								"quorum:", quorum/(quorum+noquorum),
 								"last block id:", lastBlock.id
 							].join(' '));
 							library.bus.message("fork",lastBlock, 6);
-							return cb("Fork 6 - Not enough quorum to forge next block: " + quorum/(quorum+noquorum));
+							return cb("Not enough quorum to forge next block: " + quorum/(quorum+noquorum));
 						}
 
 						if(letsforge){
