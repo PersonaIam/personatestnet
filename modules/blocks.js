@@ -287,7 +287,7 @@ __private.promiseTransactions = function (t, block, blockPromises) {
 		if (promise && promise.table) {
 			return promise.table;
 		} else {
-			throw 'Invalid promise';
+            return t;
 		}
 	};
 
@@ -298,11 +298,14 @@ __private.promiseTransactions = function (t, block, blockPromises) {
 			if (promise && promise.values) {
 				values = values.concat(promise.values);
 			} else {
-				throw 'Invalid promise';
+                return t;
 			}
 		});
 
 		var inserts = new Inserts(type[0], values, true);
+		if (!inserts.template) {
+			return t;
+		}
 		t.none(inserts.template(), inserts);
 	};
 
@@ -1098,7 +1101,6 @@ Blocks.prototype.verifyBlock = function (block, checkPreviousBlock) {
 
 // Apply the block, provided it has been verified.
 __private.applyBlock = function (block, cb) {
-
 	// Prevent shutdown during database writes.
 	__private.noShutdownRequired = true;
 
@@ -1480,7 +1482,7 @@ Blocks.prototype.deleteBlocksBefore = function (block, cb) {
 Blocks.prototype.generateBlock = function (keypair, timestamp, cb) {
 
 	var transactions = modules.transactionPool.getUnconfirmedTransactionList(false, constants.maxTxsPerBlock);
-	var ready = [];
+    var ready = [];
 
 	async.eachSeries(transactions, function (transaction, cb) {
 
@@ -1548,7 +1550,6 @@ Blocks.prototype.generateBlock = function (keypair, timestamp, cb) {
 Blocks.prototype.onProcessBlock = function (block, cb) {
 	library.blockSequence.add(function(sequenceCb){
 		if(block.numberOfTransactions == 0){
-
 			return self.processEmptyBlock(block, sequenceCb);
 		}
 		else{

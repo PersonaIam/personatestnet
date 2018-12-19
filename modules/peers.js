@@ -71,7 +71,8 @@ __private.attachApi = function () {
 	router.map(shared, {
 		'get /': 'getPeers',
 		'get /version': 'version',
-		'get /get': 'getPeer'
+		'get /get': 'getPeer',
+		'get /getRandomSeed': 'getRandomSeed'
 	});
 
 	router.use(function (req, res) {
@@ -118,6 +119,7 @@ __private.updatePeersList = function (cb) {
 						return eachCb();
 					} else {
 						self.accept(peer);
+                        modules.ipfs.accept(peer);
 						return eachCb();
 					}
 				});
@@ -140,7 +142,33 @@ __private.banManager = function (cb) {
 	// });
 };
 
+__private.getActiveSeeds = function() {
+    const peers = self.listBroadcastPeers();
+    const seeds = library.config.peers.list;
+
+    return seeds.filter(function(seed) {
+            // ToDo add detailed filtering and validation
+            return  peers.findIndex(function(peer) {return seed.ip === peer.ip}) !== -1;
+        });
+};
+
 // Public methods
+
+Peers.prototype.getRandomSeed = function (cb) {
+    const activeSeeds = __private.getActiveSeeds();
+
+    const randomSeed = shuffle(activeSeeds)[0];
+
+    shared.getPeer({ body: randomSeed }, function(err, res) {
+        if (err || (res && !res.success)) {
+            library.logger.debug('Unable to get seeded peer', err);
+            return cb('Unable to get seeded peer');
+        }
+
+        return cb(null, res);
+	});
+};
+
 //
 //__API__ `inspect`
 

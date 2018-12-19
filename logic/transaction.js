@@ -38,44 +38,29 @@ Transaction.prototype.create = function (data) {
 	if (!__private.types[data.type]) {
 		throw 'Unknown transaction type ' + data.type;
 	}
-
 	if (!data.sender) {
 		throw 'Invalid sender';
 	}
-
 	if (!data.keypair && !data.signature) {
 		throw 'Invalid keypair';
 	}
-
 	var trs = {
 		type: data.type,
-		amount: 0,
+		amount: data.amount ? data.amount : 0,
+		recipientId: data.recipientId,
 		senderPublicKey: data.sender.publicKey,
-		requesterPublicKey: data.requester ? data.requester.publicKey.toString('hex') : null,
-		timestamp: slots.getTime(),
+		requesterPublicKey: ( data.requester && data.requester.publicKey ) ? data.requester.publicKey.toString('hex') : null,
+		timestamp: data.timestamp ? data.timestamp : slots.getTime(),
 		vendorField: data.vendorField,
-		asset: {}
+		asset: data.asset
 	};
-
-	trs.ledger = false;
-	if (data.signature) {
-		trs.signature = data.signature;
-		trs.requesterPublicKey = data.sender.publicKey;
-		trs.ledger = true;
-	}
-	trs = __private.types[trs.type].create.call(this, data, trs);
-	trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
-	if(!data.signature){
-		trs.signature = this.sign(data.keypair, trs);
-	}
-
-	if (!data.signature && data.sender.secondSignature && data.secondKeypair) {
-		trs.signSignature = this.sign(data.secondKeypair, trs);
-	}
-
-	trs.id = this.getId(trs);
-
-	return trs;
+    trs.fee = __private.types[trs.type].calculateFee.call(this, trs, data.sender);
+    trs.signature = this.sign(data.keypair, trs);
+    if (data.sender.secondSignature && data.secondKeypair) {
+        trs.signSignature = this.sign(data.secondKeypair, trs);
+    }
+    trs.id = this.getId(trs);
+    return trs;
 };
 
 //
@@ -96,17 +81,17 @@ Transaction.prototype.validateAddress = function(address){
 
 //
 Transaction.prototype.attachAssetType = function (typeId, instance) {
-	if (instance && typeof instance.create === 'function' && 
+	if (instance && typeof instance.create === 'function' &&
 		typeof instance.getBytes === 'function' &&
-		typeof instance.calculateFee === 'function' && 
+		typeof instance.calculateFee === 'function' &&
 		typeof instance.verify === 'function' &&
-		typeof instance.objectNormalize === 'function' && 
+		typeof instance.objectNormalize === 'function' &&
 		typeof instance.dbRead === 'function' &&
-		typeof instance.apply === 'function' && 
+		typeof instance.apply === 'function' &&
 		typeof instance.undo === 'function' &&
-		typeof instance.applyUnconfirmed === 'function' && 
+		typeof instance.applyUnconfirmed === 'function' &&
 		typeof instance.undoUnconfirmed === 'function' &&
-		typeof instance.ready === 'function' && 
+		typeof instance.ready === 'function' &&
 		typeof instance.process === 'function'
 	) {
 		__private.types[typeId] = instance;
@@ -317,7 +302,7 @@ Transaction.prototype.checkBalance = function (amount, balance, trs, sender) {
 	return {
 		exceeded: exceeded,
 		error: exceeded ? [
-			'Account does not have enough ARK:', sender.address,
+			'Account does not have enough PRSN:', sender.address,
 			'balance:', bignum(sender[balance].toString() || '0').div(Math.pow(10,8))
 		].join(' ') : null
 	};
@@ -383,7 +368,6 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 		if (err) {
 			return cb(err);
 		}
-
 		// Check for already confirmed transaction
 		this.scope.db.one(sql.countById, { id: trs.id }).then(function (row) {
 			if (row.count > 0) {
@@ -719,9 +703,7 @@ Transaction.prototype.apply = function (trs, block, sender, cb) {
 	if (senderBalance.error) {
 		return cb(senderBalance.error);
 	}
-
 	amount = amount.toNumber();
-
 	this.scope.account.merge(sender.address, {
 		balance: -amount,
 		blockId: block.id,
@@ -796,14 +778,11 @@ Transaction.prototype.applyUnconfirmed = function (trs, sender, requester, cb) {
 	if (senderBalance.error) {
 		return cb(senderBalance.error);
 	}
-
 	amount = amount.toNumber();
-
 	this.scope.account.merge(sender.address, {u_balance: -amount}, function (err, sender) {
 		if (err) {
 			return cb(err);
 		}
-
 		__private.types[trs.type].applyUnconfirmed.call(this, trs, sender, function (err) {
 			if (err) {
 				this.scope.account.merge(sender.address, {u_balance: amount}, function (err2) {
@@ -921,7 +900,6 @@ Transaction.prototype.dbSave = function (trs) {
 //
 Transaction.prototype.afterSave = function (trs, cb) {
 	var tx_type = __private.types[trs.type];
-
 	if (!tx_type) {
 		return cb('Unknown transaction type ' + trs.type);
 	} else {

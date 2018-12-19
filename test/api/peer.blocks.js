@@ -206,7 +206,7 @@ describe('POST /peer/blocks', function () {
 			.end(function (err, res) {
 				node.debug('> Response:'.grey, JSON.stringify(res.body));
 				node.expect(res.body).to.have.property('success').to.be.ok;
-				node.expect(res.body).to.have.property('blockId').to.equal('17790183012548475874');
+				node.expect(res.body).to.have.property('blockId').to.equal('16794737022374929907');
 				done();
 			});
 	});

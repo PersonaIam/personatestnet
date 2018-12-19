@@ -34,22 +34,18 @@ module.exports = {
       private: 0x04358394
     },
     name: 'testnet',
-    nethash: 'b4e87739ca85f7eabf844a643930573e9a2dd9da291662e74d26962b5c3f0ed9',
+    nethash: 'a6a53c0da7822012da6de41cdcaef2ecad885c7df2fc97011e5c40c5684f80a9',
     token: 'TPERSONA',
     symbol: 'TP',
     pubKeyHash: 0x42, // Addresses will begin with 'T'
     explorer: 'http://testnet-explorer.persona.im',
     wif: 0x50, // Network prefix for wif generation
     activePeer: {
-      ip: '5.135.75.64',
+      ip: '127.0.0.1',
       port: 4101
     },
     peers: [
-      { ip: '5.135.75.64', port: 4101 },
-      { ip: '5.135.75.65', port: 4101 },
-      { ip: '5.135.75.66', port: 4101 },
-      { ip: '5.135.75.67', port: 4101 },
-      { ip: '5.135.75.68', port: 4101 }
+      { ip: '127.0.0.1', port: 4101 }
     ]
   },
   /** @type {Network} */

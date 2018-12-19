@@ -241,7 +241,6 @@ function fromBytes(hexString){
 		delete tx.recipientId;
 		parseSignatures(hexString, tx, 76+42+128+32);
 	}
-	console.log(tx);
 	return tx;
 }
 

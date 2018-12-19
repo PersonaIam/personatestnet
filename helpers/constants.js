@@ -14,7 +14,28 @@ module.exports = {
 		delegate: 2500000000,
 		multisignature: 500000000,
 		register: 10000000,
-		verify: 10000000
+		verify: 10000000,
+		createattribute: 4,
+		updateattribute: 3,
+		attributevalidationrequest: 2,
+        attributevalidationrequestapprove: 1,
+        attributevalidationrequestdecline: 1,
+        attributevalidationrequestnotarize: 1,
+        attributevalidationrequestreject: 1,
+        attributevalidationrequestcancel: 1,
+		attributeshare: 1,
+		attributeshareapproval: 1,
+		attributeconsume: 1,
+		reward:1,
+		startrewardround:1,
+		updaterewardround:1,
+		createservice:1,
+        inactivateservice:1,
+        identityuserequest : 1,
+        identityuserequestapprove : 1,
+        identityuserequestdecline : 1,
+        identityuserequestend : 1,
+        identityuserequestcancel : 1,
 	},
 	feeStart: 1,
 	feeStartVolume: 10000 * 100000000,
@@ -36,12 +57,76 @@ module.exports = {
 			800000000, // Initial Reward
 			400000000, // Milestone 1
 			200000000, // Milestone 2
-			100000000
+			100000000  // Milestone 3
 		],
 		offset: 100,   // Start rewards at block, ie 7 days after net start
 		distance: 7889400, // Distance between each milestone - 7889400 = 2 years
 	},
 	signatureLength: 196,
+	shareStatus : {
+		UNAPPROVED : 0,
+		APPROVED : 1,
+		COMPLETED : 2
+	},
+    validationRequestStatus : {
+        PENDING_APPROVAL : 'PENDING_APPROVAL',
+        IN_PROGRESS : 'IN_PROGRESS',
+        DECLINED : 'DECLINED',
+        COMPLETED : 'COMPLETED',
+		REJECTED: 'REJECTED',
+        CANCELED : 'CANCELED'
+    },
+    validationRequestActions : {
+        DECLINE : 'DECLINE',
+        APPROVE : 'APPROVE',
+		NOTARIZE : 'NOTARIZE',
+		REJECT : 'REJECT',
+		CANCEL : 'CANCEL'
+    },
+    validationRequestValidatorActions : {
+        DECLINE : 'DECLINE',
+        APPROVE : 'APPROVE',
+        NOTARIZE : 'NOTARIZE',
+        REJECT : 'REJECT',
+    },
+    validationRequestOwnerActions : {
+        CANCEL : 'CANCEL'
+    },
+    validationType : {
+        FACE_TO_FACE : 'FACE_TO_FACE',
+        REMOTE : 'REMOTE'
+    },
+	serviceStatus : {
+		ACTIVE : 'ACTIVE',
+		INACTIVE : 'INACTIVE'
+	},
+
+    identityUseRequestStatus : {
+        PENDING_APPROVAL : 'PENDING_APPROVAL',
+        ACTIVE : 'ACTIVE',
+        DECLINED : 'DECLINED',
+        ENDED : 'ENDED',
+        CANCELED : 'CANCELED'
+    },
+    identityUseRequestActions : {
+        APPROVE : 'APPROVE',
+        DECLINE : 'DECLINE',
+        END : 'END',
+        CANCEL : 'CANCEL'
+    },
+    identityUseRequestProviderActions : {
+        APPROVE : 'APPROVE',
+        DECLINE : 'DECLINE'
+    },
+    identityUseRequestOwnerActions : {
+        END : 'END',
+        CANCEL : 'CANCEL'
+    },
+
 	totalAmount: 6677610400000000,
-	unconfirmedTransactionTimeOut: 10800 // 1080 blocks
+	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
+	VALIDATIONS_REQUIRED : 1,
+    REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',
+    REWARD_FAUCET_KEY : '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6',
+    REWARD_ROUND_INTERVAL : 1 // TBD 1 hour in milliseconds
 };

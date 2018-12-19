@@ -83,6 +83,10 @@ var config = {
 	db: appConfig.db,
 	modules: {
 		accounts: './modules/accounts.js',
+		attributes: './modules/business/attributes.js',
+		attributeValidations: './modules/business/attributeValidations.js',
+        identityUses: './modules/business/identityUses.js',
+		services: './modules/business/services.js',
 		transactions: './modules/transactions.js',
 		blocks: './modules/blocks.js',
 		signatures: './modules/signatures.js',
@@ -96,7 +100,8 @@ var config = {
 		transactionPool: './modules/transactionPool.js',
 		blockchain: './modules/blockchain.js',
 		nodeManager: './modules/nodeManager.js',
-		identity: './modules/identity.js'
+		identity: './modules/identity.js',
+		ipfs: './modules/ipfs.js',
 	}
 };
 

@@ -527,7 +527,6 @@ Transport.prototype.onBroadcastBlock = function (block) {
 	// else {
 	// 	bloomfilter = new BloomFilter(serialized);
 	// }
-
 	var blockheaders = {
 		id: block.id,
 		height: block.height,

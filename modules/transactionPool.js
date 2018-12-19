@@ -629,7 +629,6 @@ __private.applyUnconfirmedList = function (transactions, cb) {
 		if (!transaction) {
 			return eachSeriesCb();
 		}
-
 		__private.processVerifyTransaction(transaction, function (err, sender) {
 			if (err) {
 				library.logger.debug('Failed to process / verify unconfirmed transaction: ' + transaction.id, err);

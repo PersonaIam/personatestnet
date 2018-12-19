@@ -110,6 +110,42 @@ module.exports = {
 			}
 		}
 	},
+    getSeeds: {
+        id: 'peer.getSeeds',
+        type: 'object',
+        properties: {
+            port: {
+                type: 'integer',
+                minimum: 1,
+                maximum: 65535
+            },
+            state: {
+                type: 'integer',
+                minimum: 0,
+                maximum: 3
+            },
+            os: {
+                type: 'string',
+                maxLength: 64
+            },
+            version: {
+                type: 'string',
+                maxLength: 11
+            },
+            orderBy: {
+                type: 'string'
+            },
+            limit: {
+                type: 'integer',
+                minimum: 0,
+                maximum: 100
+            },
+            offset: {
+                type: 'integer',
+                minimum: 0
+            }
+        }
+    },
 	getPeer: {
 		id: 'peer.getPeer',
 		type: 'object',

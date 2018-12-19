@@ -34,7 +34,7 @@ function Peer(ip, port, version, os){
 	this.os = os;
 	this.protocol = (port%1000)==443?"https":"http";
 	this.liteclient = port < 80;
-  this.websocketapi = false;
+	this.websocketapi = false;
 	this.status = "NEW";
 	this.publicapi = false;
 	this.blockheader;
@@ -165,7 +165,6 @@ Peer.prototype.fetchStatus = function(cb){
 			if(!check.verified){
 				that.status="FORK";
 				that.counterror++;
-				console.log(res.body);
 				library.logger.trace(that + " sent header", res.body.header);
 				library.logger.debug(that + " header errors", check.errors);
 				return cb && cb('Received invalid block header from peer '+that, res);

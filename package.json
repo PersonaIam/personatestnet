@@ -32,7 +32,12 @@
     "express-rate-limit": "=2.5.0",
     "extend": "=3.0.0",
     "figlet": "^1.2.0",
+    "fs-extra": "^7.0.0",
+    "go-ipfs-dep": "^0.4.17",
     "ip": "=1.1.3",
+    "ipfs": "0.31.7",
+    "ipfs-api": "^24.0.1",
+    "ipfsd-ctl": "0.39.2",
     "json-schema": "=0.2.3",
     "json-sql": "LiskHQ/json-sql#27e1ed1",
     "libpq": "^1.8.8",
@@ -54,9 +59,11 @@
     "validator": "=5.7.0",
     "validator.js": "=2.0.3",
     "vorpal": "^1.11.4",
+    "xlsx": "0.14.0",
     "z-schema": "=3.18.0"
   },
   "devDependencies": {
+    "app-root-path": "^2.1.0",
     "bitcore-mnemonic": "=1.1.1",
     "blanket": "=1.2.3",
     "browserify-bignum": "=1.3.0-2",
@@ -74,9 +81,12 @@
     "grunt-jsdox": "=0.1.7",
     "grunt-obfuscator": "=0.1.0",
     "jsdox": "=0.4.10",
+    "jsencrypt": "^3.0.0-rc.1",
     "jshint": "=2.9.3",
     "mocha": "=3.1.0",
+    "mochawesome": "^3.1.1",
     "moment": "=2.15.1",
+    "sleep": "=5.2.3",
     "supertest": "=2.0.0"
   },
   "config": {
