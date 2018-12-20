@@ -160,7 +160,8 @@ Service.prototype.schema = {
             type: 'string'
         },
         description: {
-            type: 'string'
+            type: 'string',
+            maxLength : 2048
         },
         attributeTypes : {
             type : 'array'

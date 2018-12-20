@@ -93,7 +93,8 @@ module.exports = {
 
     CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES : 'Cannot create identity use request : missing required service attributes',
     CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some attributes are expired or are missing required validations',
-    CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES : 'Cannot create identity use request : some required attribute values are not provided in the request'
+    CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES : 'Cannot create identity use request : some required attribute values are not provided in the request',
 
+    SERVICE_DESCRIPTION_TOO_LONG : 'The service description is limited to 2048 characters'
 };
 

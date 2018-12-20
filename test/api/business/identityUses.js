@@ -1620,6 +1620,24 @@ describe('Create Identity Use Requests - SUCCESS', function () {
             done();
         });
     });
+
+    it('Get Identity Use Request - Using the owner and the serviceId', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body).to.have.property('validation_requests_count').to.be.eq(2);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                done();
+            });
+        });
+    });
 });
 
 describe('Approve Identity Use Request', function () {
@@ -1679,18 +1697,15 @@ describe('Approve Identity Use Request', function () {
 
         getServices({provider: PROVIDER, name: SERVICE_NAME}, function (err, res) {
             param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
-                getIdentityUseRequests(param, function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ACTIVE);
-                    done();
-                });
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ACTIVE);
+                done();
             });
-        })
+        });
     })
 
     it('Approve Identity Use Request -> Request is already ACTIVE', function (done) {
@@ -1855,18 +1870,15 @@ describe('End Identity Use Request', function () {
 
         getServices({provider: PROVIDER, name: SERVICE2_NAME}, function (err, res) {
             param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
-                getIdentityUseRequests(param, function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ENDED);
-                    done();
-                });
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.ENDED);
+                done();
             });
-        })
+        });
     })
 
     it('Approve Identity Use Request -> Request is already ENDED', function (done) {
@@ -2008,18 +2020,15 @@ describe('Decline Identity Use Request', function () {
 
         getServices({provider: PROVIDER, name: SERVICE3_NAME}, function (err, res) {
             param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
-                getIdentityUseRequests(param, function (err, res) {
-                    console.log(res.body);
-                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
-                    done();
-                });
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                done();
             });
-        })
+        });
     })
 
     it('Decline Identity Use Request - SUCCESS -> Request goes from PENDING_APPROVAL to DECLINED', function (done) {
@@ -2060,19 +2069,16 @@ describe('Decline Identity Use Request', function () {
 
         getServices({provider: PROVIDER, name: SERVICE3_NAME}, function (err, res) {
             param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
+            param.owner = OWNER;
                 getIdentityUseRequests(param, function (err, res) {
                     console.log(res.body);
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                     node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.DECLINED);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(REASON_FOR_DECLINE_1024_GOOD);
                     done();
                 });
             });
-        })
     })
 
     it('Decline Identity Use Request -> Request is already DECLINED', function (done) {
@@ -2206,18 +2212,15 @@ describe('Cancel Identity Use Request', function () {
 
         getServices({provider: PROVIDER, name: SERVICE4_NAME}, function (err, res) {
             param.serviceId = res.body.services[0].id;
-            getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-                param.attributeId = res.body.attributes[0].id;
+            param.owner = OWNER;
                 getIdentityUseRequests(param, function (err, res) {
                     console.log(res.body);
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                     node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
-                    node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.CANCELED);
                     done();
                 });
             });
-        })
     })
 
     it('Decline Identity Use Request -> Request is already CANCELED', function (done) {
@@ -3033,8 +3036,8 @@ function postCancelValidationAttributeRequest(params, done) {
 
 function getIdentityUseRequests(params, done) {
     let url = '/api/identity-use';
-    if (params.attributeId && params.serviceId) {
-        url += '?attributeId=' + '' + params.attributeId + '&serviceId=' + '' + params.serviceId;
+    if (params.owner && params.serviceId) {
+        url += '?owner=' + '' + params.owner + '&serviceId=' + '' + params.serviceId;
     } else {
         if (params.serviceName || params.serviceProvider || params.owner) {
             url += '?';

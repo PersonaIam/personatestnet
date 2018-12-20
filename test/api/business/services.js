@@ -33,6 +33,10 @@ const SLEEP_TIME = 10001; // in milliseconds
 let reportData = [];
 let transactionList = [];
 
+let maxLength = 2048;
+let descriptionMaxLength = new Array(1 + maxLength).join('x');
+let descriptionTooLong = new Array(1 + maxLength + 1).join('x');
+
 // TESTS
 
 describe('Send Funds', function () {
@@ -136,7 +140,21 @@ describe('Create Service', function () {
         });
     });
 
-    it('Create Service - Second service for a given provider', function (done) {
+    it('Create Service - Service description is too long', function (done) {
+        let param = {};
+        param.name = SERVICE2_NAME;
+        param.description = descriptionTooLong;
+
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_DESCRIPTION_TOO_LONG);
+            done();
+        });
+    });
+
+    it('Create Service - Second service for a given provider, with description of max length (2048)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -147,6 +165,7 @@ describe('Create Service', function () {
 
         let param = {};
         param.name = SERVICE2_NAME;
+        param.description = descriptionMaxLength;
         let request = createServiceRequest(param);
 
         postService(request, function (err, res) {
