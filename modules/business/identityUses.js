@@ -307,9 +307,25 @@ shared.getIdentityUseRequests = function (req, cb) {
                 return cb(err);
             }
 
-            let resultData = {identity_use_requests: res.identityUseRequests, count: res.count};
+            if (req.body.serviceId && req.body.owner) { // only get validation requests if there is a single IdentityUseRequest to retrieve
+                library.db.query(sql.IdentityUseRequestsSql.getAnsweredValidationRequestsForIdentityUseRequest,
+                    {service_id: req.body.serviceId, owner: req.body.owner}).then(function (validationRequests) {
+                    if (err) {
+                        return cb(err);
+                    }
 
-            return cb(null, resultData);
+                    let attributeTypes = res.identityUseRequests[0].attribute_types;
+                    console.log(attributeTypes)
+                    console.log(validationRequests)
+                    validationRequests = validationRequests.filter(validationRequest => attributeTypes.includes(validationRequest.type));
+                    console.log(validationRequests)
+                    let resultData = {identity_use_request: res.identityUseRequests, validation_requests_count: validationRequests.length, validation_requests : validationRequests};
+                    return cb(null, resultData);
+                });
+            } else {
+                let resultData = {identity_use_requests: res.identityUseRequests, count: res.count};
+                return cb(null, resultData);
+            }
         });
     });
 };

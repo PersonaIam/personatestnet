@@ -165,6 +165,13 @@ let IdentityUseRequestsSql = {
     'JOIN services s ON s.id = iur.service_id ' +
     'WHERE iur.owner = ${owner} AND s.id = ${service_id}',
 
+    getAnsweredValidationRequestsForIdentityUseRequest :
+    'SELECT avr.id,avr.attribute_id,avr.validator,avr.status,avr.validation_type,a.type from attribute_validation_requests avr ' +
+    'JOIN attributes a ON avr.attribute_id = a.id ' +
+    'JOIN identity_use_requests iur ON iur.owner = a.owner ' +
+    'JOIN attribute_validation_request_actions avra ON avra.attribute_validation_request_id = avr.id ' +
+    'WHERE iur.owner = ${owner} AND iur.service_id = ${service_id} AND (avra.action = \'NOTARIZE\' OR avra.action = \'REJECT\')',
+
     updateIdentityUseRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
     updateIdentityUseWithReason : 'UPDATE identity_use_requests SET status = ${status}, reason = ${reason} WHERE id = ${id}',
 };

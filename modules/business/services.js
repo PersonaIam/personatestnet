@@ -298,6 +298,10 @@ shared.addService = function (req, cb) {
         if (!library.logic.transaction.validateAddress(req.body.asset.service.provider)) {
             return cb('Service provider address is incorrect');
         }
+
+        if (req.body.asset.service.description.length > 2048) {
+            return cb(messages.SERVICE_DESCRIPTION_TOO_LONG)
+        }
         let keypair;
 
         if (!req.body.signature) {
