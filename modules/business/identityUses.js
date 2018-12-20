@@ -319,7 +319,7 @@ shared.getIdentityUseRequests = function (req, cb) {
                     console.log(validationRequests)
                     validationRequests = validationRequests.filter(validationRequest => attributeTypes.includes(validationRequest.type));
                     console.log(validationRequests)
-                    let resultData = {identity_use_request: res.identityUseRequests, validation_requests_count: validationRequests.length, validation_requests : validationRequests};
+                    let resultData = {identity_use_requests: res.identityUseRequests, validation_requests_count: validationRequests.length, validation_requests : validationRequests};
                     return cb(null, resultData);
                 });
             } else {
