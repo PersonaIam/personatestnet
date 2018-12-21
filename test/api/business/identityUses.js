@@ -6,7 +6,6 @@ let sleep = require('sleep');
 let messages = require('../../../helpers/messages.js');
 let constants = require('../../../helpers/constants.js');
 let slots = require('../../../helpers/slots.js');
-let xlsx = require('xlsx');
 
 // TEST DATA
 
@@ -17,9 +16,6 @@ const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd
 const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
 const OTHER_SECRET = "city maple antenna above hurt random later common toss reveal torch label";
 const OTHER_PUBLIC_KEY = '026434affd98ea4f0d9220d30263a46834076058feca62894352e16b4cddce3bae';
-
-//'LiVgpba3pzuyzMd47BYbXiNAoq9aXC4JRv';
-//'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
 
 const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy burden digital copy online";
@@ -33,19 +29,13 @@ const PHONE_NUMBER = 'phone_number';
 const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
-const ALIAS = 'alias';
-const EMAIL = 'email';
-const INCORRECT_ATTRIBUTE_TYPE = 'noSuchType';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
-const EMAIL_VALUE = 'yeezy@gmail.com';
-const EMAIL_VALUE2 = 'yeezy2@gmail.com';
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
-const DEFAULT_AMOUNT = 0;
 
 const PROVIDER = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
 const PROVIDER_SECRET = "isolate spoil weekend protect swallow trap brown cross message patient public reward";
@@ -80,9 +70,6 @@ const COUNT = 'count';
 const TRUE = true;
 const FALSE = false;
 const STATUS = 'status';
-const ATTRIBUTES = 'attributes';
-const DESCRIPTION = 'description';
-const SERVICE_STATUS = 'service_status';
 const REASON = 'reason';
 const CUSTOM_VALIDATIONS = 2;
 const ONE_VALIDATION = 1;
@@ -92,15 +79,13 @@ const ONE_VALIDATION = 1;
 const SLEEP_TIME = 10001; // in milliseconds
 let transactionList = [];
 let ipfsTransaction = {};
-let time = 0;
-let reportData = [];
 
 // TESTS
 
-describe('Send Funds', function () {
+describe('Prerequisites ', function () {
 
     // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
-    it('Send funds - placeholder to generate public key', function (done) {
+    it('Send funds, placeholder to generate the public key', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -124,7 +109,7 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the other owner', function (done) {
+    it('Send funds to the other owner', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -147,7 +132,7 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the validator', function (done) {
+    it('Send funds to the validator', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -170,7 +155,7 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the second validator', function (done) {
+    it('Send funds to the second validator', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -196,9 +181,9 @@ describe('Send Funds', function () {
 
 // Setup Attributes
 
-describe('Create Attribute', function () {
+describe('Setup Attribute ', function () {
 
-    it('Create Attribute - FIRST_NAME', function (done) {
+    it('Create FIRST_NAME', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -223,7 +208,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - PHONE_NUMBER ', function (done) {
+    it('Create PHONE_NUMBER ', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -253,7 +238,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - BIRTHPLACE ', function (done) {
+    it('Create BIRTHPLACE ', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -283,7 +268,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attribute - FIRST_NAME', function (done) {
+    it('Get FIRST_NAME', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -299,9 +284,9 @@ describe('Create Attribute', function () {
     });
 });
 
-describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
+describe('Setup Attribute (File Data Type)', function () {
 
-    it('Create Attribute - File Data Type (IDENTITY_CARD)', function (done) {
+    it('Create IDENTITY_CARD ', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -339,7 +324,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Get File Attribute Creation Transaction - should have the IPFS hash as the attribute value', function (done) {
+    it('IDENTITY_CARD creation transaction should have the IPFS hash as the attribute value', function (done) {
         node.expect(ipfsTransaction).to.have.property('transactionId').to.be.a('string');
 
         let transactionId = ipfsTransaction.transactionId;
@@ -366,7 +351,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Get Attribute - File Data Type', function (done) {
+    it('Get IDENTITY_CARD', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -382,9 +367,11 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
     });
 });
 
-describe('Create Attribute', function () {
+// Setup Attributes
 
-    it('Create Attribute - FIRST_NAME, other owner', function (done) {
+describe('Setup Attribute ', function () {
+
+    it('Create FIRST_NAME, other owner', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -416,7 +403,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - IDENTITY_CARD, other owner, with associations', function (done) {
+    it('Create IDENTITY_CARD, other owner, with associations', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -432,7 +419,7 @@ describe('Create Attribute', function () {
             param.secret = OTHER_SECRET;
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
-            param.associations = [identityCardData.body.attributes[0].id]
+            param.associations = [identityCardData.body.attributes[0].id];
             param.expire_timestamp = slots.getTime() + 200000;
 
             let request = createAttributeRequest(param);
@@ -453,7 +440,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - ADDRESS ', function (done) {
+    it('Create ADDRESS', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -483,7 +470,7 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attributes - Multiple Results and checks order is expected', function (done) {
+    it('Get Attributes (Multiple Results) and check order is respected', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -507,9 +494,9 @@ describe('Create Attribute', function () {
 
 // Setup Services
 
-describe('Create Services', function() {
+describe('Setup Services ', function() {
 
-    it('Create Service - First Service - will store the approved request', function (done) {
+    it('First Service (will store the approved request)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -534,7 +521,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Second Service - will store the approved + ended request', function (done) {
+    it('Second Service (will store the approved + ended request)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -561,7 +548,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Third Service - will store the cancelled request', function (done) {
+    it('Third Service (will store the canceled request)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -588,7 +575,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Fourth Service - will store the denied request', function (done) {
+    it('Fourth Service (will store the denied request)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -615,7 +602,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Fifth Service - will be used to create requests on an inactive service', function (done) {
+    it('Fifth Service (will be used to create requests on an inactive service)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -642,7 +629,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Sixth Service - will be used to approve requests on an inactive service', function (done) {
+    it('Sixth Service (will be used to approve requests on an inactive service)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -669,7 +656,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Seventh Service - will be used to end requests on an inactive service', function (done) {
+    it('Seventh Service (will be used to end requests on an inactive service)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -696,7 +683,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Eighth Service - will be used to decline requests on an inactive service', function (done) {
+    it('Eighth Service (will be used to decline requests on an inactive service)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -723,7 +710,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Ninth Service - will be used to cancel requests on an inactive service', function (done) {
+    it('Ninth Service (will be used to cancel requests on an inactive service)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -750,7 +737,7 @@ describe('Create Services', function() {
         });
     });
 
-    it('Create Service - Tenth Service - will have a requirement of just 1 validations per attribute', function (done) {
+    it('Tenth Service (will have a requirement of just 1 validations per attribute)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -778,20 +765,11 @@ describe('Create Services', function() {
         });
     });
 
-    it('Get Services by provider - 10 results', function (done) {
+    it('Make sure all 10 services are created', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(10);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(10);
-            done();
-        });
-    });
-
-    it('Get Services by provider - Check number of validations is correct', function (done) {
-        getServices({provider: PROVIDER}, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(10);
             node.expect(res.body.services[0].validations_required).to.be.eq(CUSTOM_VALIDATIONS);
             node.expect(res.body.services[1].validations_required).to.be.eq(CUSTOM_VALIDATIONS);
@@ -800,13 +778,13 @@ describe('Create Services', function() {
         });
     });
 
-})
+});
 
 // Setup Validation Requests
 
-describe('Create Attribute validation request', function () {
+describe('Setup Attribute validation request ', function () {
 
-    it('Create Attribute validation request - success (IDENTITY_CARD)', function (done) {
+    it('Create for IDENTITY_CARD', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -835,7 +813,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (PHONE_NUMBER)', function (done) {
+    it('Create for PHONE_NUMBER', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -864,7 +842,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (BIRTHPLACE)', function (done) {
+    it('Create for BIRTHPLACE', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -893,7 +871,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (IDENTITY_CARD), another validator', function (done) {
+    it('Create for IDENTITY_CARD, second validator', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -922,7 +900,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute - IDENTITY_CARD - attribute is still inactive, with 2 requests, 1 COMPLETED & 1 PENDING_APPROVAL', function (done) {
+    it('Get IDENTITY_CARD (attribute is still inactive, with 1 request in PENDING_APPROVAL)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -934,7 +912,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute validation requests - with results, using validator', function (done) {
+    it('Get 3 existing requests, using validator', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -957,9 +935,11 @@ describe('Create Attribute validation request', function () {
 
 });
 
-describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', function () {
+// Setup Validation Requests ( Actions )
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized )', function (done) {
+describe('Attribute validation request actions ', function () {
+
+    it('Approve - Request exists and is PENDING_APPROVAL ( to be notarized )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -986,16 +966,11 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )', function (done) {
+    it('Approve - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1022,16 +997,11 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED ', function (done) {
+    it('Get - Verify the request status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED ', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1056,7 +1026,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED (second validator)', function (done) {
+    it('Get - Verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED (second validator)', function (done) {
 
         let param = {};
         param.validator = VALIDATOR_2;
@@ -1081,7 +1051,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be rejected )', function (done) {
+    it('Approve - Request exists and is PENDING_APPROVAL ( to be rejected )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1108,16 +1078,11 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
+    it('Get - Verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1140,7 +1105,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is in PENDING_APPROVAL', function (done) {
+    it('Cancel - Request exists and is in PENDING_APPROVAL', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1171,7 +1136,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Get Attribute validation request - verify the status is CANCELLED after a PENDING_APPROVAL request is CANCELLED', function (done) {
+    it('Get - Verify the status is canceled after a PENDING_APPROVAL request is canceled', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1196,7 +1161,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct' , function (done) {
+    it('Notarize - Request exists, is in IN_PROGRESS and NOTARIZATION is correct' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1228,7 +1193,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Get Attribute validation request - verify the status is COMPLETED after a IN_PROGRESS request is NOTARIZED', function (done) {
+    it('Get - Verify the status is COMPLETED after a IN_PROGRESS request is NOTARIZED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1254,7 +1219,19 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS', function (done) {
+    it('Get IDENTITY_CARD (attribute is now active, with 1 request COMPLETED)', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
+            done();
+        });
+    });
+
+    it('Reject - Request exists and is in IN_PROGRESS', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1286,7 +1263,7 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
         });
     });
 
-    it('Get Attribute validation request - verify the status is REJECTED after a IN_PROGRESS request is REJECTED', function (done) {
+    it('Get - Verify the status is REJECTED after an IN_PROGRESS request is REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1316,9 +1293,9 @@ describe('Approve/Decline/Notarize/Reject/Cancel attribute validation request', 
 
 // Identity Use Requests
 
-describe('Create Identity Use Requests - negative scenarios', function() {
+describe('Create Identity Use Requests ', function () {
 
-    it('Create Identity Use Request - action is made by the provider', function (done) {
+    it('FAILURE -> Action is made by the provider', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1334,7 +1311,7 @@ describe('Create Identity Use Requests - negative scenarios', function() {
         });
     });
 
-    it('Create Identity Use Request - IDENTITY_CARD attribute has just one completed validation, which is insufficient for the given service', function (done) {
+    it('FAILURE -> Attribute has just one completed validation, which is insufficient for a service that requires 2 validations', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1349,11 +1326,8 @@ describe('Create Identity Use Requests - negative scenarios', function() {
             done();
         });
     });
-})
 
-describe('Create Identity Use Requests - SUCCESS', function () {
-
-    it('Create Identity Use Request - SUCCESS -> For a service which requires a single validation', function (done) {
+    it('SUCCESS -> The service requires a single validation', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1384,23 +1358,23 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Requests - no results', function (done) {
+    it('Get Newly Created Identity Use Request', function (done) {
 
         let param = {};
 
-        param.serviceName = SERVICE_NAME;
+        param.serviceName = SERVICE10_NAME;
         param.serviceProvider = PROVIDER;
 
         getIdentityUseRequests(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(0);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             done();
         });
     });
 
-    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct ( second validator )', function (done) {
+    it('Notarize - Request exists, is in IN_PROGRESS and NOTARIZATION is correct ( second validator )', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1432,7 +1406,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Attribute - After second notarization - becomes active ( IDENTITY_CARD )', function (done) {
+    it('Get - After second notarization, attribute remains active ( IDENTITY_CARD )', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1446,7 +1420,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Create Identity Use Request - IDENTITY_CARD attribute is active, but the request contains a different attribute value', function (done) {
+    it('FAILURE -> Attribute is active, but the request contains a different attribute value', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1463,7 +1437,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Create Identity Use Request - SUCCESS -> attribute has 2 completed validations, which is enough to become active', function (done) {
+    it('SUCCESS -> Attribute has 2 completed validations, for a service that requires 2 validations', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1478,7 +1452,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH'}]
+        param.values = [{type : 'identity_card', value:'HHH'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1495,7 +1469,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Create Identity Use Request - SUCCESS -> For the second service', function (done) {
+    it('SUCCESS -> For the second service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1510,7 +1484,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH'}]
+        param.values = [{type : 'identity_card', value:'HHH'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1527,7 +1501,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Create Identity Use Request - SUCCESS -> For the third service', function (done) {
+    it('SUCCESS -> For the third service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1542,7 +1516,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH3'}]
+        param.values = [{type : 'identity_card', value:'HHH3'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1559,7 +1533,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Create Identity Use Request - SUCCESS -> For the fourth service', function (done) {
+    it('SUCCESS -> For the fourth service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1574,7 +1548,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH4'}]
+        param.values = [{type : 'identity_card', value:'HHH4'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1591,7 +1565,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Request - Using the service provider', function (done) {
+    it('Get Identity Use Requests - Using the service provider', function (done) {
 
         let param = {serviceProvider : PROVIDER};
 
@@ -1607,7 +1581,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Request - Using the owner', function (done) {
+    it('Get Identity Use Requests - Using the owner', function (done) {
 
         let param = {owner : OWNER};
 
@@ -1621,7 +1595,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
         });
     });
 
-    it('Get Identity Use Request - Using the owner and the serviceId', function (done) {
+    it('Get Identity Use Requests - Using the owner and the serviceId', function (done) {
 
         let param = {};
 
@@ -1642,7 +1616,7 @@ describe('Create Identity Use Requests - SUCCESS', function () {
 
 describe('Approve Identity Use Request', function () {
 
-    it('Approve Identity Use Request -> Request is PENDING APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
+    it('FAILURE -> Request is in PENDING APPROVAL, but the action is made by the OWNER instead of the PROVIDER', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1660,7 +1634,7 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+    it('SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1706,9 +1680,9 @@ describe('Approve Identity Use Request', function () {
                 done();
             });
         });
-    })
+    });
 
-    it('Approve Identity Use Request -> Request is already ACTIVE', function (done) {
+    it('FAILURE -> Request is already ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1726,7 +1700,7 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('Decline Identity Use Request -> Request is already ACTIVE', function (done) {
+    it('FAILURE -> Decline Identity Use Request -> Request is already ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1745,7 +1719,7 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('Cancel Identity Use Request -> Request is already ACTIVE', function (done) {
+    it('FAILURE -> Cancel Identity Use Request -> Request is already ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1762,11 +1736,11 @@ describe('Approve Identity Use Request', function () {
             done();
         });
     });
-})
+});
 
 describe('End Identity Use Request', function () {
 
-    it('End Identity Use Request -> Request is still PENDING_APPROVAL', function (done) {
+    it('FAILURE -> Request is still PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1784,7 +1758,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+    it('Approve Identity Use Request - Request goes from Pending Approval to ACTIVE', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1815,7 +1789,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('End Identity Use Request -> Request is ACTIVE, action is made by the PROVIDER instead of the OWNER', function (done) {
+    it('FAILURE -> Request is ACTIVE, action is made by the PROVIDER instead of the OWNER', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1833,7 +1807,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('End Identity Use Request - SUCCESS -> Request goes from ACTIVE to ENDED', function (done) {
+    it('SUCCESS -> Request goes from ACTIVE to ENDED', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1879,9 +1853,9 @@ describe('End Identity Use Request', function () {
                 done();
             });
         });
-    })
+    });
 
-    it('Approve Identity Use Request -> Request is already ENDED', function (done) {
+    it('FAILURE -> Approve Identity Use Request -> Request is already ENDED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1899,7 +1873,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('Decline Identity Use Request -> Request is already ENDED', function (done) {
+    it('FAILURE -> Decline Identity Use Request -> Request is already ENDED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1918,7 +1892,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('Cancel Identity Use Request -> Request is already ENDED', function (done) {
+    it('FAILURE -> Cancel Identity Use Request -> Request is already ENDED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1936,7 +1910,7 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('End Identity Use Request -> Request is already ENDED', function (done) {
+    it('FAILURE -> End Identity Use Request -> Request is already ENDED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1953,11 +1927,11 @@ describe('End Identity Use Request', function () {
             done();
         });
     });
-})
+});
 
 describe('Decline Identity Use Request', function () {
 
-    it('Decline Identity Use Request -> Request is PENDING_APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
+    it('FAILURE -> Request is PENDING_APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1976,7 +1950,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Decline Identity Use Request - no reason is provided for declining the identity use request', function (done) {
+    it('FAILURE -> No reason is provided for declining the identity use request', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1994,7 +1968,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Decline Identity Use Request - Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
+    it('FAILURE -> Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -2014,7 +1988,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - Still PENDING_APPROVAL after the incorrect declinings', function (done) {
+    it('Get Identity Use Request - Still PENDING_APPROVAL after the incorrect declines', function (done) {
 
         let param = {};
 
@@ -2029,9 +2003,9 @@ describe('Decline Identity Use Request', function () {
                 done();
             });
         });
-    })
+    });
 
-    it('Decline Identity Use Request - SUCCESS -> Request goes from PENDING_APPROVAL to DECLINED', function (done) {
+    it('SUCCESS -> Request goes from PENDING_APPROVAL to DECLINED', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2079,9 +2053,9 @@ describe('Decline Identity Use Request', function () {
                     done();
                 });
             });
-    })
+    });
 
-    it('Decline Identity Use Request -> Request is already DECLINED', function (done) {
+    it('FAILURE -> Request is already DECLINED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2100,7 +2074,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Approve Identity Use Request -> Request is already DECLINED', function (done) {
+    it('FAILURE -> Approve Identity Use Request -> Request is already DECLINED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2118,7 +2092,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Cancel Identity Use Request -> Request is already DECLINED', function (done) {
+    it('FAILURE -> Cancel Identity Use Request -> Request is already DECLINED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2136,7 +2110,7 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('End Identity Use Request -> Request is already DECLINED', function (done) {
+    it('FAILURE -> End Identity Use Request -> Request is already DECLINED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2153,11 +2127,11 @@ describe('Decline Identity Use Request', function () {
             done();
         });
     });
-})
+});
 
 describe('Cancel Identity Use Request', function () {
 
-    it('Cancel Identity Use Request -> Request is PENDING_APPROVAL, action is made by the PROVIDER instead of the OWNER', function (done) {
+    it('FAILURE -> Request is PENDING_APPROVAL, action is made by the PROVIDER instead of the OWNER', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2175,7 +2149,7 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('Cancel Identity Use Request - SUCCESS -> Request goes from PENDING_APPROVAL to CANCELED', function (done) {
+    it('SUCCESS -> Request goes from PENDING_APPROVAL to CANCELED', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2221,9 +2195,9 @@ describe('Cancel Identity Use Request', function () {
                     done();
                 });
             });
-    })
+    });
 
-    it('Decline Identity Use Request -> Request is already CANCELED', function (done) {
+    it('FAILURE -> Decline Identity Use Request -> Request is already CANCELED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2242,7 +2216,7 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('Approve Identity Use Request -> Request is already CANCELED', function (done) {
+    it('FAILURE -> Approve Identity Use Request -> Request is already CANCELED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2260,7 +2234,7 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('Cancel Identity Use Request -> Request is already CANCELED', function (done) {
+    it('FAILURE -> Cancel Identity Use Request -> Request is already CANCELED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2278,7 +2252,7 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('End Identity Use Request -> Request is already CANCELED', function (done) {
+    it('FAILURE -> End Identity Use Request -> Request is already CANCELED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2295,7 +2269,7 @@ describe('Cancel Identity Use Request', function () {
             done();
         });
     });
-})
+});
 
 describe('Actions on an inactive service', function () {
 
@@ -2344,7 +2318,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Create Identity Use Request - Service is INACTIVE', function (done) {
+    it('FAILURE -> Create Identity Use Request - Service is INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2364,7 +2338,7 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Sixth Service ( for APPROVE action )
 
-    it('Create Identity Use Request - SUCCESS -> For the sixth service', function (done) {
+    it('Create Identity Use Request -> For the sixth service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2379,7 +2353,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE6_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH5'}]
+        param.values = [{type : 'identity_card', value:'HHH5'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -2439,7 +2413,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Approve Identity Use Request -> Service is INACTIVE', function (done) {
+    it('FAILURE -> Approve Identity Use Request -> Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2459,7 +2433,7 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Seventh Service ( for END action )
 
-    it('Create Identity Use Request - SUCCESS -> For the seventh service', function (done) {
+    it('Create Identity Use Request -> For the seventh service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2474,7 +2448,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH7'}]
+        param.values = [{type : 'identity_card', value:'HHH7'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -2491,7 +2465,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Approve Identity Use Request - SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+    it('Approve Identity Use Request -> Request goes from Pending Approval to ACTIVE', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2565,7 +2539,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('End Identity Use Request -> Service is INACTIVE', function (done) {
+    it('FAILURE -> End Identity Use Request -> Request is ACTIVE, but the Service is INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2585,7 +2559,7 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Eighth Service ( for DECLINE action )
 
-    it('Create Identity Use Request - SUCCESS -> For the eighth service', function (done) {
+    it('Create Identity Use Request -> For the eighth service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2600,7 +2574,7 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH8'}]
+        param.values = [{type : 'identity_card', value:'HHH8'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -2660,7 +2634,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Decline Identity Use Request - Service is INACTIVE', function (done) {
+    it('FAILURE -> Decline Identity Use Request -> Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2681,7 +2655,7 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Ninth Service ( for CANCEL action )
 
-    it('Create Identity Use Request - SUCCESS -> For the ninth service', function (done) {
+    it('Create Identity Use Request -> For the ninth service', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2755,7 +2729,7 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Cancel Identity Use Request - Service is INACTIVE', function (done) {
+    it('FAILURE -> Cancel Identity Use Request - Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2773,15 +2747,6 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-})
-
-describe('Generate Report', function () {
-
-    it('Generate Report', function (done) {
-        createReport('Report_IdentityUses.xlsx', function (err, res) {
-            done();
-        });
-    });
 });
 
 /**
@@ -2802,32 +2767,6 @@ function createAttributeRequest(param) {
     request.asset.attribute[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.attribute[0].owner = param.owner ? param.owner : OWNER;
     request.asset.attribute[0].value = param.value ? param.value : NAME_VALUE;
-    if (param.associations) {
-        request.asset.attribute[0].associations = param.associations;
-    }
-    if (param.expire_timestamp) {
-        request.asset.attribute[0].expire_timestamp =  param.expire_timestamp;
-    }
-
-    console.log(JSON.stringify(request));
-    return request;
-}
-
-function updateAttributeRequest(param) {
-    let request = {};
-    if (!param) {
-        param = {}
-    }
-    request.secret = param.secret ? param.secret : SECRET;
-    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
-    request.asset = {};
-    request.asset.attribute = [];
-    request.asset.attribute[0] = {};
-    request.asset.attribute[0].attributeId = param.attributeId;
-    request.asset.attribute[0].owner = param.owner ? param.owner : OWNER;
-    if (param.value) {
-        request.asset.attribute[0].value = param.value;
-    }
     if (param.associations) {
         request.asset.attribute[0].associations = param.associations;
     }
@@ -2967,10 +2906,6 @@ function postAttribute(params, done) {
     node.post('/api/attributes', params, done);
 }
 
-function putAttributeUpdate(params, done) {
-    node.put('/api/attributes', params, done);
-}
-
 function getAttribute(owner, typeName, done) {
     getAttributeTypeByName(typeName, function (err, res) {
         let type;
@@ -3016,10 +2951,6 @@ function postAttributeValidationRequest(params, done) {
 
 function postApproveValidationAttributeRequest(params, done) {
     node.post('/api/attribute-validations/approve', params, done);
-}
-
-function postDeclineValidationAttributeRequest(params, done) {
-    node.post('/api/attribute-validations/decline', params, done);
 }
 
 function postNotarizeValidationAttributeRequest(params, done) {
@@ -3115,18 +3046,5 @@ function getServices(params, done) {
 
 function putInactivateService(params, done) {
     node.put('/api/services/inactivate', params, done);
-}
-
-function createReport(reportName, cb) {
-    let workbook = xlsx.utils.book_new();
-    let ws = xlsx.utils.json_to_sheet(reportData);
-    xlsx.utils.book_append_sheet(workbook, ws, "Results");
-    xlsx.writeFile(workbook, reportName, {type: 'file'});
-    return cb(null);
-}
-
-function addToReportData(data, cb){
-    reportData.push(data);
-    return cb(null);
 }
 

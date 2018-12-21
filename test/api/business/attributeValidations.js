@@ -6,7 +6,6 @@ let sleep = require('sleep');
 let messages = require('../../../helpers/messages.js');
 let constants = require('../../../helpers/constants.js');
 let slots = require('../../../helpers/slots.js');
-let xlsx = require('xlsx');
 
 // TEST DATA
 
@@ -66,7 +65,6 @@ const SLEEP_TIME = 10001; // in milliseconds
 let transactionList = [];
 let ipfsTransaction = {};
 let time = 0;
-let reportData = [];
 
 // TESTS
 
@@ -177,7 +175,7 @@ describe('Create Attribute', function () {
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE)
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE);
 
             done();
         });
@@ -362,7 +360,7 @@ describe('Create Attribute', function () {
             param.secret = OTHER_SECRET;
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
-            param.associations = [identityCardData.body.attributes[0].id]
+            param.associations = [identityCardData.body.attributes[0].id];
             param.expire_timestamp = slots.getTime() + 200000;
 
             let request = createAttributeRequest(param);
@@ -622,7 +620,7 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute - IDENTITY_CARD - attribute is still inactive, with 2 requests, 1 COMPLETED & 1 PENDING_APPROVAL', function (done) {
+    it('Get Attribute - IDENTITY_CARD - attribute is inactive, with 1 request in PENDING_APPROVAL', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -886,7 +884,7 @@ describe('Get Attribute validation requests', function () {
                 done();
             });
         });
-    })
+    });
 
     it('Get Attribute validation requests - correct parameters, using only owner', function (done) {
 
@@ -1022,13 +1020,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
-            addToReportData(
-                {   testName:"Notarize Attribute Validation Request - Request is still PENDING_APPROVAL",
-                    expected: "ERROR",
-                    errorMessage: messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS,
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
@@ -1072,13 +1064,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
-            addToReportData(
-                {   testName:"Reject Attribute Validation Request - Request is still PENDING_APPROVAL",
-                    expected: "ERROR",
-                    errorMessage: messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS,
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
@@ -1135,13 +1121,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
+                done();
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
         });
     });
 
@@ -1172,12 +1153,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
     });
 
@@ -1258,13 +1234,9 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
             });
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is PENDING_APPROVAL",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
+
     });
 
     it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
@@ -1344,14 +1316,9 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
-            addToReportData(
-                {   testName:"Approve Attribute Validation Request - Request exists and is already in IN_PROGRESS",
-                    expected: "ERROR",
-                    errorMessage: messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL,
-                }, function (err, res) {
-                    done();
-                });
+            done();
         });
+
     });
 
     it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is APPROVED', function (done) {
@@ -1939,20 +1906,6 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
             });
-            done();
-        });
-    });
-
-    it('Get Attribute - Before last notarization - still inactive ( IDENTITY_CARD )', function (done) {
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             done();
         });
     });
@@ -2777,15 +2730,6 @@ describe('GET Attribute validation score', function () {
     });
 });
 
-describe('Generate Report', function () {
-
-    it('Generate Report', function (done) {
-        createReport('Report_AttributeValidations.xlsx', function (err, res) {
-            done();
-        });
-    });
-});
-
 /**
  * Utilities
  *
@@ -2888,10 +2832,6 @@ function getAttributeTypeByName(name, done) {
     node.get('/api/attributes/types?name=' + name, done);
 }
 
-function getAttributeTypesList(done) {
-    node.get('/api/attributes/types/list', done);
-}
-
 function postAttribute(params, done) {
     node.post('/api/attributes', params, done);
 }
@@ -2936,12 +2876,6 @@ function getAttribute(owner, typeName, done) {
         }
         node.get(url, done);
     });
-}
-
-function getAttributesForOwner(owner, done) {
-
-    let url = '/api/attributes?owner=' + owner;
-    node.get(url, done);
 }
 
 function getAttributeValidationRequest(params, done) {
@@ -3006,20 +2940,4 @@ function putTransaction(params, done) {
     node.put('/api/transactions', params, done);
 }
 
-function getTransaction(params, done) {
-    node.get(`/api/transactions/get?id=${params.id}`, done);
-}
-
-function createReport(reportName, cb) {
-    let workbook = xlsx.utils.book_new();
-    let ws = xlsx.utils.json_to_sheet(reportData);
-    xlsx.utils.book_append_sheet(workbook, ws, "Results");
-    xlsx.writeFile(workbook, reportName, {type: 'file'});
-    return cb(null);
-}
-
-function addToReportData(data, cb){
-    reportData.push(data);
-    return cb(null);
-}
 

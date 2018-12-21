@@ -5,9 +5,6 @@ let node = require('../../node.js');
 let sleep = require('sleep');
 let messages = require('../../../helpers/messages.js');
 let constants = require('../../../helpers/constants.js');
-let slots = require('../../../helpers/slots.js');
-let xlsx = require('xlsx');
-let _ = require('lodash')
 
 // TEST DATA
 
@@ -30,7 +27,6 @@ const TRUE = true;
 const FALSE = false;
 
 const SLEEP_TIME = 10001; // in milliseconds
-let reportData = [];
 let transactionList = [];
 
 let maxLength = 2048;
@@ -67,9 +63,9 @@ describe('Send Funds', function () {
     });
 });
 
-describe('Get Services', function () {
+describe('List Services', function () {
 
-    it('List Services - no results', function (done) {
+    it('No results', function (done) {
         listServices(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -92,7 +88,7 @@ describe('Create Service', function () {
         });
     });
 
-    it('Create Service - Simple', function (done) {
+    it('SUCCESS -> Service does not already exist', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -100,7 +96,7 @@ describe('Create Service', function () {
             balance = parseInt(res.body.balance);
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
-        let param = {}
+        let param = {};
         param.validations = CUSTOM_VALIDATIONS;
         let request = createServiceRequest(param);
 
@@ -118,7 +114,7 @@ describe('Create Service', function () {
         });
     });
 
-    it('Create Service - Service already exists for provider', function (done) {
+    it('FAILURE -> Service already exists for provider', function (done) {
 
         let request = createServiceRequest();
 
@@ -135,12 +131,12 @@ describe('Create Service', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             node.expect(res.body.services).to.have.length(1);
-            node.expect(res.body.services[0].validations_required).to.be.eq(CUSTOM_VALIDATIONS)
+            node.expect(res.body.services[0].validations_required).to.be.eq(CUSTOM_VALIDATIONS);
             done();
         });
     });
 
-    it('Create Service - Service description is too long', function (done) {
+    it('FAILURE -> Service description is too long', function (done) {
         let param = {};
         param.name = SERVICE2_NAME;
         param.description = descriptionTooLong;
@@ -154,7 +150,7 @@ describe('Create Service', function () {
         });
     });
 
-    it('Create Service - Second service for a given provider, with description of max length (2048)', function (done) {
+    it('SUCCESS -> Second service for a given provider, with description of max length (2048)', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -192,7 +188,7 @@ describe('Create Service', function () {
         });
     });
 
-    it('Get Services by name - 2 results', function (done) {
+    it('Get Services by provider - 2 results', function (done) {
         getServices({provider : PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -206,7 +202,7 @@ describe('Create Service', function () {
 
 describe('Inactivate Service', function () {
 
-    it('Inactivate Service', function (done) {
+    it('SUCCESS -> Service was previously active', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -238,7 +234,7 @@ describe('Inactivate Service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('Get Service - Service is inactive, immediately after Inactivation' , function (done) {
         getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -249,7 +245,7 @@ describe('Inactivate Service', function () {
         });
     });
 
-    it('Inactivate Service - non existing service', function (done) {
+    it('FAILURE -> Service does not exist', function (done) {
 
         let params = {};
         params.name = NON_EXISTING_SERVICE_NAME;
@@ -265,7 +261,7 @@ describe('Inactivate Service', function () {
         });
     });
 
-    it('Inactivate Service - service is already inactive', function (done) {
+    it('FAILURE -> Service is already inactive', function (done) {
 
         let params = {};
         params.name = SERVICE_NAME;
