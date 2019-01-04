@@ -9,6 +9,10 @@ let slots = require('../../../helpers/slots.js');
 
 // TEST DATA
 
+const OWNER_FAUCET = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
+const SECRET_FAUCET = "blade early broken display angry wine diary alley panda left spy woman";
+const PUBLIC_KEY_FAUCET = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
+
 const OWNER = 'LX9JSTgnd34zPQaE665qQqXdqiPfJ1gAoJ';
 const SECRET = "seven melt double auto antique liquid damp enough road man candy second";
 const PUBLIC_KEY = '0338fee3edbaea4eb28dbe78a9340ecf25ad9f363e523dd72e691ab0d6d2bc4f92';
@@ -92,14 +96,13 @@ describe('Prerequisites ', function () {
         let expectedFee = node.expectedFee(amountToSend);
 
         putTransaction({
-            senderPublicKey: PUBLIC_KEY,
-            signature: '3045022100dacea735ccec2b4446b66a34bdb2e07e1253df8c95035535cfb37b84d2ba1d600220658893865a07d428dc8fbef2a6ab8936b9f04c8d2cf34cb59db020c8386d195b',
-            secret: SECRET,
+            senderPublicKey: PUBLIC_KEY_FAUCET,
+            secret: SECRET_FAUCET,
             amount: amountToSend,
             recipientId: OWNER
         }, function (err, res) {
             transactionList.push({
-                'sender': OWNER,
+                'sender': OWNER_FAUCET,
                 'recipient': OWNER,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
@@ -116,13 +119,13 @@ describe('Prerequisites ', function () {
         let expectedFee = node.expectedFee(amountToSend);
 
         putTransaction({
-            senderPublicKey: PUBLIC_KEY,
-            secret: SECRET,
+            senderPublicKey: PUBLIC_KEY_FAUCET,
+            secret: SECRET_FAUCET,
             amount: amountToSend,
             recipientId: OTHER_OWNER
         }, function (err, res) {
             transactionList.push({
-                'sender': OWNER,
+                'sender': OWNER_FAUCET,
                 'recipient': OTHER_OWNER,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
@@ -139,13 +142,13 @@ describe('Prerequisites ', function () {
         let expectedFee = node.expectedFee(amountToSend);
 
         putTransaction({
-            senderPublicKey: PUBLIC_KEY,
-            secret: SECRET,
+            senderPublicKey: PUBLIC_KEY_FAUCET,
+            secret: SECRET_FAUCET,
             amount: amountToSend,
             recipientId: VALIDATOR
         }, function (err, res) {
             transactionList.push({
-                'sender': OWNER,
+                'sender': OWNER_FAUCET,
                 'recipient': VALIDATOR,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
@@ -162,14 +165,37 @@ describe('Prerequisites ', function () {
         let expectedFee = node.expectedFee(amountToSend);
 
         putTransaction({
-            senderPublicKey: PUBLIC_KEY,
-            secret: SECRET,
+            senderPublicKey: PUBLIC_KEY_FAUCET,
+            secret: SECRET_FAUCET,
             amount: amountToSend,
             recipientId: VALIDATOR_2
         }, function (err, res) {
             transactionList.push({
-                'sender': OWNER,
+                'sender': OWNER_FAUCET,
                 'recipient': VALIDATOR_2,
+                'grossSent': (amountToSend + expectedFee) / node.normalizer,
+                'fee': expectedFee / node.normalizer,
+                'netSent': amountToSend / node.normalizer,
+                'txId': res.body.transactionId,
+                'type': node.txTypes.SEND
+            });
+            done();
+        });
+    });
+
+    it('Send funds to the provider', function (done) {
+        let amountToSend = 100000;
+        let expectedFee = node.expectedFee(amountToSend);
+
+        putTransaction({
+            senderPublicKey: PUBLIC_KEY_FAUCET,
+            secret: SECRET_FAUCET,
+            amount: amountToSend,
+            recipientId: PROVIDER
+        }, function (err, res) {
+            transactionList.push({
+                'sender': OWNER_FAUCET,
+                'recipient': PROVIDER,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
                 'netSent': amountToSend / node.normalizer,
@@ -186,7 +212,7 @@ describe('Prerequisites ', function () {
 describe('Setup Attribute ', function () {
 
     it('Create FIRST_NAME', function (done) {
-
+        sleep.msleep(SLEEP_TIME);
         let unconfirmedBalance = 0;
         let balance = 0;
         getBalance(OWNER, function (err, res) {
