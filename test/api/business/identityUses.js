@@ -9,20 +9,25 @@ let slots = require('../../../helpers/slots.js');
 
 // TEST DATA
 
-const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
-const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
+const OWNER = 'LX9JSTgnd34zPQaE665qQqXdqiPfJ1gAoJ';
+const SECRET = "seven melt double auto antique liquid damp enough road man candy second";
+const PUBLIC_KEY = '0338fee3edbaea4eb28dbe78a9340ecf25ad9f363e523dd72e691ab0d6d2bc4f92';
 
-const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
-const OTHER_SECRET = "city maple antenna above hurt random later common toss reveal torch label";
-const OTHER_PUBLIC_KEY = '026434affd98ea4f0d9220d30263a46834076058feca62894352e16b4cddce3bae';
+const OTHER_OWNER = 'LSuxyEmzrxEA95aDjDWEjUTEKJwg4eWbvu';
+const OTHER_SECRET = "bulb slide ribbon confirm school grit wheel judge side radio vessel refuse";
+const OTHER_PUBLIC_KEY = '034e3e86a3bf2af24a660e41db3900dacf61fb2b38bf451b973c43059524a9545a';
 
-const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
-const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy burden digital copy online";
-const VALIDATOR_PUBLIC_KEY = '022a09511647055f00f46d1546595fa5950349ffd8ac477d5684294ea107f4f84c';
-const VALIDATOR_2 = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
-const VALIDATOR_SECRET_2 = "isolate spoil weekend protect swallow trap brown cross message patient public reward";
-const VALIDATOR_PUBLIC_KEY_2 = '032699280d1527ed944131ac488fe264a80617b0acc9305fe0d40c61b9a1b924f9';
+const VALIDATOR = 'LbDsDwL3vt9e35f3djJZHxWHfHGXntq3N5';
+const VALIDATOR_SECRET = "project sock cycle embrace chest hen praise merry two receive enable foam";
+const VALIDATOR_PUBLIC_KEY = '02e89df52a352dc7d3f4df99ab1deddb9dd0dc882f08cf79936c861276dbaca99a';
+
+const VALIDATOR_2 = 'LWBeHAE1LjaPXLsedn3aqGtNU4zw6CNkR9';
+const VALIDATOR_SECRET_2 = "net strategy innocent mutual pink oval virtual song legal grocery swamp season";
+const VALIDATOR_PUBLIC_KEY_2 = '0380e1c760787e321f8ae42d13bec4cc57f09d3ab12a642ec24b29e6501f23c115';
+
+const PROVIDER = 'LSDquEuwwggJJSHjqN46oNj1QWa3xaDqhD';
+const PROVIDER_SECRET = "family valve solve message ensure front desert maze rug cabin intact party";
+const PROVIDER_PUBLIC_KEY = '030cca25405fa440277a2d226656bc281744657f805c1e66480c132d8f89a8692e';
 
 const FIRST_NAME = 'first_name';
 const PHONE_NUMBER = 'phone_number';
@@ -37,9 +42,6 @@ const THIRD_ID_VALUE = "QUEENS";
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
 
-const PROVIDER = 'LgMN2A1vB1qSQeacnFZavtakCRtBFydzfe';
-const PROVIDER_SECRET = "isolate spoil weekend protect swallow trap brown cross message patient public reward";
-const PROVIDER_PUBLIC_KEY = '032699280d1527ed944131ac488fe264a80617b0acc9305fe0d40c61b9a1b924f9';
 const SERVICE_NAME = 'Ada';             // to be used by Approve Identity Use Request
 const SERVICE2_NAME = 'Anabella';       // to be used by End Identity Use Request
 const SERVICE3_NAME = 'Amy';            // to be used by Decline Identity Use Request

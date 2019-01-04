@@ -9,13 +9,13 @@ let slots = require('../../../helpers/slots.js');
 
 // TEST DATA
 
-const OWNER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
-const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
-const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
+const OWNER = 'Lguu3RdVHxdBTsT3B5z6hHd9QsHN2UyZMk';
+const SECRET = "blame pony tuition six skirt muscle belt segment pause auction raccoon travel";
+const PUBLIC_KEY = '02b13bb6485d271cd5d20043b3d19438462c72e993726559f057494ea14f20e279';
 
-const OTHER_OWNER = 'LXe6ijpkATHu7m2aoNJnvt6kFgQMjEyQLQ';
-const OTHER_SECRET = "city maple antenna above hurt random later common toss reveal torch label";
-const OTHER_PUBLIC_KEY = '026434affd98ea4f0d9220d30263a46834076058feca62894352e16b4cddce3bae';
+const OTHER_OWNER = 'LiQ74VbVC4ALkcN6oTZ2VVva2kK77DeLXw';
+const OTHER_SECRET = "ugly submit senior stage patch milk alley crop drum plunge cheese forum";
+const OTHER_PUBLIC_KEY = '02ed5d74250e0789b6996d06fbc27b0f6c0380e4f33235935efb1f002c280c0a7b';
 
 const VALIDATOR = 'LNJJKBGmC1GZ89XbQ4nfRRwVCZiNig2H9M';
 const VALIDATOR_SECRET = "mechanic excuse globe emerge hedgehog food knee shy burden digital copy online";

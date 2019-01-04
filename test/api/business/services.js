@@ -8,7 +8,7 @@ let constants = require('../../../helpers/constants.js');
 
 // TEST DATA
 
-const PROVIDER = 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w';
+const PROVIDER = 'LTAAFiSnPSsZXnNPGD6dg7cfy2gm4o6Fu7';
 const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
 const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
 
