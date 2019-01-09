@@ -11,7 +11,7 @@ let transactionTypes = require('../../helpers/transactionTypes.js');
 let messages = require('../../helpers/messages.js');
 let async = require('async');
 let constants = require('../../helpers/constants.js');
-let _ = require('lodash')
+let _ = require('lodash');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -139,49 +139,13 @@ __private.attachApi = function () {
 };
 
 Attributes.getAttributesByFilter = function (filter, cb) {
-    let params = {}, where = [];
 
-    if (filter.id >= 0) {
-        where.push('"id" = ${id}');
-        params.id = filter.id;
+    if (!filter.owner) {
+        return cb(messages.MISSING_OWNER_ADDRESS);
     }
 
-    if (filter.type) {
-        where.push('"type" = ${type}');
-        params.type = filter.type;
-    }
-
-    if (filter.owner) {
-        where.push('"owner" = ${owner}');
-        params.owner = filter.owner;
-    }
-
-    if (_.isEmpty(params)) {
-        return cb(null, {count: 0, attributes: []});
-    }
-
-    let orderBy = OrderBy(
-        filter.orderBy, {
-            sortFields: sql.AttributesSql.sortFields,
-            fieldPrefix: function (sortField) {
-                if (['timestamp'].indexOf(sortField) > -1) {
-                    return sortField;
-                } else {
-                    return sortField;
-                }
-            }
-        }
-    );
-
-    if (orderBy.error) {
-        return cb(orderBy.error);
-    }
-
-    library.db.query(sql.AttributesSql.getAttributesFiltered({
-        where: where,
-    }), params).then(function (rows) {
+    library.db.query(sql.AttributesSql.getAttributesForOwner, {owner: filter.owner}).then(function (rows) {
         let attributes = [];
-
         for (let i = 0; i < rows.length; i++) {
             attributes.push(rows[i]);
         }
@@ -190,30 +154,31 @@ Attributes.getAttributesByFilter = function (filter, cb) {
             return cb(null, {count: 0, attributes: []});
         }
         let data = {};
-        data.count = count;
-        library.db.query(sql.AttributesSql.getAttributesForOwner,{owner: filter.owner}).then(function (ownerAttributes) {
-                library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
-                    after: slots.getTime(moment().subtract(1, 'year')),
-                    expirationAfter: slots.getTime(),
-                    owner: filter.owner,
-                    validations_required: filter.validationsRequired ? filter.validationsRequired : constants.VALIDATIONS_REQUIRED,
-                    status : constants.validationRequestStatus.COMPLETED
-                })
-                    .then(function (activeAttributes) {
-                        let activeAttributesIds = activeAttributes.map(row => row.id);
-                        attributes.forEach(attribute => {
-                            attribute.active = activeAttributesIds.includes(attribute.id);
-                            attribute.associated = ownerAttributes
-                                .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
-                            attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
-                        });
-                        data.attributes = attributes;
-                        return cb(null, data);
-                    })
+
+        let ownerAttributes = attributes;
+        attributes = filter.type ? attributes.filter(a => a.type === filter.type) : attributes;
+        attributes = filter.id ? attributes.filter(a => a.id === filter.id) : attributes;
+
+        library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
+            after: slots.getTime(moment().subtract(1, 'year')),
+            expirationAfter: slots.getTime(),
+            owner: filter.owner,
+            validations_required: filter.validationsRequired ? filter.validationsRequired : constants.VALIDATIONS_REQUIRED,
+            status: constants.validationRequestStatus.COMPLETED
+        })
+            .then(function (activeAttributes) {
+                let activeAttributesIds = activeAttributes.map(row => row.id);
+                attributes.forEach(attribute => {
+                    attribute.active = activeAttributesIds.includes(attribute.id);
+                    attribute.associated = ownerAttributes
+                        .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
+                    attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
+                });
+                data.attributes = attributes;
+                data.count = attributes.length;
+                return cb(null, data);
             })
-    }).catch(function (err) {
-        return cb(err.message);
-    });
+    })
 };
 
 __private.getAttributeConsumptionsByFilter = function (filter, cb) {
@@ -284,19 +249,15 @@ __private.checkAssociations = function (filter, cb) {
         return cb(null);
     }
     if (attributeFilter.associations && attributeFilter.associations.length === 0) {
-        return cb('If associations are specified, they must be provided');
+        return cb(messages.EMPTY_ASSOCIATIONS_ARRAY);
     }
 
-    Attributes.getAttributesByFilter({owner : filter.asset.attribute[0].owner}, function (err, data) {
-        let ownerAttributeIds = [];
-        if (data && data.attributes && data.attributes.length > 0) {
-            ownerAttributeIds = data.attributes.map(element => element.id);
-        }
+    Attributes.getAttributesByFilter({owner: filter.asset.attribute[0].owner}, function (err, data) {
         __private.listAttributeTypes({}, function (err, attributeTypes) {
-            let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o=>o.name);
+            let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o => o.name);
             if (!filter.asset.attribute[0].attributeId) { // newly created attribute
-                if (!attributeFileTypesNames.includes(filter.asset.attribute[0].type)) {
-                    return cb(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE);
+                if (!attributeFileTypesNames.includes(attributeFilter.type)) {
+                    return cb(messages.ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES);
                 } else {
                     return cb(null);
                 }
@@ -418,7 +379,7 @@ __private.getUnrewardedConsumptionCalculation = function (filter, cb) {
                             consumption_id: i.id
                         });
                     }
-                })
+                });
                 return cb(null, {unrewardedAttributeConsumptions: unrewardedAttributeConsumptions});
 
             });
@@ -694,12 +655,12 @@ shared.listAttributeTypes = function (req, cb) {
 
 Attributes.listAttributeTypes = function (req, cb) {
 
-        __private.listAttributeTypes({}, function (err, data) {
-            if (err) {
-                return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
-            }
-            return cb(null, {attribute_types: data.attribute_types, count: data.count});
-        });
+    __private.listAttributeTypes({}, function (err, data) {
+        if (err) {
+            return cb(messages.ATTRIBUTE_TYPES_LIST_FAIL);
+        }
+        return cb(null, {attribute_types: data.attribute_types, count: data.count});
+    });
 };
 
 // not exposed as API
@@ -768,7 +729,7 @@ shared.addAttribute = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         let keypair;
@@ -911,7 +872,7 @@ shared.updateAttribute = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         let keypair;
@@ -930,7 +891,10 @@ shared.updateAttribute = function (req, cb) {
                 return cb(err);
             }
 
-            Attributes.getAttributesByFilter({id: req.body.asset.attribute[0].attributeId}, function (err, data) {
+            Attributes.getAttributesByFilter({
+                owner: req.body.asset.attribute[0].owner,
+                id: req.body.asset.attribute[0].attributeId
+            }, function (err, data) {
                 if (err || !data || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND_FOR_UPDATE);
                 }
@@ -1040,7 +1004,7 @@ shared.consumeAttribute = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.attribute[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         let keypair;

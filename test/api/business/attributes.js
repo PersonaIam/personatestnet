@@ -6,7 +6,6 @@ let sleep = require('sleep');
 let messages = require('../../../helpers/messages.js');
 let constants = require('../../../helpers/constants.js');
 let slots = require('../../../helpers/slots.js');
-let xlsx = require('xlsx');
 
 // TEST DATA
 
@@ -37,6 +36,7 @@ const INCORRECT_ADDRESS = 'ABC';
 
 // RESULTS
 
+const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
 const COUNT = 'count';
@@ -49,7 +49,6 @@ const SLEEP_TIME = 10001; // in milliseconds
 let transactionList = [];
 let ipfsTransaction = {};
 let time = 0;
-let reportData = [];
 
 // TESTS
 
@@ -104,9 +103,10 @@ describe('Send Funds', function () {
     });
 });
 
-describe('Attribute Type', function () {
+describe('ATTRIBUTE TYPES', function () {
 
-    it('Get Attribute Type - Attribute Type exists (FIRST_NAME)', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute type (FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute type details (name is FIRST_NAME)', function (done) {
         getAttributeTypeByName(FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -118,7 +118,8 @@ describe('Attribute Type', function () {
         });
     });
 
-    it('Get Attribute Type - Attribute Type does not exist', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute type that does not exist (weight). ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_TYPE_NOT_FOUND', function (done) {
         getAttributeTypeByName('weight', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
@@ -127,7 +128,8 @@ describe('Attribute Type', function () {
         });
     });
 
-    it('Get Attribute Type List', function (done) {
+    it('As a user (PUBLIC), I want to Get the list of attribute types. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute type list', function (done) {
         getAttributeTypesList(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -138,9 +140,10 @@ describe('Attribute Type', function () {
     });
 });
 
-describe('Create Attribute', function () {
+describe('CREATE ATTRIBUTE', function () {
 
-    it('Create Attribute - Non file type, with associations', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type and provide associations. ' +
+        'EXPECTED : FAILURE. ERROR : ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES', function (done) {
 
         let params = {};
         params.associations = [1];
@@ -148,18 +151,13 @@ describe('Create Attribute', function () {
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE)
-
-            addToReportData(
-                {   testName:"CREATE ATTRIBUTE - FIRST_NAME, no associations",
-                    expected: "SUCCESS"
-                }, function (err, res) {
-                    done();
-                });
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES);
+            done();
         });
     });
 
-    it('Create Attribute - FIRST_NAME', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type (FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -172,7 +170,7 @@ describe('Create Attribute', function () {
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -184,7 +182,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - PHONE_NUMBER ', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type (PHONE_NUMBER). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -214,7 +213,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - BIRTHPLACE ', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type (BIRTHPLACE). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -232,7 +232,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -244,7 +244,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attribute - FIRST_NAME', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute (OWNER, FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute Details, including value, type, active, expire_timestamp', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -259,7 +260,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attribute - Attribute does not exist', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute that does not exist (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Result body contains "attributes" property, which is an empty array', function (done) {
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -269,7 +271,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - Owner Address is incorrect', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type, but the provided owner address is invalid. ' +
+        'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
         params.owner = INCORRECT_ADDRESS;
@@ -279,12 +282,13 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.eq('Owner address is incorrect');
+            node.expect(res.body).to.have.property(ERROR).to.eq(messages.INVALID_OWNER_ADDRESS);
             done();
         });
     });
 
-    it('Create Attribute - Attribute Type does not exist', function (done) {
+    it('As a user (OWNER), I want to Create an attribute, but the provided attribute type does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_TYPE_NOT_FOUND', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -300,7 +304,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - Sender and attribute owner do not correspond', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute for some other user (OWNER). ' +
+        'EXPECTED : FAILURE. ERROR : SENDER_IS_NOT_OWNER', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -319,9 +324,10 @@ describe('Create Attribute', function () {
     });
 });
 
-describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
+describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
-    it('Create Attribute - File Data Type with no expiration timestamp', function (done) {
+    it('As a user (OWNER), I want to Create a file type attribute, but without providing an expiration timestamp. ' +
+        'EXPECTED : FAILURE. ERROR : EXPIRE_TIMESTAMP_REQUIRED', function (done) {
 
         let params = {};
         params.type = IDENTITY_CARD;
@@ -339,7 +345,8 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Create Attribute - Expirable type, expire timestamp is in the past', function (done) {
+    it('As a user (OWNER), I want to Create a file type attribute, but with the provided expiration timestamp being in the past. ' +
+        'EXPECTED : FAILURE. ERROR : EXPIRE_TIMESTAMP_IN_THE_PAST', function (done) {
 
         let params = {};
         params.type = IDENTITY_CARD;
@@ -358,7 +365,8 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Create Attribute - File Data Type (IDENTITY_CARD)', function (done) {
+    it('As a user (OWNER), I want to Create a file type attribute (IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -380,7 +388,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             ipfsTransaction.transactionId = res.body.transactionId;
@@ -396,8 +404,9 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Get File Attribute Creation Transaction - should have the IPFS hash as the attribute value', function (done) {
-        node.expect(ipfsTransaction).to.have.property('transactionId').to.be.a('string');
+    it('As a user (PUBLIC), I want to Get the details of a transaction used to create a file type attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction asset value is the IPFS Hash of the file type attribute', function (done) {
+        node.expect(ipfsTransaction).to.have.property(TRANSACTION_ID).to.be.a('string');
 
         let transactionId = ipfsTransaction.transactionId;
 
@@ -423,7 +432,8 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-    it('Get Attribute - File Data Type', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a file type attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute details, having IPFS Hash as value and "active" property false', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -439,9 +449,10 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
     });
 });
 
-describe('Create Attribute', function () {
+describe('CREATE ATTRIBUTE', function () {
 
-    it('Get Attributes - no results', function (done) {
+    it('As a user (PUBLIC), I want to Get the attributes of a user (OTHER_OWNER) that has no attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an empty array, and "count" result of 0', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -451,7 +462,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - FIRST_NAME, other owner', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create a non file attribute type (FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -471,7 +483,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OTHER_OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -483,7 +495,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attributes - 1 result', function (done) {
+    it('As a user (PUBLIC), I want to Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, and "count" result of 1', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -497,7 +510,32 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - IDENTITY_CARD, other owner, with associations', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create a file type attribute (IDENTITY_CARD), providing an empty association array for it. ' +
+        'EXPECTED : FAILURE. ERROR : EMPTY_ASSOCIATIONS_ARRAY', function (done) {
+
+        getAttribute(OTHER_OWNER, FIRST_NAME, function() {
+            let param = {};
+            param.owner = OTHER_OWNER;
+            param.type = IDENTITY_CARD;
+            param.secret = OTHER_SECRET;
+            param.publicKey = OTHER_PUBLIC_KEY;
+            param.value = THIRD_ID_VALUE;
+            param.associations = [];
+            param.expire_timestamp = slots.getTime() + 200000;
+
+            let request = createAttributeRequest(param);
+
+            postAttribute(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.EMPTY_ASSOCIATIONS_ARRAY);
+                done();
+            });
+        });
+    });
+
+    it('As a user (OTHER_OWNER), I want to Create a file type attribute (IDENTITY_CARD), providing an association (FIRST_NAME) for it. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -513,7 +551,7 @@ describe('Create Attribute', function () {
             param.secret = OTHER_SECRET;
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
-            param.associations = [identityCardData.body.attributes[0].id]
+            param.associations = [identityCardData.body.attributes[0].id];
             param.expire_timestamp = slots.getTime() + 200000;
 
             let request = createAttributeRequest(param);
@@ -521,7 +559,7 @@ describe('Create Attribute', function () {
             postAttribute(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -534,7 +572,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - ADDRESS ', function (done) {
+    it('As a user (OWNER), I want to Create a non file attribute type (ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -552,7 +591,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -564,20 +603,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Get Attribute - ADDRESS', function (done) {
-        getAttribute(OWNER, ADDRESS, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ADDRESS_VALUE);
-            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ADDRESS);
-            done();
-        });
-    });
-
-    it('Get Attributes - Multiple Results and checks order is expected', function (done) {
+    it('As a user (PUBLIC), I want to Get the attributes of a user (OWNER) that has multiple attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 5 elements, and "count" result of 5', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -599,9 +626,10 @@ describe('Create Attribute', function () {
     });
 });
 
-describe('Update Attribute', function () {
+describe('UPDATE ATTRIBUTE', function () {
 
-    it('Update Attribute - Value stored in IPFS ( IDENTITY_CARD )', function (done) {
+    it('As a user (OWNER), I want to Update a file type attribute (IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
 
@@ -627,7 +655,7 @@ describe('Update Attribute', function () {
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
 
                 ipfsTransaction.transactionId = res.body.transactionId;
@@ -644,7 +672,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Get Attribute - After Update ( IDENTITY_CARD )', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as new IPFS Hash', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -659,7 +688,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Update Attribute - ( ADDRESS )', function (done) {
+    it('As a user (OWNER), I want to Update a non file type attribute (ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
 
@@ -678,14 +708,13 @@ describe('Update Attribute', function () {
             param.publicKey = PUBLIC_KEY;
             param.value = NEW_ADDRESS;
             time = slots.getTime();
-            console.log(time);
             param.expire_timestamp = time + 200000;
             let request = updateAttributeRequest(param);
 
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -699,7 +728,8 @@ describe('Update Attribute', function () {
 
     });
 
-    it('Get Attribute - After Update ( ADDRESS )', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as new address value', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
@@ -715,7 +745,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Update Attribute - Attribute does not exist', function (done) {
+    it('As a user (OWNER), I want to Update an attribute that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND_FOR_UPDATE', function (done) {
 
         let param = {};
         param.attributeId = 777;
@@ -735,7 +766,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Update Attribute - Only expire timestamp ( ADDRESS )', function (done) {
+    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by changing the expire timestamp, and keeping the value the same. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
 
@@ -759,7 +791,7 @@ describe('Update Attribute', function () {
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -772,7 +804,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Update Attribute - Only value ( ADDRESS )', function (done) {
+    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by changing the value, and keeping the expire timestamp the same. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
 
@@ -795,7 +828,7 @@ describe('Update Attribute', function () {
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -808,9 +841,10 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Update Attribute - Sender and attribute owner do not correspond', function (done) {
+    it('As a user (OWNER), I want to Update another user\'s attribute (OTHER_OWNER, FIRST_NAME). ' +
+        'EXPECTED : FAILURE. ERROR : SENDER_IS_NOT_OWNER', function (done) {
 
-        getAttribute(OWNER, ADDRESS, function (err, res) {
+        getAttribute(OTHER_OWNER, FIRST_NAME, function (err, res) {
             let param = {};
             param.attributeId = res.body.attributes[0].id;
             param.owner = OTHER_OWNER;
@@ -828,7 +862,8 @@ describe('Update Attribute', function () {
         });
     });
 
-    it('Get Attribute - After Second Update ( ADDRESS )', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as the address provided in the second update', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
@@ -842,11 +877,12 @@ describe('Update Attribute', function () {
         });
     });
 
-})
+});
 
-describe('Update Attribute Associations', function () {
+describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
 
-    it('Update Associations - Document to Attribute association ( IDENTITY_CARD -> FIRST_NAME )', function (done) {
+    it('As a user (OWNER), I want to Update an attribute (IDENTITY_CARD) by providing a new association (FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
 
@@ -876,7 +912,7 @@ describe('Update Attribute Associations', function () {
                 putAttributeUpdate(request, function (err, res) {
                     console.log(res.body);
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                    node.expect(res.body).to.have.property('transactionId');
+                    node.expect(res.body).to.have.property(TRANSACTION_ID);
                     sleep.msleep(SLEEP_TIME);
                     getBalance(OTHER_OWNER, function (err, res) {
                         let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -890,7 +926,8 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Get Attribute - After Association Update ( IDENTITY_CARD )', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array, and an "associations" property', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -904,8 +941,9 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Get Attribute - After association was made, verify Attribute is still not documented, and is associated( IDENTITY_CARD is not active yet, but the association exists )', function (done) {
-        getAttribute(OWNER, 'first_name', function (err, res) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute (OWNER, FIRST_NAME) that is part of an association. ' +
+        'EXPECTED : SUCCESS. RESULT : The attribute is associated, not documented (associated Identity Card is still inactive) and not active', function (done) {
+        getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
@@ -914,72 +952,14 @@ describe('Update Attribute Associations', function () {
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(false);
             node.expect(res.body.attributes[0]).to.have.property('associated').to.eq(true);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
             done();
         });
     });
 
-    // it('Update Associations - One association element, and it belongs to different owner', function (done) {
-    //
-    //     getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
-    //         let attributeId = identityCardData.body.attributes[0].id;
-    //
-    //         getAttribute(OTHER_OWNER, FIRST_NAME, function (err, attributeData) {
-    //             let param = {};
-    //             param.attributeId = attributeId;
-    //             param.owner = OWNER;
-    //             param.secret = SECRET;
-    //             param.publicKey = PUBLIC_KEY;
-    //
-    //             param.value = '24680';
-    //             param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
-    //             param.associations = [attributeData.body.attributes[0].id];
-    //
-    //             let request = updateAttributeRequest(param);
-    //
-    //             putAttributeUpdate(request, function (err, res) {
-    //                 console.log(res.body);
-    //                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-    //                 node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
-    //                 done();
-    //             });
-    //         });
-    //     });
-    // });
-
-    // it('Update Associations - Two association elements, and the second belongs to different owner', function (done) {
-    //
-    //     getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
-    //         let attributeId = identityCardData.body.attributes[0].id;
-    //
-    //         getAttribute(OWNER, FIRST_NAME, function (err, firstNameData) {
-    //             let attributeIdFN = firstNameData.body.attributes[0].id;
-    //
-    //         getAttribute(OTHER_OWNER, FIRST_NAME, function (err, attributeDataOtherOwner) {
-    //             let param = {};
-    //             param.attributeId = attributeId;
-    //             param.owner = OWNER;
-    //             param.secret = SECRET;
-    //             param.publicKey = PUBLIC_KEY;
-    //
-    //             param.value = '24681';
-    //             param.expire_timestamp = identityCardData.body.attributes[0].expire_timestamp;
-    //             param.associations = [attributeIdFN, attributeDataOtherOwner.body.attributes[0].id];
-    //
-    //             let request = updateAttributeRequest(param);
-    //
-    //             putAttributeUpdate(request, function (err, res) {
-    //                 console.log(res.body);
-    //                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-    //                 node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
-    //                 done();
-    //             });
-    //         });
-    //         });
-    //     });
-    // });
-
-    it('Update Associations - Attribute to Attribute association', function (done) {
+    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by providing a new association (FIRST_NAME). ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
             let addressAttributeId = addressAttribute.body.attributes[0].id;
@@ -1006,7 +986,8 @@ describe('Update Attribute Associations', function () {
         });
     });
 
-    it('Update Associations - Attribute to Document association', function (done) {
+    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by providing a new association (IDENTITY_CARD). ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
             let addressAttributeId = addressAttribute.body.attributes[0].id;
@@ -1034,9 +1015,10 @@ describe('Update Attribute Associations', function () {
     });
 });
 
-describe('Expired Attribute', function () {
+describe('EXPIRED ATTRIBUTES', function () {
 
-    it('Create Attribute - success (Timestamp in the past, but not expirable)', function (done) {
+    it('As a user (OWNER), I want to Create a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the past. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1055,7 +1037,7 @@ describe('Expired Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1067,7 +1049,8 @@ describe('Expired Attribute', function () {
         });
 });
 
-    it('Get Attribute - expired' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a non-expirable attribute (OWNER, EMAIL). ' +
+        'EXPECTED : SUCCESS. RESULT : The attribute details contains the expire_timestamp, as provided during attribute creation' , function (done) {
         getAttribute(OWNER, 'email', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1081,7 +1064,8 @@ describe('Expired Attribute', function () {
         });
     });
 
-    it('Update Attribute - Only expire timestamp ( EMAIL, make it not expired )', function (done) {
+    it('As a user (OWNER), I want to Update the expire_timestamp of a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the future. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, 'email', function (err, res) {
 
@@ -1106,7 +1090,7 @@ describe('Expired Attribute', function () {
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1116,15 +1100,6 @@ describe('Expired Attribute', function () {
                 });
                 done();
             });
-        });
-    });
-});
-
-describe('Generate Report', function () {
-
-    it('Generate Report', function (done) {
-        createReport('Report_Attributes.xlsx', function (err, res) {
-            done();
         });
     });
 });
@@ -1229,17 +1204,4 @@ function putTransaction(params, done) {
 
 function getTransaction(params, done) {
     node.get(`/api/transactions/get?id=${params.id}`, done);
-}
-
-function createReport(reportName, cb) {
-    let workbook = xlsx.utils.book_new();
-    let ws = xlsx.utils.json_to_sheet(reportData);
-    xlsx.utils.book_append_sheet(workbook, ws, "Results");
-    xlsx.writeFile(workbook, reportName, {type: 'file'});
-    return cb(null);
-}
-
-function addToReportData(data, cb){
-    reportData.push(data);
-    return cb(null);
 }

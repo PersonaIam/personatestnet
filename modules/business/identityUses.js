@@ -185,7 +185,7 @@ shared.requestIdentityUse = function (req, cb) {
             return cb('Identity use attributes are not provided');
         }
         if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         let keypair;
@@ -234,7 +234,7 @@ shared.requestIdentityUse = function (req, cb) {
                         }
 
                         if (_.intersection(ownerAttributesActiveAndNotExpiredTypes, serviceAttributes).length !== serviceAttributes.length) {
-                            return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE);
+                            return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
                         }
 
                         if (_.intersection(identityRequestAttributesTypes, serviceAttributes).length !== serviceAttributes.length) {
@@ -338,7 +338,7 @@ __private.identityUseAnswer = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.identityuse[0].serviceProvider)) {
@@ -427,14 +427,14 @@ __private.checkIdentityUseAnswer = function(params, cb) {
 
     if (params.answer === constants.identityUseRequestActions.APPROVE) {
         if (params.status !== constants.identityUseRequestStatus.PENDING_APPROVAL) {
-            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            return cb(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
         }
 
         return cb(null, {transactionType : transactionTypes.APPROVE_IDENTITY_USE_REQUEST});
     }
     if (params.answer === constants.identityUseRequestActions.DECLINE) {
         if (params.status !== constants.identityUseRequestStatus.PENDING_APPROVAL) {
-            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            return cb(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
         }
 
         return cb(null, {transactionType : transactionTypes.DECLINE_IDENTITY_USE_REQUEST});
@@ -442,14 +442,14 @@ __private.checkIdentityUseAnswer = function(params, cb) {
 
     if (params.answer === constants.identityUseRequestActions.END) {
         if (params.status !== constants.identityUseRequestStatus.ACTIVE) {
-            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            return cb(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
         }
         return cb(null, {transactionType : transactionTypes.END_IDENTITY_USE_REQUEST});
     }
 
     if (params.answer === constants.identityUseRequestActions.CANCEL) {
         if (params.status !== constants.identityUseRequestStatus.PENDING_APPROVAL) {
-            return cb(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            return cb(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
         }
         return cb(null, {transactionType : transactionTypes.CANCEL_IDENTITY_USE_REQUEST});
     }

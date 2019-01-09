@@ -263,11 +263,11 @@ __private.validationRequestAnswer = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].validator)) {
-            return cb('Validator address is incorrect');
+            return cb(messages.INVALID_VALIDATOR_ADDRESS);
         }
 
         let keypair;
@@ -366,11 +366,11 @@ shared.requestAttributeValidation = function (req, cb) {
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].owner)) {
-            return cb('Owner address is incorrect');
+            return cb(messages.INVALID_OWNER_ADDRESS);
         }
 
         if (!library.logic.transaction.validateAddress(req.body.asset.validation[0].validator)) {
-            return cb('Validator address is incorrect');
+            return cb(messages.INVALID_VALIDATOR_ADDRESS);
         }
 
         if (req.body.asset.validation[0].owner === req.body.asset.validation[0].validator) {

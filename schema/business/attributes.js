@@ -22,7 +22,8 @@ module.exports = {
                 type: 'integer',
                 minimum: 0
             }
-        }
+        },
+        required: ['owner']
     },
     listAttributeTypes: {
         id: 'attributes.listAttributeTypes',

@@ -68,8 +68,9 @@ module.exports = {
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
     REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed',
 
-    NO_ASSOCIATIONS_FOR_NON_FILE_TYPE : 'Associations are not supported for non-file attribute types',
+    ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     MISSING_VALIDATION_TYPE : 'Validation type is missing',
+    MISSING_OWNER_ADDRESS : 'Owner parameter must be provided',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
     REASON_TOO_BIG_DECLINE : 'The reason for declining a request is limited to 1024 characters',
     REASON_TOO_BIG_REJECT : 'The reason for rejecting a request is limited to 1024 characters',
@@ -81,8 +82,8 @@ module.exports = {
 
     IDENTITY_USE_REQUEST_MISSING_FOR_ACTION : 'There is no identity use request for this action',
     UNKNOWN_IDENTITY_USE_REQUEST_ANSWER : 'Unknown identity use request answer',
-    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE: 'The specified identity use request must be active for the action to take place',
-    ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be pending approval for the action to take place',
+    IDENTITY_USE_REQUEST_NOT_ACTIVE: 'The specified identity use request must be active for the action to take place',
+    IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be in pending approval status for the action to take place',
 
     IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR : 'Only the service provider is allowed to perform this action on an identity use request',
     IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to perform this action on an identity use request',
@@ -92,9 +93,13 @@ module.exports = {
     DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
 
     CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES : 'Cannot create identity use request : missing required service attributes',
-    CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some attributes are expired or are missing required validations',
+    CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some attributes are expired or are missing required validations',
     CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES : 'Cannot create identity use request : some required attribute values are not provided in the request',
 
-    SERVICE_DESCRIPTION_TOO_LONG : 'The service description is limited to 2048 characters'
+    SERVICE_DESCRIPTION_TOO_LONG : 'The service description is limited to 2048 characters',
+
+    INVALID_OWNER_ADDRESS : 'Owner address is invalid',
+    INVALID_VALIDATOR_ADDRESS : 'Validator address is invalid',
+    EMPTY_ASSOCIATIONS_ARRAY : 'If associations are specified, they must be provided'
 };
 

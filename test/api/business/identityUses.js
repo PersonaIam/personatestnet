@@ -70,6 +70,7 @@ const REASON_FOR_DECLINE_1025_TOO_LONG =
 
 // RESULTS
 
+const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
 const COUNT = 'count';
@@ -209,9 +210,10 @@ describe('Prerequisites ', function () {
 
 // Setup Attributes
 
-describe('Setup Attribute ', function () {
+describe('CREATE ATTRIBUTES', function () {
 
-    it('Create FIRST_NAME', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
         sleep.msleep(SLEEP_TIME);
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -224,7 +226,7 @@ describe('Setup Attribute ', function () {
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -236,7 +238,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Create PHONE_NUMBER ', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type PHONE_NUMBER for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -254,7 +257,7 @@ describe('Setup Attribute ', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -266,7 +269,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Create BIRTHPLACE ', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type BIRTHPLACE for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -284,7 +288,7 @@ describe('Setup Attribute ', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -296,7 +300,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Get FIRST_NAME', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute (based on OWNER and ATTRIBUTE_TYPE). ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute Details', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -312,9 +317,10 @@ describe('Setup Attribute ', function () {
     });
 });
 
-describe('Setup Attribute (File Data Type)', function () {
+describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
-    it('Create IDENTITY_CARD ', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -336,7 +342,7 @@ describe('Setup Attribute (File Data Type)', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             ipfsTransaction.transactionId = res.body.transactionId;
@@ -352,8 +358,9 @@ describe('Setup Attribute (File Data Type)', function () {
         });
     });
 
-    it('IDENTITY_CARD creation transaction should have the IPFS hash as the attribute value', function (done) {
-        node.expect(ipfsTransaction).to.have.property('transactionId').to.be.a('string');
+    it('As a user (PUBLIC), I want to Get the details of the transaction that created a file type attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : The transaction attribute value is the IPFS hash of the saved file (document)', function (done) {
+        node.expect(ipfsTransaction).to.have.property(TRANSACTION_ID).to.be.a('string');
 
         let transactionId = ipfsTransaction.transactionId;
 
@@ -379,7 +386,8 @@ describe('Setup Attribute (File Data Type)', function () {
         });
     });
 
-    it('Get IDENTITY_CARD', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a file type attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute Details (the value is the IPFS Hash)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -397,9 +405,10 @@ describe('Setup Attribute (File Data Type)', function () {
 
 // Setup Attributes
 
-describe('Setup Attribute ', function () {
+describe('CREATE ATTRIBUTES', function () {
 
-    it('Create FIRST_NAME, other owner', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -419,7 +428,7 @@ describe('Setup Attribute ', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OTHER_OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -431,7 +440,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Create IDENTITY_CARD, other owner, with associations', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself, with associations (FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -440,7 +450,7 @@ describe('Setup Attribute ', function () {
             balance = parseInt(res.body.balance);
         });
 
-        getAttribute(OTHER_OWNER, 'first_name', function (err, identityCardData) {
+        getAttribute(OTHER_OWNER, FIRST_NAME, function (err, identityCardData) {
             let param = {};
             param.owner = OTHER_OWNER;
             param.type = IDENTITY_CARD;
@@ -455,7 +465,7 @@ describe('Setup Attribute ', function () {
             postAttribute(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -468,7 +478,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Create ADDRESS', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute of type ADDRESS for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -486,7 +497,7 @@ describe('Setup Attribute ', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -498,7 +509,8 @@ describe('Setup Attribute ', function () {
         });
     });
 
-    it('Get Attributes (Multiple Results) and check order is respected', function (done) {
+    it('As a user (PUBLIC), I want to Get all the attributes of a given OWNER. ' +
+        'EXPECTED : SUCCESS. RESULT : Multiple attributes (5) of certain given types', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -522,9 +534,10 @@ describe('Setup Attribute ', function () {
 
 // Setup Services
 
-describe('Setup Services ', function() {
+describe('CREATE SERVICES', function() {
 
-    it('First Service (will store the approved request)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -537,7 +550,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -549,7 +562,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Second Service (will store the approved + ended request)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will store the approved + ended Identity Use request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -564,7 +578,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -576,7 +590,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Third Service (will store the canceled request)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will store the canceled Identity Use request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -591,7 +606,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -603,7 +618,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Fourth Service (will store the denied request)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will store the declined Identity Use request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -618,7 +634,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -630,7 +646,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Fifth Service (will be used to create requests on an inactive service)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will be used to create requests on an inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -645,7 +662,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -657,7 +674,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Sixth Service (will be used to approve requests on an inactive service)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will be used to approve requests on an inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -672,7 +690,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -684,7 +702,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Seventh Service (will be used to end requests on an inactive service)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will be used to end requests on an inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -699,7 +718,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -711,7 +730,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Eighth Service (will be used to decline requests on an inactive service)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will be used to decline requests on an inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -726,7 +746,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -738,7 +758,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Ninth Service (will be used to cancel requests on an inactive service)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will be used to cancel requests on an inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -753,7 +774,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -765,7 +786,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Tenth Service (will have a requirement of just 1 validations per attribute)', function (done) {
+    it('As a user (PROVIDER), I want to Create a service for myself, which will require a single validation per attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -781,7 +803,7 @@ describe('Setup Services ', function() {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -793,7 +815,8 @@ describe('Setup Services ', function() {
         });
     });
 
-    it('Make sure all 10 services are created', function (done) {
+    it('As a user (PUBLIC), I want to Get all the services that belong to the user PROVIDER. ' +
+        'EXPECTED : SUCCESS. RESULT : The services list, which has 10 results', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -810,9 +833,10 @@ describe('Setup Services ', function() {
 
 // Setup Validation Requests
 
-describe('Setup Attribute validation request ', function () {
+describe('CREATE ATTRIBUTE VALIDATION REQUEST', function () {
 
-    it('Create for IDENTITY_CARD', function (done) {
+    it('As a user (OWNER), I want to Create an attribute validation request for an IDENTITY_CARD attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -830,6 +854,7 @@ describe('Setup Attribute validation request ', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -841,7 +866,8 @@ describe('Setup Attribute validation request ', function () {
         });
     });
 
-    it('Create for PHONE_NUMBER', function (done) {
+    it('As a user (OWNER), I want to Create an attribute validation request for a PHONE_NUMBER attribute. ' +
+        'EXPECTED : SUCCESS, RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -853,12 +879,13 @@ describe('Setup Attribute validation request ', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'phone_number';
+        param.type = PHONE_NUMBER;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -870,7 +897,8 @@ describe('Setup Attribute validation request ', function () {
         });
     });
 
-    it('Create for BIRTHPLACE', function (done) {
+    it('As a user (OWNER), I want to Create an attribute validation request for a BIRTHPLACE attribute. ' +
+        'EXPECTED : SUCCESS, RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -888,6 +916,7 @@ describe('Setup Attribute validation request ', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -899,7 +928,8 @@ describe('Setup Attribute validation request ', function () {
         });
     });
 
-    it('Create for IDENTITY_CARD, second validator', function (done) {
+    it('As a user (OWNER), I want to Create an attribute validation request for an IDENTITY_CARD attribute, using a different validator (VALIDATOR_2). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -917,6 +947,7 @@ describe('Setup Attribute validation request ', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -928,7 +959,8 @@ describe('Setup Attribute validation request ', function () {
         });
     });
 
-    it('Get IDENTITY_CARD (attribute is still inactive, with 1 request in PENDING_APPROVAL)', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute that has only PENDING_APPROVAL validation requests. '+
+        'EXPECTED : SUCCESS. RESULT : Attribute is still inactive ("active" is false)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -940,7 +972,8 @@ describe('Setup Attribute validation request ', function () {
         });
     });
 
-    it('Get 3 existing requests, using validator', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests that belong to a given VALIDATOR. '+
+        'EXPECTED : SUCCESS. RESULT : VALIDATOR has multiple validation requests (3)', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -949,7 +982,7 @@ describe('Setup Attribute validation request ', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
-            node.expect(res.body).to.have.property(COUNT);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(3);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -965,9 +998,10 @@ describe('Setup Attribute validation request ', function () {
 
 // Setup Validation Requests ( Actions )
 
-describe('Attribute validation request actions ', function () {
+describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
 
-    it('Approve - Request exists and is PENDING_APPROVAL ( to be notarized )', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -998,7 +1032,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Approve - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )', function (done) {
+    it('As a user (VALIDATOR_2), I want to Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1018,6 +1053,7 @@ describe('Attribute validation request actions ', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1029,10 +1065,10 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the request status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED ', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of 2 validation requests after they were APPROVED. ' +
+        'EXPECTED : SUCCESS. RESULT : The 2 validation requests\' statuses are IN_PROGRESS', function (done) {
 
         let param = {};
-        param.validator = VALIDATOR;
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
@@ -1041,10 +1077,11 @@ describe('Attribute validation request actions ', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
+                node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
@@ -1054,32 +1091,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED (second validator)', function (done) {
-
-        let param = {};
-        param.validator = VALIDATOR_2;
-
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            param.attributeId = res.body.attributes[0].id;
-
-            getAttributeValidationRequest(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.IN_PROGRESS);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // the request was approved - action
-                done();
-            });
-        });
-    });
-
-    it('Approve - Request exists and is PENDING_APPROVAL ( to be rejected )', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a PENDING_APPROVAL validation request (OWNER, PHONE_NUMBER), which will later be used for rejection. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1091,7 +1104,7 @@ describe('Attribute validation request actions ', function () {
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -1099,6 +1112,7 @@ describe('Attribute validation request actions ', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1110,12 +1124,13 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a validation request (OWNER, PHONE_NUMBER) that is APPROVED. ' +
+        'EXPECTED : SUCCESS. RESULT : The validation request status is now IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1133,7 +1148,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Cancel - Request exists and is in PENDING_APPROVAL', function (done) {
+    it('As a user (OWNER), I want to Cancel a PENDING_APPROVAL validation request which belongs to me. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1153,6 +1169,7 @@ describe('Attribute validation request actions ', function () {
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1164,7 +1181,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the status is canceled after a PENDING_APPROVAL request is canceled', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a validation request that is CANCELED. ' +
+        'EXPECTED : SUCCESS. RESULT : The validation request status is CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1189,7 +1207,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Notarize - Request exists, is in IN_PROGRESS and NOTARIZATION is correct' , function (done) {
+    it('As a user (VALIDATOR), I want to Notarize an APPROVED validation request (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1210,6 +1229,7 @@ describe('Attribute validation request actions ', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1221,7 +1241,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the status is COMPLETED after a IN_PROGRESS request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a validation request (OWNER, IDENTITY_CARD) that was notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : The validation request status is COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1247,7 +1268,8 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get IDENTITY_CARD (attribute is now active, with 1 request COMPLETED)', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute (OWNER, IDENTITY_CARD) that has a notarized validation request. ' +
+        'EXPECTED : SUCCESS. RESULT : The attribute is ACTIVE' , function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1259,11 +1281,12 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Reject - Request exists and is in IN_PROGRESS', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) that is IN_PROGRESS. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(VALIDATOR, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -1271,7 +1294,7 @@ describe('Attribute validation request actions ', function () {
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -1280,8 +1303,9 @@ describe('Attribute validation request actions ', function () {
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestreject);
@@ -1291,12 +1315,13 @@ describe('Attribute validation request actions ', function () {
         });
     });
 
-    it('Get - Verify the status is REJECTED after an IN_PROGRESS request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a validation request (OWNER, PHONE_NUMBER) that is REJECTED. ' +
+        'EXPECTED : SUCCESS. RESULT : The validation request status is REJECTED and a reason exists for the rejection', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1321,9 +1346,10 @@ describe('Attribute validation request actions ', function () {
 
 // Identity Use Requests
 
-describe('Create Identity Use Requests ', function () {
+describe('CREATE IDENTITY USE REQUEST', function () {
 
-    it('FAILURE -> Action is made by the provider', function (done) {
+    it('As a user (PROVIDER), I want to Create an Identity Use Request on behalf of some other user (OWNER). ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1339,7 +1365,9 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('FAILURE -> Attribute has just one completed validation, which is insufficient for a service that requires 2 validations', function (done) {
+    it('As a user (OWNER), I want to create an Identity Use Request for an attribute that has just one completed validation, ' +
+        'which is insufficient for a service that requires 2 validations. ' +
+        'EXPECTED : FAILURE. ERROR : CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1350,12 +1378,14 @@ describe('Create Identity Use Requests ', function () {
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_EXPIRED_OR_INACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
             done();
         });
     });
 
-    it('SUCCESS -> The service requires a single validation', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request for an attribute that has one completed validation and a service that ' +
+        'requires one validation. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1375,6 +1405,7 @@ describe('Create Identity Use Requests ', function () {
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1386,7 +1417,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Get Newly Created Identity Use Request', function (done) {
+    it('As a user (PUBLIC), I want to Get the Identity Use Requests for a given SERVICE and PROVIDER. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result', function (done) {
 
         let param = {};
 
@@ -1402,7 +1434,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Notarize - Request exists, is in IN_PROGRESS and NOTARIZATION is correct ( second validator )', function (done) {
+    it('As a user (VALIDATOR_2), I want to Notarize a validation request (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1423,6 +1456,7 @@ describe('Create Identity Use Requests ', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1434,7 +1468,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Get - After second notarization, attribute remains active ( IDENTITY_CARD )', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an attribute which has 2 completed notarizations. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute is active', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1448,13 +1483,15 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('FAILURE -> Attribute is active, but the request contains a different attribute value', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations ' +
+        'but failing to provide one of the required service attribute type values (IDENTITY_CARD). ' +
+        'EXPECTED : FAILURE. ERROR : CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES', function (done) {
 
         let param = {};
         param.owner = OWNER;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
-        param.values = [{type : 'first_name', value:'HHH'}];
+        param.values = [{type : FIRST_NAME, value:'HHH'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
@@ -1465,7 +1502,9 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('SUCCESS -> Attribute has 2 completed validations, for a service that requires 2 validations', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE_NAME) that ' +
+        'requires 2 validations. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1480,12 +1519,13 @@ describe('Create Identity Use Requests ', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1497,7 +1537,9 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('SUCCESS -> For the second service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE2_NAME) that ' +
+        'requires 2 validations ( will be used for Approve + End Request). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1512,12 +1554,13 @@ describe('Create Identity Use Requests ', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1529,7 +1572,9 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('SUCCESS -> For the third service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE3_NAME) that ' +
+        'requires 2 validations ( will be used for Cancel Request). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1544,12 +1589,13 @@ describe('Create Identity Use Requests ', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH3'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH3'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1561,7 +1607,9 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('SUCCESS -> For the fourth service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE4_NAME) that ' +
+        'requires 2 validations (will be used for Decline Request). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1576,12 +1624,13 @@ describe('Create Identity Use Requests ', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH4'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH4'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1593,7 +1642,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Get Identity Use Requests - Using the service provider', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of all Identity Use Requests for a given PROVIDER. ' +
+        'EXPECTED : SUCCESS. RESULT : 5 Results', function (done) {
 
         let param = {serviceProvider : PROVIDER};
 
@@ -1609,7 +1659,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Get Identity Use Requests - Using the owner', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of all Identity Use Requests for a given OWNER. ' +
+        'EXPECTED : SUCCESS. RESULT : 5 Results', function (done) {
 
         let param = {owner : OWNER};
 
@@ -1623,7 +1674,8 @@ describe('Create Identity Use Requests ', function () {
         });
     });
 
-    it('Get Identity Use Requests - Using the owner and the serviceId', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of all Identity Use Requests (based on PROVIDER, SERVICE, OWNER). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, details include number of validation requests', function (done) {
 
         let param = {};
 
@@ -1642,9 +1694,10 @@ describe('Create Identity Use Requests ', function () {
     });
 });
 
-describe('Approve Identity Use Request', function () {
+describe('APPROVE IDENTITY USE REQUEST', function () {
 
-    it('FAILURE -> Request is in PENDING APPROVAL, but the action is made by the OWNER instead of the PROVIDER', function (done) {
+    it('As a user (OWNER), I want to Approve my own PENDING_APPROVAL Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1662,11 +1715,12 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('SUCCESS -> Request goes from Pending Approval to ACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Approve a PENDING_APPROVAL Identity Use Request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(PROVIDER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -1682,8 +1736,9 @@ describe('Approve Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
@@ -1693,7 +1748,8 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - ACTIVE', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an ACTIVE Identity Use Request (based on SERVICE and OWNER). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Identity Use Request Result (ACTIVE)', function (done) {
 
         let param = {};
 
@@ -1710,7 +1766,8 @@ describe('Approve Identity Use Request', function () {
         });
     });
 
-    it('FAILURE -> Request is already ACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Approve an Identity Use Request which is already ACTIVE. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1723,12 +1780,13 @@ describe('Approve Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Decline Identity Use Request -> Request is already ACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Decline an Identity Use Request which is already ACTIVE. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1742,12 +1800,13 @@ describe('Approve Identity Use Request', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Cancel Identity Use Request -> Request is already ACTIVE', function (done) {
+    it('As a user (OWNER), I want to Cancel an Identity Use Request which is already ACTIVE. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1760,15 +1819,16 @@ describe('Approve Identity Use Request', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 });
 
-describe('End Identity Use Request', function () {
+describe('END IDENTITY USE REQUEST', function () {
 
-    it('FAILURE -> Request is still PENDING_APPROVAL', function (done) {
+    it('As a user (OWNER), I want to End an Identity Use Request which is still PENDING_APPROVAL. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1781,16 +1841,17 @@ describe('End Identity Use Request', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
             done();
         });
     });
 
-    it('Approve Identity Use Request - Request goes from Pending Approval to ACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Approve an Identity Use Request which is in PENDING_APPROVAL status (to be used later by END Request action). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(PROVIDER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -1806,8 +1867,9 @@ describe('End Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
@@ -1817,7 +1879,8 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('FAILURE -> Request is ACTIVE, action is made by the PROVIDER instead of the OWNER', function (done) {
+    it('As a user (PROVIDER), I want to End an ACTIVE Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1835,7 +1898,8 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('SUCCESS -> Request goes from ACTIVE to ENDED', function (done) {
+    it('As a user (OWNER), I want to End an ACTIVE Identity Use Request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1855,6 +1919,7 @@ describe('End Identity Use Request', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1866,7 +1931,8 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - ENDED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an ENDED Identity Use Request (based on SERVICE and OWNER). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 request, in ENDED status', function (done) {
 
         let param = {};
 
@@ -1883,7 +1949,8 @@ describe('End Identity Use Request', function () {
         });
     });
 
-    it('FAILURE -> Approve Identity Use Request -> Request is already ENDED', function (done) {
+    it('As a user (PROVIDER), I want to Approve an already ENDED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1896,12 +1963,13 @@ describe('End Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Decline Identity Use Request -> Request is already ENDED', function (done) {
+    it('As a user (PROVIDER), I want to Decline an already ENDED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1915,12 +1983,13 @@ describe('End Identity Use Request', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Cancel Identity Use Request -> Request is already ENDED', function (done) {
+    it('As a user (OWNER), I want to Cancel an already ENDED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1933,12 +2002,13 @@ describe('End Identity Use Request', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> End Identity Use Request -> Request is already ENDED', function (done) {
+    it('As a user (OWNER), I want to End an already ENDED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1951,15 +2021,16 @@ describe('End Identity Use Request', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
             done();
         });
     });
 });
 
-describe('Decline Identity Use Request', function () {
+describe('DECLINE IDENTITY USE REQUEST', function () {
 
-    it('FAILURE -> Request is PENDING_APPROVAL, action is made by the OWNER instead of the PROVIDER', function (done) {
+    it('As a user (OWNER), I want to Decline a PENDING_APPROVAL Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_PROVIDER_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1978,7 +2049,8 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('FAILURE -> No reason is provided for declining the identity use request', function (done) {
+    it('As a user (PROVIDER), I want to Decline a PENDING_APPROVAL Identity Use Request, without providing any reason. ' +
+        'EXPECTED : FAILURE. ERROR : DECLINE_IDENTITY_USE_REQUEST_NO_REASON', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1996,7 +2068,8 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('FAILURE -> Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
+    it('As a user (PROVIDER), I want to Decline a PENDING_APPROVAL Identity Use Request, but the reason provided is too long. ' +
+        'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_DECLINE', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -2016,7 +2089,8 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - Still PENDING_APPROVAL after the incorrect declines', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a PENDING_APPROVAL Identity Use Request, which was incorrectly declined several times. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Identity Use Request, in PENDING_APPROVAL status', function (done) {
 
         let param = {};
 
@@ -2033,7 +2107,8 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('SUCCESS -> Request goes from PENDING_APPROVAL to DECLINED', function (done) {
+    it('As a user (PROVIDER), I want to Decline a PENDING_APPROVAL Identity Use Request, providing a correct reason for this action. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2054,6 +2129,7 @@ describe('Decline Identity Use Request', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2065,7 +2141,8 @@ describe('Decline Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a DECLINED Identity Use Request. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Identity Use Request, in DECLINED status', function (done) {
 
         let param = {};
 
@@ -2083,7 +2160,8 @@ describe('Decline Identity Use Request', function () {
             });
     });
 
-    it('FAILURE -> Request is already DECLINED', function (done) {
+    it('As a user (PROVIDER), I want to Decline a DECLINED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2097,12 +2175,13 @@ describe('Decline Identity Use Request', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Approve Identity Use Request -> Request is already DECLINED', function (done) {
+    it('As a user (PROVIDER), I want to Approve a DECLINED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2115,12 +2194,13 @@ describe('Decline Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Cancel Identity Use Request -> Request is already DECLINED', function (done) {
+    it('As a user (OWNER), I want to Cancel a DECLINED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2133,12 +2213,13 @@ describe('Decline Identity Use Request', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> End Identity Use Request -> Request is already DECLINED', function (done) {
+    it('As a user (OWNER), I want to End a DECLINED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2151,15 +2232,16 @@ describe('Decline Identity Use Request', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
             done();
         });
     });
 });
 
-describe('Cancel Identity Use Request', function () {
+describe('CANCEL IDENTITY USE REQUEST', function () {
 
-    it('FAILURE -> Request is PENDING_APPROVAL, action is made by the PROVIDER instead of the OWNER', function (done) {
+    it('As a user (PROVIDER), I want to Cancel a PENDING_APPROVAL Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2177,7 +2259,8 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('SUCCESS -> Request goes from PENDING_APPROVAL to CANCELED', function (done) {
+    it('As a user (OWNER), I want to Cancel a PENDING_APPROVAL Identity Use Request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2197,6 +2280,7 @@ describe('Cancel Identity Use Request', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2208,7 +2292,8 @@ describe('Cancel Identity Use Request', function () {
         });
     });
 
-    it('Get Identity Use Request - CANCELED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a CANCELED Identity Use Request. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Identity Use Request, in CANCELED status', function (done) {
 
         let param = {};
 
@@ -2225,7 +2310,8 @@ describe('Cancel Identity Use Request', function () {
             });
     });
 
-    it('FAILURE -> Decline Identity Use Request -> Request is already CANCELED', function (done) {
+    it('As a user (PROVIDER), I want to Decline a CANCELED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2239,12 +2325,13 @@ describe('Cancel Identity Use Request', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Approve Identity Use Request -> Request is already CANCELED', function (done) {
+    it('As a user (PROVIDER), I want to Approve a CANCELED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2257,12 +2344,13 @@ describe('Cancel Identity Use Request', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> Cancel Identity Use Request -> Request is already CANCELED', function (done) {
+    it('As a user (OWNER), I want to Cancel a CANCELED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2275,12 +2363,13 @@ describe('Cancel Identity Use Request', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
             done();
         });
     });
 
-    it('FAILURE -> End Identity Use Request -> Request is already CANCELED', function (done) {
+    it('As a user (OWNER), I want to End a CANCELED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2293,17 +2382,18 @@ describe('Cancel Identity Use Request', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
             done();
         });
     });
 });
 
-describe('Actions on an inactive service', function () {
+describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Fifth Service ( for CREATE action )
 
-    it('Inactivate Service', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my ACTIVE services. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2321,7 +2411,7 @@ describe('Actions on an inactive service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -2335,7 +2425,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an INACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE5_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2346,7 +2437,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('FAILURE -> Create Identity Use Request - Service is INACTIVE', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations, but for an INACTIVE service. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2366,7 +2458,8 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Sixth Service ( for APPROVE action )
 
-    it('Create Identity Use Request -> For the sixth service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations (to be used for APPROVE on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2381,12 +2474,13 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE6_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH5'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH5'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2398,7 +2492,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Inactivate Service', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my ACTIVE services (to be used for APPROVE on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2416,7 +2511,7 @@ describe('Actions on an inactive service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -2430,7 +2525,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an INACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE6_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2441,7 +2537,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('FAILURE -> Approve Identity Use Request -> Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Approve an Identity Use Request made on a Service that has since been Inactivated. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2461,7 +2558,8 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Seventh Service ( for END action )
 
-    it('Create Identity Use Request -> For the seventh service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations (to be used for END on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2476,12 +2574,13 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH7'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH7'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2493,11 +2592,12 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Approve Identity Use Request -> Request goes from Pending Approval to ACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Approve an Identity Use Request (to be used for END on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(PROVIDER, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -2513,8 +2613,9 @@ describe('Actions on an inactive service', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
@@ -2524,7 +2625,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Inactivate Service', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my ACTIVE services (to be used for END on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2542,7 +2644,7 @@ describe('Actions on an inactive service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -2556,7 +2658,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an INACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE7_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2567,7 +2670,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('FAILURE -> End Identity Use Request -> Request is ACTIVE, but the Service is INACTIVE', function (done) {
+    it('As a user (OWNER), I want to End an Identity Use Request made on a Service that has since been Inactivated. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2587,7 +2691,8 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Eighth Service ( for DECLINE action )
 
-    it('Create Identity Use Request -> For the eighth service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations (to be used for DECLINE on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2602,12 +2707,13 @@ describe('Actions on an inactive service', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
         param.serviceProvider = PROVIDER;
-        param.values = [{type : 'identity_card', value:'HHH8'}];
+        param.values = [{type : IDENTITY_CARD, value:'HHH8'}];
 
         let request = createIdentityUseRequest(param);
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2619,7 +2725,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Inactivate Service', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my ACTIVE services (to be used for DECLINE on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2637,7 +2744,7 @@ describe('Actions on an inactive service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -2651,7 +2758,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an INACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE8_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2662,7 +2770,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('FAILURE -> Decline Identity Use Request -> Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
+    it('As a user (PROVIDER), I want to Decline an Identity Use Request made on a Service that has since been Inactivated. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2683,7 +2792,8 @@ describe('Actions on an inactive service', function () {
 
     // Inactivate Ninth Service ( for CANCEL action )
 
-    it('Create Identity Use Request -> For the ninth service', function (done) {
+    it('As a user (OWNER), I want to Create an Identity Use Request, having all the required notarizations (to be used for CANCEL on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2703,6 +2813,7 @@ describe('Actions on an inactive service', function () {
         postIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2714,7 +2825,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Inactivate Service', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my ACTIVE services (to be used for CANCEL on INACTIVE service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2732,7 +2844,7 @@ describe('Actions on an inactive service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -2746,7 +2858,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('Get Service - After Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an INACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE9_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2757,7 +2870,8 @@ describe('Actions on an inactive service', function () {
         });
     });
 
-    it('FAILURE -> Cancel Identity Use Request - Request is in PENDING_APPROVAL, but the Service is INACTIVE', function (done) {
+    it('As a user (OWNER), I want to Cancel an Identity Use Request made on a Service that has since been Inactivated. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2839,7 +2953,7 @@ function createIdentityUseRequest(param) {
     request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
     request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
     request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
-    request.asset.identityuse[0].attributes = param.values ? param.values : [{type : 'identity_card', value:'HHH'}];
+    request.asset.identityuse[0].attributes = param.values ? param.values : [{type : IDENTITY_CARD, value:'HHH'}];
 
     console.log(request);
     return request;
@@ -2902,7 +3016,7 @@ function createServiceRequest(param) {
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
     request.asset.service.description = param.description ? param.description : DESCRIPTION_VALUE;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
-    request.asset.service.attributeTypes = ['identity_card'];
+    request.asset.service.attributeTypes = [IDENTITY_CARD];
     request.asset.service.validations_required = param.validations ? param.validations : CUSTOM_VALIDATIONS;
 
     console.log(JSON.stringify(request));

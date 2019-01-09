@@ -24,6 +24,7 @@ const CUSTOM_VALIDATIONS = 2;
 
 // RESULTS
 
+const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
 const COUNT = 'count';
@@ -67,9 +68,9 @@ describe('Send Funds', function () {
     });
 });
 
-describe('List Services', function () {
+describe('LIST SERVICES', function () {
 
-    it('No results', function (done) {
+    it('As a user (PUBLIC), I want to see the List of available Services. EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
         listServices(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -80,9 +81,10 @@ describe('List Services', function () {
     });
 });
 
-describe('Create Service', function () {
+describe('CREATE SERVICE', function () {
 
-    it('Get Services by provider - no results', function (done) {
+    it('As a user (PUBLIC), I want to see the List of available Services which belong to a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -92,7 +94,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('SUCCESS -> Service does not already exist', function (done) {
+    it('As a user (PROVIDER), I want to Create a new Service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -106,7 +109,7 @@ describe('Create Service', function () {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -118,7 +121,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('FAILURE -> Service already exists for provider', function (done) {
+    it('As a user (PROVIDER), I want to Create a Service which already exists. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_ALREADY_EXISTS', function (done) {
 
         let request = createServiceRequest();
 
@@ -129,7 +133,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('Get Services by provider - 1 result', function (done) {
+    it('As a user (PUBLIC), I want to Get the List of available Services which belong to a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Service', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -140,7 +145,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('FAILURE -> Service description is too long', function (done) {
+    it('As a user (PROVIDER), I want to Create a new Service, with a description that is too long. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_DESCRIPTION_TOO_LONG', function (done) {
         let param = {};
         param.name = SERVICE2_NAME;
         param.description = descriptionTooLong;
@@ -154,7 +160,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('SUCCESS -> Second service for a given provider, with description of max length (2048)', function (done) {
+    it('As a user (PROVIDER), I want to Create a new Service, with a description that is of maximum length. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -170,7 +177,7 @@ describe('Create Service', function () {
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(PROVIDER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -182,7 +189,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('Get Services by name - 1 result', function (done) {
+    it('As a user (PUBLIC), I want to Get the List of available Services that have a given name. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Service', function (done) {
         getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -192,7 +200,8 @@ describe('Create Service', function () {
         });
     });
 
-    it('Get Services by provider - 2 results', function (done) {
+    it('As a user (PUBLIC), I want to Get the List of available Services which belong to a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : 2 Services', function (done) {
         getServices({provider : PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -204,9 +213,10 @@ describe('Create Service', function () {
 
 });
 
-describe('Inactivate Service', function () {
+describe('INACTIVATE SERVICE', function () {
 
-    it('SUCCESS -> Service was previously active', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate one of my services. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -224,7 +234,7 @@ describe('Inactivate Service', function () {
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             getBalance(PROVIDER, function (err, res) {
@@ -238,7 +248,8 @@ describe('Inactivate Service', function () {
         });
     });
 
-    it('Get Service - Service is inactive, immediately after Inactivation' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details of an Inactive service. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -247,9 +258,11 @@ describe('Inactivate Service', function () {
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
             done();
         });
+
     });
 
-    it('FAILURE -> Service does not exist', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate a service that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_NOT_FOUND', function (done) {
 
         let params = {};
         params.name = NON_EXISTING_SERVICE_NAME;
@@ -265,7 +278,8 @@ describe('Inactivate Service', function () {
         });
     });
 
-    it('FAILURE -> Service is already inactive', function (done) {
+    it('As a user (PROVIDER), I want to Inactivate a service that is already INACTIVE. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_IS_ALREADY_INACTIVE', function (done) {
 
         let params = {};
         params.name = SERVICE_NAME;

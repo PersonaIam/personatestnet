@@ -35,12 +35,13 @@ const PHONE_NUMBER = 'phone_number';
 const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
+const EMAIL = 'email';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
-const EMAIL = 'yeezy@gmail.com';
+const EMAIL_VALUE = 'yeezy@gmail.com';
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
 const INCORRECT_ADDRESS = 'ABC';
@@ -57,6 +58,7 @@ const REASON_FOR_REJECT_1025_TOO_LONG =
 
 // RESULTS
 
+const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
 const COUNT = 'count';
@@ -169,23 +171,10 @@ describe('Send Funds', function () {
     });
 });
 
-describe('Create Attribute', function () {
+describe('CREATE ATTRIBUTES', function () {
 
-    it('Create Attribute - Non file type, with associations', function (done) {
-
-        let params = {};
-        params.associations = [1];
-        let request = createAttributeRequest(params);
-
-        postAttribute(request, function (err, res) {
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.NO_ASSOCIATIONS_FOR_NON_FILE_TYPE);
-
-            done();
-        });
-    });
-
-    it('Create Attribute - FIRST_NAME', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -198,7 +187,7 @@ describe('Create Attribute', function () {
 
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -210,7 +199,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - PHONE_NUMBER ', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type PHONE_NUMBER for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -228,7 +218,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -240,7 +230,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - BIRTHPLACE ', function (done) {
+    it('As a user (OWNER), I want to Create an attribute of type BIRTHPLACE for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -258,7 +249,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -270,11 +261,39 @@ describe('Create Attribute', function () {
         });
     });
 
-});
+    it('As a user (OWNER), I want to Create an attribute of type ADDRESS for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
-describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
 
-    it('Create Attribute - File Data Type (IDENTITY_CARD)', function (done) {
+        let param = {};
+        param.owner = OWNER;
+        param.value = ADDRESS_VALUE;
+        param.type = ADDRESS;
+
+        let request = createAttributeRequest(param);
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('As a user (OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -296,7 +315,7 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
 
             ipfsTransaction.transactionId = res.body.transactionId;
@@ -312,11 +331,8 @@ describe('Create Attribute of File Data Type (IDENTITY_CARD)', function () {
         });
     });
 
-});
-
-describe('Create Attribute', function () {
-
-    it('Create Attribute - FIRST_NAME, other owner', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -336,7 +352,7 @@ describe('Create Attribute', function () {
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OTHER_OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -348,7 +364,8 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - IDENTITY_CARD, other owner, with associations', function (done) {
+    it('As a user (OTHER_OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself, associating the FIRST_NAME to it. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -357,7 +374,7 @@ describe('Create Attribute', function () {
             balance = parseInt(res.body.balance);
         });
 
-        getAttribute(OTHER_OWNER, 'first_name', function (err, identityCardData) {
+        getAttribute(OTHER_OWNER, FIRST_NAME, function (err, identityCardData) {
             let param = {};
             param.owner = OTHER_OWNER;
             param.type = IDENTITY_CARD;
@@ -372,7 +389,7 @@ describe('Create Attribute', function () {
             postAttribute(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -385,40 +402,12 @@ describe('Create Attribute', function () {
         });
     });
 
-    it('Create Attribute - ADDRESS ', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(OWNER, function (err, res) {
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-            balance = parseInt(res.body.balance);
-        });
-
-        let param = {};
-        param.owner = OWNER;
-        param.value = ADDRESS_VALUE;
-        param.type = ADDRESS;
-
-        let request = createAttributeRequest(param);
-        postAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
-            sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.createattribute);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
-            });
-            done();
-        });
-    });
 });
 
-describe('Expired Attribute', function () {
+describe('EXPIRED ATTRIBUTES', function () {
 
-    it('Create Attribute - success (Timestamp in the past, but not expirable)', function (done) {
+    it('As a user (OWNER), I want to Create a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the past. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -430,14 +419,14 @@ describe('Expired Attribute', function () {
         let param = {};
         time = slots.getTime() - 20000;
         param.expire_timestamp = time;
-        param.type = 'email';
-        param.value = EMAIL;
+        param.type = EMAIL;
+        param.value = EMAIL_VALUE;
         let request = createAttributeRequest(param);
 
         postAttribute(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('transactionId');
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -449,14 +438,15 @@ describe('Expired Attribute', function () {
         });
     });
 
-    it('Create Attribute validation request - expired attribute', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non-file type, expirable attribute (EMAIL) which has an expiration timestamp in the past. ' +
+        'EXPECTED : FAILURE. ERROR : EXPIRED_ATTRIBUTE', function (done) {
 
         let param = {};
         param.owner = OWNER;
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.validator = VALIDATOR;
-        param.type = 'email';
+        param.type = EMAIL;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
@@ -467,9 +457,10 @@ describe('Expired Attribute', function () {
         });
     });
 
-    it('Update Attribute - Only expire timestamp ( EMAIL, make it not expired )', function (done) {
+    it('As a user (OWNER), I want to Update the expire_timestamp of a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the future. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
 
             let attributeId = res.body.attributes[0].id;
             let unconfirmedBalance = 0;
@@ -484,7 +475,7 @@ describe('Expired Attribute', function () {
             param.owner = OWNER;
             param.secret = SECRET;
             param.publicKey = PUBLIC_KEY;
-            param.value = EMAIL;
+            param.value = EMAIL_VALUE;
             time = slots.getTime();
             param.expire_timestamp = time + 200000;
             let request = updateAttributeRequest(param);
@@ -492,7 +483,7 @@ describe('Expired Attribute', function () {
             putAttributeUpdate(request, function (err, res) {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('transactionId');
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
                 sleep.msleep(SLEEP_TIME);
                 getBalance(OTHER_OWNER, function (err, res) {
                     let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -506,9 +497,10 @@ describe('Expired Attribute', function () {
     });
 });
 
-describe('Create Attribute validation request', function () {
+describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('Create Attribute validation request - success (IDENTITY_CARD)', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -526,6 +518,7 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -537,7 +530,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (PHONE_NUMBER)', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (PHONE_NUMBER). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -549,12 +543,13 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'phone_number';
+        param.type = PHONE_NUMBER;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -566,7 +561,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (BIRTHPLACE)', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (BIRTHPLACE). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -584,6 +580,7 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -595,7 +592,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success (IDENTITY_CARD), another validator', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD), and another validator (VALIDATOR_2). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -613,6 +611,7 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -624,7 +623,9 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute - IDENTITY_CARD - attribute is inactive, with 1 request in PENDING_APPROVAL', function (done) {
+    it('As a user (PUBLIC), I want to Get the details of a file type attribute (OWNER, IDENTITY_CARD), which has 2 PENDING_APPROVAL validation requests,' +
+        'and no approved validation requests. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute Details (active is false)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -636,7 +637,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - incorrect owner address', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (FIRST_NAME), by providing an incorrect Address. ' +
+        'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -648,12 +650,13 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.eq('Owner address is incorrect');
+            node.expect(res.body).to.have.property(ERROR).to.eq(messages.INVALID_OWNER_ADDRESS);
             done();
         });
     });
 
-    it('Create Attribute validation request - incorrect validator address', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (FIRST_NAME), by providing an incorrect Validator. ' +
+        'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
         params.validator = INCORRECT_ADDRESS;
@@ -665,12 +668,14 @@ describe('Create Attribute validation request', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.eq('Validator address is incorrect');
+            node.expect(res.body).to.have.property(ERROR).to.eq(messages.INVALID_VALIDATOR_ADDRESS);
             done();
         });
     });
 
-    it('Create Attribute validation request - active validation request already exists', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD), ' +
+        'but an active validation request already exists for the provided VALIDATOR. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -686,7 +691,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - non existing attribute', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for a non existing attribute (OTHER_OWNER, ADDRESS). ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
 
         let param = {};
         param.owner = OTHER_OWNER;
@@ -704,11 +710,12 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - owner is validator', function (done) {
+    it('As a user (OWNER), I want to Create a validation request, with myself as VALIDATOR. ' +
+        'EXPECTED : FAILURE. ERROR : OWNER_IS_VALIDATOR_ERROR', function (done) {
 
         let param = {};
         param.owner = OWNER;
-        param.type = ADDRESS;
+        param.type = PHONE_NUMBER;
         param.validator = OWNER;
 
         let request = createAttributeValidationRequest(param);
@@ -720,7 +727,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Get Attribute validation request - 1 result, using validator and attributeId', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests given an attribute (OWNER, IDENTITY_CARD) and a VALIDATOR. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Validation Request, in PENDING_APPROVAL status', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -733,33 +741,10 @@ describe('Create Attribute validation request', function () {
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
                 node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-                done();
-            });
-        });
-    });
-
-    it('Get Attribute validation request - verify the status is PENDING_APPROVAL for newly created validation request', function (done) {
-
-        let param = {};
-        param.validator = VALIDATOR;
-
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            param.attributeId = res.body.attributes[0].id;
-
-            getAttributeValidationRequest(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 done();
@@ -767,7 +752,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - attribute with no associations and which requires an associated document (ADDRESS)', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for an attribute with no associations, but which requires an associated document (ADDRESS). ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -783,7 +769,8 @@ describe('Create Attribute validation request', function () {
         });
     });
 
-    it('Create Attribute validation request - success, attribute with no associations and which does not require an associated document (EMAIL)', function (done) {
+    it('As a user (OWNER), I want to Create a validation request for an attribute with no associations, but which does not require an associated document (EMAIL). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -795,12 +782,13 @@ describe('Create Attribute validation request', function () {
         let param = {};
         param.owner = OWNER;
         param.validator = VALIDATOR;
-        param.type = 'email';
+        param.type = EMAIL;
 
         let request = createAttributeValidationRequest(param);
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -813,9 +801,10 @@ describe('Create Attribute validation request', function () {
     });
 });
 
-describe('Get Attribute validation requests', function () {
+describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('Get Attribute validation requests - with results, using validator', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given VALIDATOR. ' +
+        'EXPECTED : SUCCESS. RESULT : 4 Validation Requests, all in PENDING_APPROVAL', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -824,7 +813,7 @@ describe('Get Attribute validation requests', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('attribute_validation_requests');
-            node.expect(res.body).to.have.property(COUNT);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -832,11 +821,16 @@ describe('Get Attribute validation requests', function () {
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
             node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
+            node.expect(res.body.attribute_validation_requests[3]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
             done();
         });
     });
 
-    it('Get Attribute validation requests - with results, using attributeId', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : 2 Validation Requests', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -846,7 +840,7 @@ describe('Get Attribute validation requests', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT);
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator');
@@ -859,7 +853,8 @@ describe('Get Attribute validation requests', function () {
         });
     });
 
-    it('Get Attribute validation requests - no results, using validator', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given validator VALIDATOR_3, with no validation requests. ' +
+        'EXPECTED : SUCCESS. RESULT : No Results (empty "attribute_validation_requests" array)', function (done) {
 
         let param = {};
         param.validator = VALIDATOR_3;
@@ -873,7 +868,8 @@ describe('Get Attribute validation requests', function () {
         });
     });
 
-    it('Get Attribute validation requests - no results, using attributeId', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, ADDRESS), with no validation requests. ' +
+        'EXPECTED : SUCCESS. RESULT : No Results (empty "attribute_validation_requests" array)', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -890,7 +886,8 @@ describe('Get Attribute validation requests', function () {
         });
     });
 
-    it('Get Attribute validation requests - correct parameters, using only owner', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given user (OWNER), with multiple validation requests. ' +
+        'EXPECTED : SUCCESS. RESULT : 5 Validation Requests', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -908,56 +905,17 @@ describe('Get Attribute validation requests', function () {
         });
     });
 
-    it('Get Attribute validation requests - 4 PENDING_APPROVAL requests, using validator', function (done) {
-
-        let param = {};
-        param.validator = VALIDATOR;
-
-        getAttributeValidationRequests(param, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('attribute_validation_requests');
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(4);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-            node.expect(res.body.attribute_validation_requests[1]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-            node.expect(res.body.attribute_validation_requests[2]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-            node.expect(res.body.attribute_validation_requests[3]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
-            done();
-        });
-    });
-
-    it('Get Incomplete Attribute validation requests - 2 incomplete requests, using attributeId', function (done) {
-
-        let param = {};
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            param.attributeId = res.body.attributes[0].id;
-            getAttributeValidationRequest(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validator').to.eq(VALIDATOR);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.eq(constants.validationRequestStatus.PENDING_APPROVAL);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
-                done();
-            });
-        });
-    });
-
 });
 
-describe('Approve/Decline/Notarize/Reject attribute validation request', function () {
+describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
-    it('Approve Attribute validation request - Approver is the owner, not the validator', function (done) {
+    it('As a user (OWNER), I want to Approve a validation request that belongs to me. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
 
@@ -970,12 +928,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Decline Attribute validation request - Decliner is the owner, not the validator', function (done) {
+    it('As a user (OWNER), I want to Decline a validation request that belongs to me. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
         params.reason = REASON_FOR_DECLINE_1024_GOOD;
@@ -989,7 +948,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Canceller is the validator, not the owner', function (done) {
+    it('As a user (VALIDATOR), I want to Cancel a validation request that is assigned to me. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1009,7 +969,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Notarize/Reject when PENDING_APPROVAL
 
-    it('Notarize Attribute Validation Request - Request is still PENDING_APPROVAL', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request that is still PENDING_APPROVAL. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1028,7 +989,9 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still PENDING_APPROVAL after a PENDING_APPROVAL request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD), ' +
+        'which after an unsuccessful notarization, remains in PENDING_APPROVAL status. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with PENDING_APPROVAL status', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1053,7 +1016,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute Validation Request - Request is still PENDING_APPROVAL', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request that is still PENDING_APPROVAL. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1072,7 +1036,9 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still PENDING_APPROVAL after a PENDING_APPROVAL request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD), ' +
+        'which after an unsuccessful rejection, remains in PENDING_APPROVAL status. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with PENDING_APPROVAL status', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1099,7 +1065,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Successful Approve
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized )', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is still PENDING_APPROVAL. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1119,6 +1086,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1130,7 +1098,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be notarized by second validator )', function (done) {
+    it('As a user (VALIDATOR_2), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is still PENDING_APPROVAL. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1150,6 +1119,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1161,7 +1131,42 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED ', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, PHONE_NUMBER) that is still PENDING_APPROVAL (to be rejected). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = PHONE_NUMBER;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
+            });
+            done();
+        });
+
+    });
+
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was recently approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1186,7 +1191,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED (second validator)', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was recently approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR_2;
@@ -1211,44 +1217,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Approve Attribute validation Request - Request exists and is PENDING_APPROVAL ( to be rejected )', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(VALIDATOR, function (err, res) {
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-            balance = parseInt(res.body.balance);
-        });
-
-        let params = {};
-        params.validator = VALIDATOR;
-        params.owner = OWNER;
-        params.type = 'phone_number';
-        params.secret = VALIDATOR_SECRET;
-        params.publicKey = VALIDATOR_PUBLIC_KEY;
-
-        let request = createAnswerAttributeValidationRequest(params);
-        postApproveValidationAttributeRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            sleep.msleep(SLEEP_TIME);
-            getBalance(VALIDATOR, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
-            });
-            done();
-        });
-
-    });
-
-    it('Get Attribute validation request - verify the status is IN_PROGRESS after a PENDING_APPROVAL request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was recently approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1266,7 +1241,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Action is made by the owner, not the validator', function (done) {
+    it('As a user (OWNER), I want to Notarize a validation request that belongs to me. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1285,7 +1261,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Action is made by the owner, not the validator', function (done) {
+    it('As a user (OWNER), I want to Reject a validation request that belongs to me. ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1306,7 +1283,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Approve/Decline when IN_PROGRESS
 
-    it('Approve Attribute Validation Request - Request exists and is already IN_PROGRESS', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1325,7 +1303,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     });
 
-    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved twice. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1350,7 +1329,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Decline Attribute validation request - Request exists and is already IN_PROGRESS', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1369,7 +1349,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then declined. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1394,7 +1375,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is already IN_PROGRESS', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request that is already IN_PROGRESS. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1402,7 +1384,6 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = IDENTITY_CARD;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
-        params.reason = REASON_FOR_DECLINE_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postCancelValidationAttributeRequest(request, function (err, res) {
@@ -1413,7 +1394,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then canceled. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1438,12 +1420,15 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL, but reason is too long', function (done) {
+    // Decline
+
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
+        'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_DECLINE', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_DECLINE_1025_TOO_LONG;
@@ -1457,12 +1442,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL, but no reason is specified', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) without providing a reason for the decline. ' +
+        'EXPECTED : FAILURE. ERROR : DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -1475,9 +1461,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    // Successful Decline
-
-    it('Decline Attribute validation request - Request exists and is in PENDING_APPROVAL', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, EMAIL) by providing a reason that has maximum length (1024 characters). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1489,7 +1474,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_DECLINE_1024_GOOD;
@@ -1498,6 +1483,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postDeclineValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1509,12 +1495,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is DECLINED after a PENDING_APPROVAL request is DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly declined. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1535,9 +1522,10 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    // Successful cancel
+    // Successful Cancel
 
-    it('Cancel Attribute validation request - Request exists and is in PENDING_APPROVAL', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) that is PENDING_APPROVAL. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1557,6 +1545,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1568,7 +1557,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is CANCELLED after a PENDING_APPROVAL request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly canceled. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1593,14 +1583,15 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    // Actions on a DECLINED validation request
+    // Actions on a Declined validation request
 
-    it('Decline Attribute validation request - Request exists and is already DECLINED', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, EMAIL) that is already declined. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_DECLINE_1024_GOOD;
@@ -1614,12 +1605,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined twice. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1640,12 +1632,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     });
 
-    it('Approve Attribute validation request - Request exists and is already DECLINED', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, EMAIL) that is already declined. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -1659,12 +1652,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1684,12 +1678,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is already DECLINED', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, EMAIL) that is already declined. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = constants.validationType.FACE_TO_FACE;
@@ -1703,12 +1698,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1728,12 +1724,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is already DECLINED', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, EMAIL) that is already declined. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -1748,12 +1745,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then rejected. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1773,12 +1771,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is already DECLINED', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) that is already declined. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'email';
+        params.type = EMAIL;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -1793,12 +1792,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still DECLINED after a DECLINED request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then canceled. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'email', function (err, res) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -1818,7 +1818,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is in IN_PROGRESS, but validation type is missing', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) without providing a validation type. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_VALIDATION_TYPE', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1836,7 +1837,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is in IN_PROGRESS, but validation type is incorrect', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) by providing an incorrect validation type. ' +
+        'EXPECTED : FAILURE. ERROR : INCORRECT_VALIDATION_TYPE', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1855,7 +1857,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still IN_PROGRESS after a IN_PROGRESS request is incorrectly NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was incorrectly notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1882,7 +1885,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Successful Notarization
 
-    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct' , function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1903,6 +1907,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1914,7 +1919,23 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists, is in IN_PROGRESS and NOTARIZATION is correct ( second validator )' , function (done) {
+    it('As a user (PUBLIC), I want to Get the details for an attribute (OWNER, IDENTITY_CARD) that was correctly notarized once. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
+            done();
+        });
+    });
+
+    it('As a user (VALIDATOR_2), I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -1935,6 +1956,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -1946,21 +1968,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute - After last notarization - becomes active ( IDENTITY_CARD )', function (done) {
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
-            done();
-        });
-    });
-
-    it('Get Attribute validation request - verify the status is COMPLETED after a IN_PROGRESS request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was correctly notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -1986,12 +1995,15 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS, but reason is too long', function (done) {
+    // Reject
+
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
+        'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_REJECT', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1025_TOO_LONG;
@@ -2005,12 +2017,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS, but no reason is specified', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) without providing a reason. ' +
+        'EXPECTED : FAILURE. ERROR : REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -2023,9 +2036,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    // Successful Reject
-
-    it('Reject Attribute validation request - Request exists and is in IN_PROGRESS', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is of maximum length (1024 characters). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
         let balance = 0;
@@ -2037,7 +2049,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -2046,6 +2058,7 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
             getBalance(OWNER, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
@@ -2057,12 +2070,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is REJECTED after a IN_PROGRESS request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was correctly rejected. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -2085,7 +2099,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Actions on a COMPLETED validation request
 
-    it('Decline Attribute validation request - Request exists and is already COMPLETED', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2104,7 +2119,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then declined. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2129,7 +2145,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Approve Attribute validation request - Request exists and is already COMPLETED', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2148,7 +2165,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2173,7 +2191,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is already COMPLETED', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2192,7 +2211,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized twice. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2217,7 +2237,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is already COMPLETED', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2236,7 +2257,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then rejected. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2261,7 +2283,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is already COMPLETED', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request (OWNER, IDENTITY_CARD) which is already notarized. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2269,7 +2292,6 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         params.type = IDENTITY_CARD;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
-        params.reason = REASON_FOR_REJECT_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postCancelValidationAttributeRequest(request, function (err, res) {
@@ -2280,7 +2302,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still COMPLETED after a COMPLETED request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then canceled. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2307,12 +2330,59 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
     // Actions on a REJECTED validation request
 
-    it('Reject Attribute validation request - Request exists and is already REJECTED', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            done();
+        });
+    });
+
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then declined. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
+                done();
+            });
+        });
+    });
+
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.reason = REASON_FOR_REJECT_1024_GOOD;
@@ -2326,12 +2396,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still REJECTED after a REJECTED request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected twice. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -2351,12 +2422,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Approve Attribute validation request - Request exists and is already REJECTED', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
 
@@ -2369,12 +2441,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still REJECTED after a REJECTED request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -2394,12 +2467,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is already REJECTED', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
         params.validationType = constants.validationType.FACE_TO_FACE;
@@ -2413,12 +2487,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still REJECTED after a REJECTED request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -2438,12 +2513,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is already REJECTED', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
-        params.type = 'phone_number';
+        params.type = PHONE_NUMBER;
         params.secret = SECRET;
         params.publicKey = PUBLIC_KEY;
 
@@ -2456,12 +2532,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still REJECTED after a REJECTED request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then canceled. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
 
-        getAttribute(OWNER, 'phone_number', function (err, res) {
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             param.attributeId = res.body.attributes[0].id;
 
             getAttributeValidationRequest(param, function (err, res) {
@@ -2481,9 +2558,10 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    // Actions on a CANCELLED validation request
+    // Actions on a CANCELED validation request
 
-    it('Approve Attribute validation request - Request exists and is already CANCELLED', function (done) {
+    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2501,7 +2579,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is APPROVED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then approved. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2526,7 +2605,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Decline Attribute validation request - Request exists and is already CANCELLED', function (done) {
+    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2545,7 +2625,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is DECLINED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then declined. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2570,7 +2651,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Notarize Attribute validation request - Request exists and is already CANCELLED', function (done) {
+    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2589,7 +2671,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is NOTARIZED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2614,7 +2697,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Reject Attribute validation request - Request exists and is already CANCELLED', function (done) {
+    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2633,7 +2717,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is REJECTED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then rejected. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2658,7 +2743,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Cancel Attribute validation request - Request exists and is already CANCELLED', function (done) {
+    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2676,7 +2762,8 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
         });
     });
 
-    it('Get Attribute validation request - verify the status is still CANCELLED after a CANCELLED request is CANCELLED', function (done) {
+    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled twice. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
         param.validator = VALIDATOR;
@@ -2703,12 +2790,13 @@ describe('Approve/Decline/Notarize/Reject attribute validation request', functio
 
 });
 
-describe('GET Attribute validation score', function () {
+describe('ATTRIBUTE VALIDATION SCORE', function () {
 
-    it('Get Attribute validation score - no validations', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation score for an attribute (OWNER, ADDRESS) that was no completed validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  0', function (done) {
 
         let param = {};
-        param.type = "address";
+        param.type = ADDRESS;
         param.owner = OWNER;
 
         getAttributeValidationScore(param, function (err, res) {
@@ -2719,7 +2807,8 @@ describe('GET Attribute validation score', function () {
         });
     });
 
-    it('Get Attribute validation score - with validations', function (done) {
+    it('As a user (PUBLIC), I want to Get the validation score for an attribute (OWNER, IDENTITY_CARD) that was 2 completed validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  2', function (done) {
 
         let param = {};
         param.type = IDENTITY_CARD;
@@ -2909,28 +2998,6 @@ function getAttributeValidationScore(params, done) {
     }
     if (params.owner) {
         url += '&owner=' + '' + params.owner;
-    }
-    node.get(url, done);
-
-}
-
-function getAttributeValidationRequests(params, done) {
-
-    let url = '/api/attribute-validations/validationrequest/';
-    if (params.validator || params.type || params.owner) {
-        url += '?';
-    }
-    if (params.validator) {
-        url += '&validator=' + '' + params.validator;
-    }
-    if (params.type) {
-        url += '&type=' + '' + params.type;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
-    }
-    if (params.status) {
-        url += '&status=' + '' + params.status;
     }
     node.get(url, done);
 

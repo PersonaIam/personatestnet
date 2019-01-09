@@ -191,7 +191,7 @@ Services.getServiceAttributeTypes = function (filter, cb) {
         library.logger.error("stack", err.stack);
         return cb(err.message);
     })
-}
+};
 
 shared.listServices = function (req, cb) {
     library.schema.validate(req.body, schema.listServices, function (err) {
