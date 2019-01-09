@@ -173,7 +173,7 @@ describe('Send Funds', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('As a user (OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+    it('As an OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -199,7 +199,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create an attribute of type PHONE_NUMBER for myself. ' +
+    it('As an OWNER, I want to Create an attribute (PHONE_NUMBER) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -230,7 +230,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create an attribute of type BIRTHPLACE for myself. ' +
+    it('As an OWNER, I want to Create an attribute (BIRTHPLACE) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -261,7 +261,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create an attribute of type ADDRESS for myself. ' +
+    it('As an OWNER, I want to Create an attribute (ADDRESS) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -292,7 +292,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself. ' +
+    it('As an OWNER, I want to Create an attribute (IDENTITY_CARD) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -331,7 +331,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create an attribute of type FIRST_NAME for myself. ' +
+    it('As an OTHER_OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -364,7 +364,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create an attribute of file type IDENTITY_CARD for myself, associating the FIRST_NAME to it. ' +
+    it('As an OTHER_OWNER, I want to Create an attribute of file type (IDENTITY_CARD), associating the FIRST_NAME to it. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -406,7 +406,7 @@ describe('CREATE ATTRIBUTES', function () {
 
 describe('EXPIRED ATTRIBUTES', function () {
 
-    it('As a user (OWNER), I want to Create a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the past. ' +
+    it('As an OWNER, I want to Create a non-expirable attribute (EMAIL) and provide an expiration timestamp in the past. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -438,7 +438,7 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non-file type, expirable attribute (EMAIL) which has an expiration timestamp in the past. ' +
+    it('As an OWNER, I want to Create a validation request for a non-expirable attribute (EMAIL) which has an expiration timestamp in the past. ' +
         'EXPECTED : FAILURE. ERROR : EXPIRED_ATTRIBUTE', function (done) {
 
         let param = {};
@@ -457,7 +457,7 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update the expire_timestamp of a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the future. ' +
+    it('As an OWNER, I want to Update the expire_timestamp of a non-expirable attribute (EMAIL) and provide an expiration timestamp in the future. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, EMAIL, function (err, res) {
@@ -499,7 +499,7 @@ describe('EXPIRED ATTRIBUTES', function () {
 
 describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD). ' +
+    it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -530,7 +530,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (PHONE_NUMBER). ' +
+    it('As an OWNER, I want to Create a validation request for a non-file attribute (PHONE_NUMBER). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -561,7 +561,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (BIRTHPLACE). ' +
+    it('As an OWNER, I want to Create a validation request for a non-file attribute (BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -592,7 +592,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD), and another validator (VALIDATOR_2). ' +
+    it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD), and another validator (VALIDATOR_2). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -623,8 +623,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a file type attribute (OWNER, IDENTITY_CARD), which has 2 PENDING_APPROVAL validation requests,' +
-        'and no approved validation requests. ' +
+    it('As a PUBLIC user, I want to Get the details of a file attribute (OWNER, IDENTITY_CARD), which has only 2 PENDING_APPROVAL validation requests.' +
         'EXPECTED : SUCCESS. RESULT : Attribute Details (active is false)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -637,7 +636,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (FIRST_NAME), by providing an incorrect Address. ' +
+    it('As an OWNER, I want to Create a validation request for a non-file attribute (FIRST_NAME), by providing an incorrect Owner Address. ' +
         'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
@@ -655,7 +654,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non-file type attribute (FIRST_NAME), by providing an incorrect Validator. ' +
+    it('As an OWNER, I want to Create a validation request for a non-file attribute (FIRST_NAME), by providing an incorrect Validator Address. ' +
         'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
@@ -673,7 +672,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a file type attribute (IDENTITY_CARD), ' +
+    it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD), ' +
         'but an active validation request already exists for the provided VALIDATOR. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE', function (done) {
 
@@ -686,12 +685,12 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         postAttributeValidationRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS);
             done();
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for a non existing attribute (OTHER_OWNER, ADDRESS). ' +
+    it('As an OWNER, I want to Create a validation request for a non existing attribute (OTHER_OWNER, ADDRESS). ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
 
         let param = {};
@@ -710,7 +709,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request, with myself as VALIDATOR. ' +
+    it('As an OWNER, I want to Create a validation request, with myself as VALIDATOR. ' +
         'EXPECTED : FAILURE. ERROR : OWNER_IS_VALIDATOR_ERROR', function (done) {
 
         let param = {};
@@ -727,7 +726,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests given an attribute (OWNER, IDENTITY_CARD) and a VALIDATOR. ' +
+    it('As a PUBLIC user, I want to Get the List of validation requests given an attribute (OWNER, IDENTITY_CARD) and a VALIDATOR. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Validation Request, in PENDING_APPROVAL status', function (done) {
 
         let param = {};
@@ -752,7 +751,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for an attribute with no associations, but which requires an associated document (ADDRESS). ' +
+    it('As an OWNER, I want to Create a validation request for an attribute (ADDRESS) with no associations, but which requires an associated document. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED', function (done) {
 
         let param = {};
@@ -769,7 +768,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a validation request for an attribute with no associations, but which does not require an associated document (EMAIL). ' +
+    it('As an OWNER, I want to Create a validation request for an attribute (EMAIL) with no associations, which does not require an associated document. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -803,7 +802,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
 describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given VALIDATOR. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for a given VALIDATOR. ' +
         'EXPECTED : SUCCESS. RESULT : 4 Validation Requests, all in PENDING_APPROVAL', function (done) {
 
         let param = {};
@@ -829,7 +828,7 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD). ' +
+    it('As a PUBLIC user, I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : 2 Validation Requests', function (done) {
 
         let param = {};
@@ -853,7 +852,7 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given validator VALIDATOR_3, with no validation requests. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for a given validator VALIDATOR_3, with no validation requests. ' +
         'EXPECTED : SUCCESS. RESULT : No Results (empty "attribute_validation_requests" array)', function (done) {
 
         let param = {};
@@ -868,7 +867,7 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, ADDRESS), with no validation requests. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for a given attribute (OWNER, ADDRESS), with no validation requests. ' +
         'EXPECTED : SUCCESS. RESULT : No Results (empty "attribute_validation_requests" array)', function (done) {
 
         let param = {};
@@ -886,7 +885,7 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given user (OWNER), with multiple validation requests. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for a given user (OWNER), with multiple validation requests. ' +
         'EXPECTED : SUCCESS. RESULT : 5 Validation Requests', function (done) {
 
         let param = {};
@@ -909,7 +908,7 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
 
 describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
-    it('As a user (OWNER), I want to Approve a validation request that belongs to me. ' +
+    it('As an OWNER, I want to Approve a validation request that belongs to me. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
@@ -928,7 +927,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Decline a validation request that belongs to me. ' +
+    it('As an OWNER, I want to Decline a validation request that belongs to me. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
@@ -948,7 +947,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Cancel a validation request that is assigned to me. ' +
+    it('As a VALIDATOR, I want to Cancel a validation request that is assigned to me. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
         let params = {};
@@ -969,7 +968,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Notarize/Reject when PENDING_APPROVAL
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request that is still PENDING_APPROVAL. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request that is still PENDING_APPROVAL. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -989,8 +988,8 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD), ' +
-        'which after an unsuccessful notarization, remains in PENDING_APPROVAL status. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for an attribute (OWNER, IDENTITY_CARD) ' +
+        'which was unsuccessfully notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with PENDING_APPROVAL status', function (done) {
 
         let param = {};
@@ -1016,7 +1015,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request that is still PENDING_APPROVAL. ' +
+    it('As a VALIDATOR, I want to Reject a validation request that is still PENDING_APPROVAL. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -1036,8 +1035,8 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation requests for a given attribute (OWNER, IDENTITY_CARD), ' +
-        'which after an unsuccessful rejection, remains in PENDING_APPROVAL status. ' +
+    it('As a PUBLIC user, I want to Get the validation requests for an attribute (OWNER, IDENTITY_CARD) ' +
+        'which was unsuccessfully rejected. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with PENDING_APPROVAL status', function (done) {
 
         let param = {};
@@ -1065,7 +1064,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Successful Approve
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is still PENDING_APPROVAL. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, IDENTITY_CARD) that is in PENDING_APPROVAL. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1098,7 +1097,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR_2), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is still PENDING_APPROVAL. ' +
+    it('As a VALIDATOR_2, I want to Approve a validation request (OWNER, IDENTITY_CARD) that is in PENDING_APPROVAL. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1131,7 +1130,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, PHONE_NUMBER) that is still PENDING_APPROVAL (to be rejected). ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, PHONE_NUMBER) that is in PENDING_APPROVAL (to be rejected). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1165,7 +1164,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was recently approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1191,7 +1190,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was recently approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1217,7 +1216,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was recently approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1241,7 +1240,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Notarize a validation request that belongs to me. ' +
+    it('As an OWNER, I want to Notarize a validation request that belongs to me. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
@@ -1261,7 +1260,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Reject a validation request that belongs to me. ' +
+    it('As an OWNER, I want to Reject a validation request that belongs to me. ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR', function (done) {
 
         let params = {};
@@ -1283,7 +1282,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Approve/Decline when IN_PROGRESS
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1303,7 +1302,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved twice. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved twice. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1329,7 +1328,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1349,7 +1348,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then declined. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then declined. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1375,7 +1374,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Cancel a validation request that is already IN_PROGRESS. ' +
+    it('As an OWNER, I want to Cancel a validation request that is already IN_PROGRESS. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1394,7 +1393,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then canceled. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was approved and then canceled. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1422,7 +1421,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Decline
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
         'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_DECLINE', function (done) {
 
         let params = {};
@@ -1442,7 +1441,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) without providing a reason for the decline. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) without providing a reason for the decline. ' +
         'EXPECTED : FAILURE. ERROR : DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON', function (done) {
 
         let params = {};
@@ -1461,7 +1460,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, EMAIL) by providing a reason that has maximum length (1024 characters). ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, EMAIL) by providing a reason that has maximum length (1024 characters). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1495,7 +1494,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly declined. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly declined. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1524,7 +1523,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Successful Cancel
 
-    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) that is PENDING_APPROVAL. ' +
+    it('As an OWNER, I want to Cancel a validation request (OWNER, BIRTHPLACE) that is PENDING_APPROVAL. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1557,7 +1556,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly canceled. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was correctly canceled. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -1585,7 +1584,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Actions on a Declined validation request
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, EMAIL) that is already declined. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, EMAIL) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1605,7 +1604,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined twice. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined twice. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1632,7 +1631,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     });
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, EMAIL) that is already declined. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, EMAIL) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1652,7 +1651,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1678,7 +1677,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, EMAIL) that is already declined. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, EMAIL) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -1698,7 +1697,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then notarized. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1724,7 +1723,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, EMAIL) that is already declined. ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, EMAIL) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -1745,7 +1744,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then rejected. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then rejected. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1771,7 +1770,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) that is already declined. ' +
+    it('As an OWNER, I want to Cancel a validation request (OWNER, BIRTHPLACE) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -1792,7 +1791,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then canceled. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, EMAIL, VALIDATOR) that was declined and then canceled. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status DECLINED', function (done) {
 
         let param = {};
@@ -1818,7 +1817,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) without providing a validation type. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) without providing a validation type. ' +
         'EXPECTED : FAILURE. ERROR : MISSING_VALIDATION_TYPE', function (done) {
 
         let params = {};
@@ -1837,7 +1836,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) by providing an incorrect validation type. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) by providing an incorrect validation type. ' +
         'EXPECTED : FAILURE. ERROR : INCORRECT_VALIDATION_TYPE', function (done) {
 
         let params = {};
@@ -1857,7 +1856,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was incorrectly notarized. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was incorrectly notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1885,7 +1884,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Successful Notarization
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1919,7 +1918,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for an attribute (OWNER, IDENTITY_CARD) that was correctly notarized once. ' +
+    it('As a PUBLIC user, I want to Get the details for an attribute (OWNER, IDENTITY_CARD) that was correctly notarized once. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -1934,7 +1933,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR_2), I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
+    it('As a VALIDATOR_2, I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1968,7 +1967,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was correctly notarized. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was correctly notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -1997,7 +1996,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Reject
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is too long (1025 characters). ' +
         'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_REJECT', function (done) {
 
         let params = {};
@@ -2017,7 +2016,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) without providing a reason. ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) without providing a reason. ' +
         'EXPECTED : FAILURE. ERROR : REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON', function (done) {
 
         let params = {};
@@ -2036,7 +2035,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is of maximum length (1024 characters). ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) by providing a reason that is of maximum length (1024 characters). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2070,7 +2069,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was correctly rejected. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was correctly rejected. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2099,7 +2098,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Actions on a COMPLETED validation request
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2119,7 +2118,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then declined. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then declined. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -2145,7 +2144,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2165,7 +2164,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -2191,7 +2190,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2211,7 +2210,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized twice. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized twice. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -2237,7 +2236,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2257,7 +2256,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then rejected. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then rejected. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -2283,7 +2282,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Cancel a validation request (OWNER, IDENTITY_CARD) which is already notarized. ' +
+    it('As an OWNER, I want to Cancel a validation request (OWNER, IDENTITY_CARD) which is already notarized. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2302,7 +2301,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then canceled. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was notarized and then canceled. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
 
         let param = {};
@@ -2330,7 +2329,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Actions on a REJECTED validation request
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2350,7 +2349,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then declined. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then declined. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2376,7 +2375,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2396,7 +2395,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected twice. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected twice. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2422,7 +2421,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2441,7 +2440,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2467,7 +2466,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2487,7 +2486,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then notarized. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2513,7 +2512,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Cancel a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
+    it('As an OWNER, I want to Cancel a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2532,7 +2531,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then canceled. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was rejected and then canceled. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status REJECTED', function (done) {
 
         let param = {};
@@ -2560,7 +2559,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
     // Actions on a CANCELED validation request
 
-    it('As a user (VALIDATOR), I want to Approve a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+    it('As a VALIDATOR, I want to Approve a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2579,7 +2578,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then approved. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -2605,7 +2604,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Decline a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2625,7 +2624,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then declined. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then declined. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -2651,7 +2650,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Notarize a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2671,7 +2670,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then notarized. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then notarized. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -2697,7 +2696,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (VALIDATOR), I want to Reject a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+    it('As a VALIDATOR, I want to Reject a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
 
         let params = {};
@@ -2717,7 +2716,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then rejected. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled and then rejected. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -2743,7 +2742,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Cancel a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
+    it('As an OWNER, I want to Cancel a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
         let params = {};
@@ -2762,7 +2761,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled twice. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, BIRTHPLACE, VALIDATOR) that was canceled twice. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status CANCELED', function (done) {
 
         let param = {};
@@ -2792,7 +2791,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
 describe('ATTRIBUTE VALIDATION SCORE', function () {
 
-    it('As a user (PUBLIC), I want to Get the validation score for an attribute (OWNER, ADDRESS) that was no completed validations. ' +
+    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, ADDRESS) that was no completed validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  0', function (done) {
 
         let param = {};
@@ -2807,7 +2806,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the validation score for an attribute (OWNER, IDENTITY_CARD) that was 2 completed validations. ' +
+    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, IDENTITY_CARD) that was 2 completed validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  2', function (done) {
 
         let param = {};

@@ -70,7 +70,7 @@ describe('Send Funds', function () {
 
 describe('LIST SERVICES', function () {
 
-    it('As a user (PUBLIC), I want to see the List of available Services. EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
+    it('As a PUBLIC user, I want to Get the List of Services. EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
         listServices(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -83,7 +83,7 @@ describe('LIST SERVICES', function () {
 
 describe('CREATE SERVICE', function () {
 
-    it('As a user (PUBLIC), I want to see the List of available Services which belong to a given provider. ' +
+    it('As a PUBLIC user, I want to Get the List of Services which belong to a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -94,7 +94,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PROVIDER), I want to Create a new Service. ' +
+    it('As a PROVIDER, I want to Create a new Service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -121,7 +121,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PROVIDER), I want to Create a Service which already exists. ' +
+    it('As a PROVIDER, I want to Create a Service which already exists. ' +
         'EXPECTED : FAILURE. ERROR : SERVICE_ALREADY_EXISTS', function (done) {
 
         let request = createServiceRequest();
@@ -133,7 +133,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the List of available Services which belong to a given provider. ' +
+    it('As a PUBLIC user, I want to Get the List of Services which belong to a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Service', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -145,7 +145,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PROVIDER), I want to Create a new Service, with a description that is too long. ' +
+    it('As a PROVIDER, I want to Create a new Service, with a description that is too long. ' +
         'EXPECTED : FAILURE. ERROR : SERVICE_DESCRIPTION_TOO_LONG', function (done) {
         let param = {};
         param.name = SERVICE2_NAME;
@@ -160,7 +160,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PROVIDER), I want to Create a new Service, with a description that is of maximum length. ' +
+    it('As a PROVIDER, I want to Create a new Service, with a description that is of maximum length. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -189,7 +189,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the List of available Services that have a given name. ' +
+    it('As a PUBLIC user, I want to Get the List of Services that have a given name. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Service', function (done) {
         getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
@@ -200,7 +200,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the List of available Services which belong to a given provider. ' +
+    it('As a PUBLIC user, I want to Get the List of Services which belong to a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 2 Services', function (done) {
         getServices({provider : PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -215,7 +215,7 @@ describe('CREATE SERVICE', function () {
 
 describe('INACTIVATE SERVICE', function () {
 
-    it('As a user (PROVIDER), I want to Inactivate one of my services. ' +
+    it('As a PROVIDER, I want to Inactivate one of my services. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -248,7 +248,7 @@ describe('INACTIVATE SERVICE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of an Inactive service. ' +
+    it('As a PUBLIC user, I want to Get the details of an Inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE_NAME}, function (err, res) {
             console.log(res.body);
@@ -261,7 +261,7 @@ describe('INACTIVATE SERVICE', function () {
 
     });
 
-    it('As a user (PROVIDER), I want to Inactivate a service that does not exist. ' +
+    it('As a PROVIDER, I want to Inactivate a service that does not exist. ' +
         'EXPECTED : FAILURE. ERROR : SERVICE_NOT_FOUND', function (done) {
 
         let params = {};
@@ -278,7 +278,7 @@ describe('INACTIVATE SERVICE', function () {
         });
     });
 
-    it('As a user (PROVIDER), I want to Inactivate a service that is already INACTIVE. ' +
+    it('As a PROVIDER, I want to Inactivate a service that is already INACTIVE. ' +
         'EXPECTED : FAILURE. ERROR : SERVICE_IS_ALREADY_INACTIVE', function (done) {
 
         let params = {};

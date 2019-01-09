@@ -230,15 +230,15 @@ shared.requestIdentityUse = function (req, cb) {
                         let identityRequestAttributesTypes = identityRequestAttributes.map(attribute => attribute.type)
 
                         if (_.intersection(ownerAttributeTypes, serviceAttributes).length !== serviceAttributes.length) {
-                            return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES);
+                            return cb(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING);
                         }
 
                         if (_.intersection(ownerAttributesActiveAndNotExpiredTypes, serviceAttributes).length !== serviceAttributes.length) {
-                            return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_SOME_REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
+                            return cb(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
                         }
 
                         if (_.intersection(identityRequestAttributesTypes, serviceAttributes).length !== serviceAttributes.length) {
-                            return cb(messages.CANNOT_CREATE_IDENTITY_USE_REQUEST_MISSING_REQUIRED_SERVICE_ATTRIBUTES_VALUES);
+                            return cb(messages.REQUIRED_SERVICE_ATTRIBUTES_VALUES_ARE_MISSING);
                         }
 
                         req.body.serviceId = serviceResult.services[0].id;
@@ -250,7 +250,7 @@ shared.requestIdentityUse = function (req, cb) {
                             }
 
                             if (identityUseRequests && identityUseRequests.length === 0) {
-                                return cb(messages.IDENTITY_USE_ALREADY_EXISTS);
+                                return cb(messages.IDENTITY_USE_REQUEST_ALREADY_EXISTS);
                             }
 
                             req.body.asset.identityuse[0].serviceId = serviceResult.services[0].id;

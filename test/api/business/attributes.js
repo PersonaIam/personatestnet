@@ -105,7 +105,7 @@ describe('Send Funds', function () {
 
 describe('ATTRIBUTE TYPES', function () {
 
-    it('As a user (PUBLIC), I want to Get the details of an attribute type (FIRST_NAME). ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute type (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Attribute type details (name is FIRST_NAME)', function (done) {
         getAttributeTypeByName(FIRST_NAME, function (err, res) {
             console.log(res.body);
@@ -118,7 +118,7 @@ describe('ATTRIBUTE TYPES', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of an attribute type that does not exist (weight). ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute type that does not exist. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_TYPE_NOT_FOUND', function (done) {
         getAttributeTypeByName('weight', function (err, res) {
             console.log(res.body);
@@ -128,7 +128,7 @@ describe('ATTRIBUTE TYPES', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the list of attribute types. ' +
+    it('As a PUBLIC user, I want to Get the list of attribute types. ' +
         'EXPECTED : SUCCESS. RESULT : Attribute type list', function (done) {
         getAttributeTypesList(function (err, res) {
             console.log(res.body);
@@ -142,7 +142,7 @@ describe('ATTRIBUTE TYPES', function () {
 
 describe('CREATE ATTRIBUTE', function () {
 
-    it('As a user (OWNER), I want to Create a non file attribute type and provide associations. ' +
+    it('As an OWNER, I want to Create a non file attribute and provide associations. ' +
         'EXPECTED : FAILURE. ERROR : ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES', function (done) {
 
         let params = {};
@@ -156,7 +156,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a non file attribute type (FIRST_NAME). ' +
+    it('As an OWNER, I want to Create a non file attribute (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -182,7 +182,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a non file attribute type (PHONE_NUMBER). ' +
+    it('As an OWNER, I want to Create a non file attribute (PHONE_NUMBER). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -213,7 +213,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a non file attribute type (BIRTHPLACE). ' +
+    it('As an OWNER, I want to Create a non file attribute (BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -244,7 +244,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of an attribute (OWNER, FIRST_NAME). ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Attribute Details, including value, type, active, expire_timestamp', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
@@ -260,8 +260,8 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of an attribute that does not exist (OWNER, ADDRESS). ' +
-        'EXPECTED : SUCCESS. RESULT : Result body contains "attributes" property, which is an empty array', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute that does not exist (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Empty "attributes" array', function (done) {
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -271,7 +271,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a non file attribute type, but the provided owner address is invalid. ' +
+    it('As an OWNER, I want to Create a non file attribute type, but the provided owner address is invalid. ' +
         'EXPECTED : FAILURE. ERROR : INVALID_OWNER_ADDRESS', function (done) {
 
         let params = {};
@@ -287,7 +287,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create an attribute, but the provided attribute type does not exist. ' +
+    it('As an OWNER, I want to Create an attribute, but the provided attribute type does not exist. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_TYPE_NOT_FOUND', function (done) {
 
         let param = {};
@@ -304,7 +304,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create an attribute for some other user (OWNER). ' +
+    it('As an OTHER_OWNER, I want to Create an attribute for some other user (OWNER). ' +
         'EXPECTED : FAILURE. ERROR : SENDER_IS_NOT_OWNER', function (done) {
 
         let param = {};
@@ -326,7 +326,7 @@ describe('CREATE ATTRIBUTE', function () {
 
 describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
-    it('As a user (OWNER), I want to Create a file type attribute, but without providing an expiration timestamp. ' +
+    it('As an OWNER, I want to Create a file type attribute, without providing an expiration timestamp. ' +
         'EXPECTED : FAILURE. ERROR : EXPIRE_TIMESTAMP_REQUIRED', function (done) {
 
         let params = {};
@@ -345,7 +345,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a file type attribute, but with the provided expiration timestamp being in the past. ' +
+    it('As an OWNER, I want to Create a file type attribute, with the provided expiration timestamp in the past. ' +
         'EXPECTED : FAILURE. ERROR : EXPIRE_TIMESTAMP_IN_THE_PAST', function (done) {
 
         let params = {};
@@ -365,7 +365,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a file type attribute (IDENTITY_CARD). ' +
+    it('As an OWNER, I want to Create a file type attribute (IDENTITY_CARD) correctly. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -404,8 +404,8 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a transaction used to create a file type attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction asset value is the IPFS Hash of the file type attribute', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a tx used to create a file type attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Tx asset value is the IPFS Hash of the file type attribute', function (done) {
         node.expect(ipfsTransaction).to.have.property(TRANSACTION_ID).to.be.a('string');
 
         let transactionId = ipfsTransaction.transactionId;
@@ -432,8 +432,8 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a file type attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Attribute details, having IPFS Hash as value and "active" property false', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a file type attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute details, having the IPFS Hash as value', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -451,8 +451,8 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
 describe('CREATE ATTRIBUTE', function () {
 
-    it('As a user (PUBLIC), I want to Get the attributes of a user (OTHER_OWNER) that has no attributes. ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an empty array, and "count" result of 0', function (done) {
+    it('As a PUBLIC user, I want to Get the attributes of a user (OTHER_OWNER) that has no attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Empty "attributes" array', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -462,7 +462,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create a non file attribute type (FIRST_NAME). ' +
+    it('As an OTHER_OWNER, I want to Create a non file attribute (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -495,8 +495,8 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, and "count" result of 1', function (done) {
+    it('As a PUBLIC user, I want to Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" as an array with 1 element', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -510,7 +510,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create a file type attribute (IDENTITY_CARD), providing an empty association array for it. ' +
+    it('As an OTHER_OWNER, I want to Create a file type attribute (IDENTITY_CARD), providing an empty association array for it. ' +
         'EXPECTED : FAILURE. ERROR : EMPTY_ASSOCIATIONS_ARRAY', function (done) {
 
         getAttribute(OTHER_OWNER, FIRST_NAME, function() {
@@ -534,7 +534,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OTHER_OWNER), I want to Create a file type attribute (IDENTITY_CARD), providing an association (FIRST_NAME) for it. ' +
+    it('As an OTHER_OWNER, I want to Create a file type attribute (IDENTITY_CARD), providing an association (FIRST_NAME) for it. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -572,7 +572,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Create a non file attribute type (ADDRESS). ' +
+    it('As an OWNER, I want to Create a non file attribute (ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -603,8 +603,8 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the attributes of a user (OWNER) that has multiple attributes. ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 5 elements, and "count" result of 5', function (done) {
+    it('As a PUBLIC user, I want to Get the attributes of a user (OWNER) that has multiple attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "attributes" as an array with 5 elements', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -628,7 +628,7 @@ describe('CREATE ATTRIBUTE', function () {
 
 describe('UPDATE ATTRIBUTE', function () {
 
-    it('As a user (OWNER), I want to Update a file type attribute (IDENTITY_CARD). ' +
+    it('As an OWNER, I want to Update a file type attribute (IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
@@ -672,8 +672,8 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as new IPFS Hash', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "value" as the new IPFS Hash', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -688,7 +688,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update a non file type attribute (ADDRESS). ' +
+    it('As an OWNER, I want to Update a non file attribute (ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
@@ -728,8 +728,8 @@ describe('UPDATE ATTRIBUTE', function () {
 
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as new address value', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a recently updated non file attribute (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "value" as the new address value', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
@@ -745,7 +745,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update an attribute that does not exist. ' +
+    it('As an OWNER, I want to Update an attribute that does not exist. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND_FOR_UPDATE', function (done) {
 
         let param = {};
@@ -766,7 +766,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by changing the expire timestamp, and keeping the value the same. ' +
+    it('As an OWNER, I want to Update an attribute (ADDRESS) by changing the expire timestamp, keeping the value the same. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
@@ -804,7 +804,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by changing the value, and keeping the expire timestamp the same. ' +
+    it('As an OWNER, I want to Update an attribute (ADDRESS) by changing the value, keeping the expire timestamp the same. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
@@ -841,7 +841,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update another user\'s attribute (OTHER_OWNER, FIRST_NAME). ' +
+    it('As an OWNER, I want to Update another user\'s attribute (OTHER_OWNER, FIRST_NAME). ' +
         'EXPECTED : FAILURE. ERROR : SENDER_IS_NOT_OWNER', function (done) {
 
         getAttribute(OTHER_OWNER, FIRST_NAME, function (err, res) {
@@ -862,8 +862,8 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array with 1 element, "value" as the address provided in the second update', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains "value" as the address provided in the second update', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
             console.log(res.body);
@@ -881,7 +881,7 @@ describe('UPDATE ATTRIBUTE', function () {
 
 describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
 
-    it('As a user (OWNER), I want to Update an attribute (IDENTITY_CARD) by providing a new association (FIRST_NAME). ' +
+    it('As an OWNER, I want to Update an attribute (IDENTITY_CARD) by providing a new association (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, identityCardData) {
@@ -926,8 +926,8 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
-        'EXPECTED : SUCCESS. RESULT : Contains "attributes" result as an array, and an "associations" property', function (done) {
+    it('As a PUBLIC user, I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
+        'EXPECTED : SUCCESS. RESULT : Contains an "associations" property', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -941,8 +941,8 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As a user (PUBLIC), I want to Get the details of an attribute (OWNER, FIRST_NAME) that is part of an association. ' +
-        'EXPECTED : SUCCESS. RESULT : The attribute is associated, not documented (associated Identity Card is still inactive) and not active', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, FIRST_NAME) that is part of an association. ' +
+        'EXPECTED : SUCCESS. RESULT : The attribute is associated, not documented and not active', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -958,7 +958,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by providing a new association (FIRST_NAME). ' +
+    it('As an OWNER, I want to Update an attribute (ADDRESS) by providing a new association (FIRST_NAME). ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
@@ -986,7 +986,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update an attribute (ADDRESS) by providing a new association (IDENTITY_CARD). ' +
+    it('As an OWNER, I want to Update an attribute (ADDRESS) by providing a new association (IDENTITY_CARD). ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
@@ -1017,7 +1017,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
 
 describe('EXPIRED ATTRIBUTES', function () {
 
-    it('As a user (OWNER), I want to Create a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the past. ' +
+    it('As an OWNER, I want to Create a non-expirable, non-file attribute (EMAIL) with an expiration in the past. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1049,8 +1049,8 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
 });
 
-    it('As a user (PUBLIC), I want to Get the details of a non-expirable attribute (OWNER, EMAIL). ' +
-        'EXPECTED : SUCCESS. RESULT : The attribute details contains the expire_timestamp, as provided during attribute creation' , function (done) {
+    it('As a PUBLIC user, I want to Get the details of a non-expirable attribute (OWNER, EMAIL). ' +
+        'EXPECTED : SUCCESS. RESULT : The details contain the "expire_timestamp" provided during creation' , function (done) {
         getAttribute(OWNER, 'email', function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1064,7 +1064,7 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
     });
 
-    it('As a user (OWNER), I want to Update the expire_timestamp of a non-expirable, non-file type attribute (EMAIL) and provide an expiration timestamp in the future. ' +
+    it('As an OWNER, I want to Update the expire_timestamp of a non-expirable attribute (EMAIL). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, 'email', function (err, res) {

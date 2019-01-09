@@ -135,7 +135,7 @@ __private.attachApi = function () {
 __private.getAttributeValidationRequests = function (filter, cb) {
 
     if (!filter.validator && !filter.owner && !filter.attributeId) {
-        return cb(messages.INCORRECT_VALIDATION_PARAMETERS);
+        return cb(messages.INCORRECT_VALIDATION_REQUEST_PARAMETERS);
     }
     let query, params;
     if (filter.attributeId && !filter.validator) {
@@ -426,7 +426,7 @@ shared.requestAttributeValidation = function (req, cb) {
                         return cb(err);
                     }
                     if (attributeValidationRequests) {
-                        return cb(messages.VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE);
+                        return cb(messages.PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS);
                     }
                     attributes.buildTransaction({
                             req: req,
@@ -452,7 +452,7 @@ shared.getAttributeValidationRequests = function (req, cb) {
         }
 
         if (!req.body.attributeId && !req.body.validator && !req.body.owner) {
-            return cb(messages.INCORRECT_VALIDATION_PARAMETERS)
+            return cb(messages.INCORRECT_VALIDATION_REQUEST_PARAMETERS)
         }
 
         __private.getAttributeValidationRequests(req.body, function (err, res) {
