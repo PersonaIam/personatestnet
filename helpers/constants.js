@@ -124,6 +124,8 @@ module.exports = {
     },
 
 	totalAmount: 6677610400000000,
+	startBlockHeightForRewardSplitting: 360000, // REAL Time : "1/12/2019, 2:55:20 AM (EEST)"
+	enrolmentCreditAddress: 'Thq2jDtsuQLUGNvfYiNwGALQLAbmUupvRB',
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 	VALIDATIONS_REQUIRED : 1,
     REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',

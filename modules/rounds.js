@@ -66,46 +66,77 @@ function Rounds (cb, scope) {
 //__API__ `tick`
 
 //
-Rounds.prototype.tick = function(block, cb){
-	var round = __private.current;
+Rounds.prototype.tick = function (block, cb) {
+    var round = __private.current;
 
-	// if genesis block, nothing to do about the forger
-	// but make sure votes are updated properly to start the round
-	if(block.height == 1){
-		__private.updateTotalVotesOnDatabase(function(err){
-			cb(err, block);
-		});
-	}
+    // if genesis block, nothing to do about the forger
+    // but make sure votes are updated properly to start the round
+    if (block.height == 1) {
+        __private.updateTotalVotesOnDatabase(function (err) {
+            cb(err, block);
+        });
+    }
 
-	else{
-		// give block rewards + fees to the block forger
-		modules.accounts.mergeAccountAndGet({
-			publicKey: block.generatorPublicKey,
-			balance: block.reward + block.totalFee,
-			u_balance: block.reward + block.totalFee,
-			fees: block.totalFee,
-			rewards: block.reward,
-			producedblocks: 1,
-			blockId: block.id,
-			round: round
-		}, function (err) {
-			if(err){
-				return cb(err, block);
-			}
-			else {
-				__private.collectedfees[round] += block.totalFee;
-				__private.forgers[round].push(block.generatorPublicKey);
+    else {
+        var rewardSplit = 1;
 
-				// last block of the round? we prepare next round
-				if(self.getRoundFromHeight(block.height+1) == round + 1){
-					return __private.changeRoundForward(block, cb);
-				}
-				else {
-					return cb(null, block);
-				}
-			}
-		});
-	}
+        // noinspection JSAnnotator
+        function giveAwardToTheBlockForger() {
+            // give block rewards + fees to the block forger
+            modules.accounts.mergeAccountAndGet({
+                publicKey: block.generatorPublicKey,
+                balance: (block.reward / rewardSplit) + block.totalFee,
+                u_balance: (block.reward / rewardSplit) + block.totalFee,
+                fees: block.totalFee,
+                rewards: (block.reward / rewardSplit),
+                producedblocks: 1,
+                blockId: block.id,
+                round: round
+            }, function (err) {
+                if (err) {
+                    return cb(err, block);
+                }
+                else {
+                    __private.collectedfees[round] += block.totalFee;
+                    __private.forgers[round].push(block.generatorPublicKey);
+
+                    // last block of the round? we prepare next round
+                    if (self.getRoundFromHeight(block.height + 1) == round + 1) {
+                        return __private.changeRoundForward(block, cb);
+                    }
+                    else {
+                        return cb(null, block);
+                    }
+                }
+            });
+        }
+
+        if (block.height >= constants.startBlockHeightForRewardSplitting &&
+            block.reward === constants.rewards.milestones[0] && constants.enrolmentCreditAddress) {
+            rewardSplit = 2;
+
+            //first collect half of the reward
+            modules.accounts.mergeAccountAndGet({
+                publicKey: constants.enrolmentCreditAddress,
+                balance: (block.reward / rewardSplit) + block.totalFee,
+                u_balance: (block.reward / rewardSplit) + block.totalFee,
+                fees: block.totalFee,
+                rewards: (block.reward / rewardSplit),
+                producedblocks: 1,
+                blockId: block.id,
+                round: round
+            }, function (err) {
+                if (err) {
+                    return cb(err, block);
+                }
+                else {
+                    giveAwardToTheBlockForger()
+                }
+            });
+        } else {
+            giveAwardToTheBlockForger()
+        }
+    }
 }
 
 // *backward tick*
