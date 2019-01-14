@@ -31,7 +31,7 @@ module.exports = {
     // TODO : Add business logic & tests
     ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one of the attributes to be associated does not belong to the current owner',
     INCORRECT_VALIDATION_REQUEST_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
-    INCORRECT_IDENTITY_USE_PARAMETERS : 'Either the attribute ( owner and type or ID ) or the service ( provider and name or ID  ) must be provided',
+    INCORRECT_IDENTITY_USE_PARAMETERS : 'If the serviceName parameter is specified, the serviceProvider parameter must also be specified',
 
     //TODO : add tests or remove (applies to all items in the section below)
     IPFS_UPLOAD_FAIL : 'Failed to upload to IPFS',
@@ -55,6 +55,9 @@ module.exports = {
 
     ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     MISSING_VALIDATION_TYPE : 'Validation type is missing',
+    MISSING_SERVICE_DESCRIPTION : 'Service description is not provided. Nothing to create',
+    MISSING_ATTRIBUTE_TYPES : 'Service attribute types are not provided. Nothing to create',
+    MISSING_NUMBER_OF_VALIDATIONS_REQUIRED : 'Service attribute validations required number is not provided. Nothing to create',
     //TODO : add tests
     MISSING_OWNER_ADDRESS : 'Owner parameter must be provided',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
@@ -63,7 +66,7 @@ module.exports = {
     REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when rejecting a validation request',
     DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when declining a validation request',
 
-    SERVICE_ALREADY_EXISTS : 'A service already exists for this provider',
+    SERVICE_ALREADY_EXISTS : 'A service with this name already exists for this provider',
     SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',
 
     //TODO : add tests

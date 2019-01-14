@@ -94,6 +94,51 @@ describe('CREATE SERVICE', function () {
         });
     });
 
+    it('As a PROVIDER, I want to Create a new Service without specifying any description. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_SERVICE_DESCRIPTION', function (done) {
+
+        let param = {};
+        param.attributeTypes = ['identity_card'];
+        param.validations_required = 1;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_SERVICE_DESCRIPTION);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Create a new Service without specifying any attribute types. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_ATTRIBUTE_TYPES', function (done) {
+
+        let param = {};
+        param.description = DESCRIPTION;
+        param.validations_required = 1;
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_ATTRIBUTE_TYPES);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Create a new Service without specifying the number of validations required. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_NUMBER_OF_VALIDATIONS_REQUIRED', function (done) {
+
+        let param = {};
+        param.description = DESCRIPTION;
+        param.attributeTypes = ['identity_card'];
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_NUMBER_OF_VALIDATIONS_REQUIRED);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Create a new Service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -104,7 +149,9 @@ describe('CREATE SERVICE', function () {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
         });
         let param = {};
-        param.validations = CUSTOM_VALIDATIONS;
+        param.validations_required = CUSTOM_VALIDATIONS;
+        param.description = DESCRIPTION;
+        param.attributeTypes = ['identity_card'];
         let request = createServiceRequest(param);
 
         postService(request, function (err, res) {
@@ -124,7 +171,11 @@ describe('CREATE SERVICE', function () {
     it('As a PROVIDER, I want to Create a Service which already exists. ' +
         'EXPECTED : FAILURE. ERROR : SERVICE_ALREADY_EXISTS', function (done) {
 
-        let request = createServiceRequest();
+        let param = {};
+        param.validations_required = CUSTOM_VALIDATIONS;
+        param.description = DESCRIPTION;
+        param.attributeTypes = ['identity_card'];
+        let request = createServiceRequest(param);
 
         postService(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
@@ -150,6 +201,8 @@ describe('CREATE SERVICE', function () {
         let param = {};
         param.name = SERVICE2_NAME;
         param.description = descriptionTooLong;
+        param.attributeTypes = ['identity_card'];
+        param.validations_required = CUSTOM_VALIDATIONS;
 
         let request = createServiceRequest(param);
 
@@ -173,6 +226,8 @@ describe('CREATE SERVICE', function () {
         let param = {};
         param.name = SERVICE2_NAME;
         param.description = descriptionMaxLength;
+        param.attributeTypes = ['identity_card'];
+        param.validations_required = CUSTOM_VALIDATIONS;
         let request = createServiceRequest(param);
 
         postService(request, function (err, res) {
@@ -207,6 +262,48 @@ describe('CREATE SERVICE', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(2);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
+        'EXPECTED : SUCCESS. RESULT : No results', function (done) {
+        getServices({status : 'INACTIVE'}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the List of Services that are active. ' +
+        'EXPECTED : SUCCESS. RESULT : 2 results', function (done) {
+        getServices({status : 'ACTIVE'}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(2);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the Attribute Types for a given service. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result', function (done) {
+        getServiceAttributeTypes({provider : PROVIDER, name : SERVICE_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('service_attribute_types');
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the Attribute Types for a service that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_NOT_FOUND', function (done) {
+        getServiceAttributeTypes({provider : PROVIDER, name : NON_EXISTING_SERVICE_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_NOT_FOUND);
             done();
         });
     });
@@ -250,7 +347,7 @@ describe('INACTIVATE SERVICE', function () {
 
     it('As a PUBLIC user, I want to Get the details of an Inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Service, with INACTIVE status' , function (done) {
-        getServices({name: SERVICE_NAME}, function (err, res) {
+        getServices({name: SERVICE_NAME, provider : PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(1);
@@ -259,6 +356,39 @@ describe('INACTIVATE SERVICE', function () {
             done();
         });
 
+    });
+
+    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
+        getServices({status : 'INACTIVE'}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the List of Services that inactive and belong to a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
+        getServices({status : 'INACTIVE', provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the List of Services that inactive and belong to a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
+        getServices({status : 'ACTIVE', provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
     });
 
     it('As a PROVIDER, I want to Inactivate a service that does not exist. ' +
@@ -308,10 +438,16 @@ function createServiceRequest(param) {
     request.asset = {};
     request.asset.service = {};
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
-    request.asset.service.description = param.description ? param.description : DESCRIPTION;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
-    request.asset.service.validations_required = param.validations ? param.validations : 1;
-    request.asset.service.attributeTypes = ['identity_card'];
+    if (param.description) {
+        request.asset.service.description = param.description;
+    }
+    if (param.validations_required) {
+        request.asset.service.validations_required = param.validations_required;
+    }
+    if (param.attributeTypes) {
+        request.asset.service.attributeTypes = param.attributeTypes;
+    }
 
     console.log(JSON.stringify(request));
     return request;
@@ -341,7 +477,7 @@ function listServices(done) {
 
 function getServices(params, done) {
 
-    let url = '/api/services/';
+    let url = '/api/services';
     if (params.name || params.provider || params.status) {
         url += '?';
     }
@@ -349,10 +485,25 @@ function getServices(params, done) {
         url += 'name=' + '' + params.name;
     }
     if (params.provider) {
-        url += 'provider=' + '' + params.provider;
+        url += '&provider=' + '' + params.provider;
     }
     if (params.status) {
-        url += 'status=' + '' + params.status;
+        url += '&status=' + '' + params.status;
+    }
+    node.get(url, done);
+}
+
+function getServiceAttributeTypes(params, done) {
+
+    let url = '/api/services/attributeTypes';
+    if (params.name || params.provider) {
+        url += '?';
+    }
+    if (params.name) {
+        url += '&name=' + '' + params.name;
+    }
+    if (params.provider) {
+        url += '&provider=' + '' + params.provider;
     }
     node.get(url, done);
 }

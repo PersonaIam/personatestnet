@@ -230,9 +230,13 @@ shared.getServiceAttributeTypes = function (req, cb) {
         if (err) {
             return cb(err[0].message);
         }
-
-        Services.getServiceAttributeTypes(req.body, function (err, data) {
-            return cb(null, {service_attribute_types: data.service_attribute_types, count: data.count});
+        Services.getServicesByFilter(req.body, function (err, data) {
+            if (!data || !data.services || data.services.length === 0) {
+                return cb(messages.SERVICE_NOT_FOUND)
+            }
+            Services.getServiceAttributeTypes(req.body, function (err, data) {
+                return cb(null, {service_attribute_types: data});
+            });
         });
     });
 };
@@ -294,6 +298,15 @@ shared.addService = function (req, cb) {
         }
         if (!req.body.asset || !req.body.asset.service) {
             return cb('Service is not provided. Nothing to create');
+        }
+        if (!req.body.asset.service.description) {
+            return cb(messages.MISSING_SERVICE_DESCRIPTION);
+        }
+        if (!req.body.asset.service.attributeTypes) {
+            return cb(messages.MISSING_ATTRIBUTE_TYPES);
+        }
+        if (!req.body.asset.service.validations_required) {
+            return cb(messages.MISSING_NUMBER_OF_VALIDATIONS_REQUIRED);
         }
         if (!library.logic.transaction.validateAddress(req.body.asset.service.provider)) {
             return cb('Service provider address is incorrect');

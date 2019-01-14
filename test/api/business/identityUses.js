@@ -833,7 +833,7 @@ describe('CREATE SERVICES', function() {
 
 // Setup Validation Requests
 
-describe('CREATE ATTRIBUTE VALIDATION REQUEST', function () {
+describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
     it('As an OWNER, I want to Create an attribute validation request for an IDENTITY_CARD attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -1348,6 +1348,22 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
 
 describe('CREATE IDENTITY USE REQUEST', function () {
 
+    it('As a PUBLIC user, I want to Get the Identity Use Requests for a given SERVICE that has no requests. ' +
+        'EXPECTED : SUCCESS. ERROR : Empty array', function (done) {
+
+        let param = {};
+
+        param.serviceName = SERVICE10_NAME;
+        param.serviceProvider = PROVIDER;
+
+        getIdentityUseRequests(param, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('identity_use_requests').to.have.length(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Create an Identity Use Request on behalf of some other user (OWNER). ' +
         'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
@@ -1430,6 +1446,20 @@ describe('CREATE IDENTITY USE REQUEST', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
             node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the Identity Use Requests for a given SERVICE name, without mentioning the provider. ' +
+        'EXPECTED : FALSE. ERROR : INCORRECT_IDENTITY_USE_PARAMETERS', function (done) {
+
+        let param = {};
+
+        param.serviceName = SERVICE10_NAME;
+
+        getIdentityUseRequests(param, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_IDENTITY_USE_PARAMETERS);
             done();
         });
     });

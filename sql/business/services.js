@@ -13,7 +13,7 @@ let ServicesSql = {
 
     updateServiceStatus:'UPDATE services SET "status" = ${status} WHERE "provider" = ${provider} AND name = ${name}',
     getServicesForProvider:'SELECT * FROM services where "provider" = ${provider} order by id',
-    getServiceAttributeTypes:'SELECT attribute_types::json FROM services WHERE "provider" = ${provider} AND name = ${name}',
+    getServiceAttributeTypes:'SELECT attribute_types::json FROM services WHERE "provider" = ${provider} AND "name" = ${name}',
 
     getServicesFiltered: function (params) {
         return [
