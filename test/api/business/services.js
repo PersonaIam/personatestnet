@@ -266,20 +266,9 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
-        'EXPECTED : SUCCESS. RESULT : No results', function (done) {
-        getServices({status : 'INACTIVE'}, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(0);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
-            done();
-        });
-    });
-
-    it('As a PUBLIC user, I want to Get the List of Services that are active. ' +
+    it('As a PUBLIC user, I want to Get the List of Services that are active, for a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 2 results', function (done) {
-        getServices({status : 'ACTIVE'}, function (err, res) {
+        getServices({status : 'ACTIVE', provider:PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(2);
@@ -358,9 +347,9 @@ describe('INACTIVATE SERVICE', function () {
 
     });
 
-    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
+    it('As a PUBLIC user, I want to Get the List of Services that are inactive for a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
-        getServices({status : 'INACTIVE'}, function (err, res) {
+        getServices({status : 'INACTIVE', provider : PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body.services).to.have.length(1);

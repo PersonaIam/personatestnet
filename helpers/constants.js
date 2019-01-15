@@ -124,7 +124,7 @@ module.exports = {
     },
 
 	totalAmount: 6677610400000000,
-	startBlockHeightForRewardSplitting: 1525000,
+	startBlockHeightForRewardSplitting: 3000000,
 	enrolmentCreditAddress: 'Thq2jDtsuQLUGNvfYiNwGALQLAbmUupvRB',
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 	VALIDATIONS_REQUIRED : 1,

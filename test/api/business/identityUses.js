@@ -536,6 +536,17 @@ describe('CREATE ATTRIBUTES', function () {
 
 describe('CREATE SERVICES', function() {
 
+    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
+        'EXPECTED : SUCCESS. RESULT : No results', function (done) {
+        getServices({status : 'INACTIVE'}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Create a service for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
