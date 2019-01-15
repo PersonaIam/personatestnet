@@ -36,6 +36,7 @@ const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
 const EMAIL = 'email';
+const SSN = 'ssn';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
@@ -498,6 +499,25 @@ describe('EXPIRED ATTRIBUTES', function () {
 });
 
 describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
+
+    it('As an OWNER, I want to Approve a validation request that does not exist ( attribute exists ). ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
 
     it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {

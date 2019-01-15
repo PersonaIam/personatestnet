@@ -22,6 +22,7 @@ const PHONE_NUMBER = 'phone_number';
 const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
+const INCORRECT_TYPE = 'whatevs';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
@@ -38,6 +39,7 @@ const INCORRECT_ADDRESS = 'ABC';
 
 const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
+const MESSAGE = 'message';
 const ERROR = 'error';
 const COUNT = 'count';
 const TRUE = true;
@@ -256,6 +258,26 @@ describe('CREATE ATTRIBUTE', function () {
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(FIRST_NAME);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp').to.eq(null);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of an attribute without providing the owner parameter. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_OWNER_ADDRESS', function (done) {
+        getAttribute(null, FIRST_NAME, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_OWNER_ADDRESS);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of an attribute by providing a correct owner and an incorrect attribute type. ' +
+        'EXPECTED : SUCCESS. RESULT : "attributes" as an empty array', function (done) {
+        getAttributesForOwnerAndType(OWNER, INCORRECT_TYPE, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attributes').to.have.length(0);
             done();
         });
     });
@@ -728,6 +750,31 @@ describe('UPDATE ATTRIBUTE', function () {
 
     });
 
+    it('As an OWNER, I want to Update a non file attribute (ADDRESS) but change nothing in the attribute itself. ' +
+        'EXPECTED : SUCCESS. RESULT : "message" result with value NOTHING_TO_UPDATE', function (done) {
+
+        getAttribute(OWNER, ADDRESS, function (err, res) {
+
+            let attributeId = res.body.attributes[0].id;
+
+            let param = {};
+            param.attributeId = attributeId;
+            param.owner = OWNER;
+            param.secret = SECRET;
+            param.publicKey = PUBLIC_KEY;
+            param.value = NEW_ADDRESS;
+            param.expire_timestamp = time + 200000;
+            let request = updateAttributeRequest(param);
+
+            putAttributeUpdate(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(MESSAGE);
+                done();
+            });
+        });
+    });
+
     it('As a PUBLIC user, I want to Get the details of a recently updated non file attribute (OWNER, ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Contains "value" as the new address value', function (done) {
 
@@ -1181,7 +1228,12 @@ function getAttribute(owner, typeName, done) {
         if (res.body.attribute_type) {
             type = '' + res.body.attribute_type.name;
         }
-        let url = '/api/attributes?owner=' + owner;
+        let url;
+        if (owner) {
+            url = '/api/attributes?owner=' + owner;
+        } else {
+            url = '/api/attributes?';
+        }
         if (type) {
             url += '&type=' + '' + type;
         }
@@ -1191,6 +1243,11 @@ function getAttribute(owner, typeName, done) {
 
 function getAttributesForOwner(owner, done) {
     let url = '/api/attributes?owner=' + owner;
+    node.get(url, done);
+}
+
+function getAttributesForOwnerAndType(owner, type, done) {
+    let url = '/api/attributes?owner=' + owner + '&type=' + type;
     node.get(url, done);
 }
 

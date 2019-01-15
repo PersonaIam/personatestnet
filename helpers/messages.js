@@ -12,20 +12,16 @@ module.exports = {
     EXPIRED_ATTRIBUTE : 'Attribute is expired',
     INACTIVE_ATTRIBUTE : 'Attribute is inactive',
     ATTRIBUTE_TYPE_NOT_FOUND : 'Attribute type not found',
-    // TODO : add tests
     NOTHING_TO_UPDATE : 'Nothing to update',
     EXPIRE_TIMESTAMP_REQUIRED : 'Expire timestamp is required for this attribute type',
     EXPIRE_TIMESTAMP_IN_THE_PAST : 'Expire timestamp must be a timestamp in the future',
     ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no associations and therefore cannot be validated',
 
     PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has a pending approval validation request for the given attribute',
-    // TODO : add tests
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
 
     ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
     ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
-    // TODO : add tests
-    UNKNOWN_VALIDATION_REQUEST_ANSWER : 'Unknown validation request answer',
 
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
     // TODO : Add business logic & tests
@@ -46,11 +42,9 @@ module.exports = {
     VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_VALIDATOR_ERROR : 'Only the validator is allowed to perform this action on a validation request',
     VALIDATION_REQUEST_ANSWER_SENDER_IS_NOT_OWNER_ERROR : 'Only the owner is allowed to perform this action on a validation request',
 
-    //TODO : add tests
+    //TODO : add tests ( all 3 below )
     NO_CONSUMPTIONS_FOR_REWARD_ROUND : 'The reward was round not generated because there were no attribute consumptions since the last completed reward round',
-    //TODO : add tests
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
-    //TODO : add tests
     REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed',
 
     ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
@@ -58,8 +52,7 @@ module.exports = {
     MISSING_SERVICE_DESCRIPTION : 'Service description is not provided. Nothing to create',
     MISSING_ATTRIBUTE_TYPES : 'Service attribute types are not provided. Nothing to create',
     MISSING_NUMBER_OF_VALIDATIONS_REQUIRED : 'Service attribute validations required number is not provided. Nothing to create',
-    //TODO : add tests
-    MISSING_OWNER_ADDRESS : 'Owner parameter must be provided',
+    MISSING_OWNER_ADDRESS : 'Missing required property: owner',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
     REASON_TOO_BIG_DECLINE : 'The reason for declining a request is limited to 1024 characters',
     REASON_TOO_BIG_REJECT : 'The reason for rejecting a request is limited to 1024 characters',
@@ -69,10 +62,7 @@ module.exports = {
     SERVICE_ALREADY_EXISTS : 'A service with this name already exists for this provider',
     SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',
 
-    //TODO : add tests
     IDENTITY_USE_REQUEST_MISSING_FOR_ACTION : 'There is no identity use request for this action',
-    //TODO : add tests
-    UNKNOWN_IDENTITY_USE_REQUEST_ANSWER : 'Unknown identity use request answer',
     IDENTITY_USE_REQUEST_NOT_ACTIVE: 'The specified identity use request must be active for the action to take place',
     IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be in pending approval status for the action to take place',
     IDENTITY_USE_REQUEST_ALREADY_EXISTS : 'The given attribute already has an identity use request for the given service',
@@ -93,6 +83,10 @@ module.exports = {
 
     INVALID_OWNER_ADDRESS : 'Owner address is invalid',
     INVALID_VALIDATOR_ADDRESS : 'Validator address is invalid',
-    EMPTY_ASSOCIATIONS_ARRAY : 'If associations are specified, they must be provided'
+    EMPTY_ASSOCIATIONS_ARRAY : 'If associations are specified, they must be provided',
+
+    // INTERNAL - not exposed in the API
+    UNKNOWN_VALIDATION_REQUEST_ANSWER : 'Unknown validation request answer',
+    UNKNOWN_IDENTITY_USE_REQUEST_ANSWER : 'Unknown identity use request answer'
 };
 

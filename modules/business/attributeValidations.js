@@ -250,7 +250,7 @@ __private.checkValidationAnswerSender = function (params, cb) {
     }
 
     return cb(null, null);
-}
+};
 
 __private.validationRequestAnswer = function (req, cb) {
     library.schema.validate(req.body, schema.attributeOperation, function (err) {
@@ -291,7 +291,7 @@ __private.validationRequestAnswer = function (req, cb) {
             reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
 
             attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes) {
+                if (err || !data.attributes || data.attributes.length === 0) {
                     return cb(messages.ATTRIBUTE_NOT_FOUND);
                 }
 

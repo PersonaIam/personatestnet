@@ -38,6 +38,7 @@ const PHONE_NUMBER = 'phone_number';
 const BIRTHPLACE = 'birthplace';
 const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
+const SSN = 'ssn';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
@@ -57,6 +58,7 @@ const SERVICE7_NAME = 'Akiane';         // to be used by End Identity Use Reques
 const SERVICE8_NAME = 'Anne';           // to be used by Decline Identity Use Request on Inactive Service
 const SERVICE9_NAME = 'Astrid';         // to be used by Cancel Identity Use Request on Inactive Service
 const SERVICE10_NAME = 'Amelie';        // to be used by Create Identity Use Request with insufficient validation
+const SERVICE11_NAME = 'Audrey';        // to be used by Create Identity Use Request for service with 2 required attributes, user has only one
 
 const DESCRIPTION_VALUE = 'Modus';
 
@@ -840,6 +842,36 @@ describe('CREATE SERVICES', function() {
         });
     });
 
+    it('As a PROVIDER, I want to Create a service for myself (2 attribute types), which will require a single validation per attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE11_NAME;
+        param.validations = ONE_VALIDATION;
+        param.attributeTypes = [IDENTITY_CARD, SSN];
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
 });
 
 // Setup Validation Requests
@@ -1375,6 +1407,25 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
+    it('As a PROVIDER, I want to Approve an Identity Use Request that does not exist (attribute exists). ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Create an Identity Use Request on behalf of some other user (OWNER). ' +
         'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR', function (done) {
 
@@ -1388,6 +1439,26 @@ describe('CREATE IDENTITY USE REQUEST', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes, ' +
+        'only one of which exists. ' +
+        'EXPECTED : FAILURE. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE11_NAME;
+        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING);
             done();
         });
     });
@@ -3057,7 +3128,7 @@ function createServiceRequest(param) {
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
     request.asset.service.description = param.description ? param.description : DESCRIPTION_VALUE;
     request.asset.service.provider = param.provider ? param.provider : PROVIDER;
-    request.asset.service.attributeTypes = [IDENTITY_CARD];
+    request.asset.service.attributeTypes = param.attributeTypes ? param.attributeTypes : [IDENTITY_CARD];
     request.asset.service.validations_required = param.validations ? param.validations : CUSTOM_VALIDATIONS;
 
     console.log(JSON.stringify(request));
