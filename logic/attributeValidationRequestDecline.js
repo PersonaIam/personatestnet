@@ -65,8 +65,8 @@ AttributeValidationRequestDecline.prototype.verify = function (trs, sender, cb) 
         return cb('Validation attribute owner is undefined');
     }
 
-    if (!trs.asset.validation[0].type) {
-        return cb('Validation attribute type is undefined');
+    if (!trs.asset.validation[0].type && !trs.asset.validation[0].attributeId) {
+        return cb('Either the attribute type or the attributeId must be provided');
     }
 
     if (!trs.asset.validation[0].validator) {
@@ -173,9 +173,12 @@ AttributeValidationRequestDecline.prototype.schema = {
         validator: {
             type: 'string',
             format: 'address'
+        },
+        attributeId: {
+            type: 'integer',
         }
     },
-    required: ['owner', 'type', 'validator']
+    required: ['owner', 'validator']
 };
 
 //

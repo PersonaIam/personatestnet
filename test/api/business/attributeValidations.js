@@ -43,6 +43,7 @@ const NAME_VALUE = "JOE";
 const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
 const EMAIL_VALUE = 'yeezy@gmail.com';
+const EMAIL_VALUE2 = 'beehive@gmail.com';
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
 const INCORRECT_ADDRESS = 'ABC';
@@ -63,8 +64,10 @@ const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
 const COUNT = 'count';
+const VALUE = 'value';
 const TRUE = true;
 const FALSE = false;
+const ATTRIBUTE_VALIDATIONS_RESULT = 'attribute_validations';
 
 // TEST UTILS
 
@@ -500,15 +503,15 @@ describe('EXPIRED ATTRIBUTES', function () {
 
 describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('As an OWNER, I want to Approve a validation request that does not exist ( attribute exists ). ' +
+    it('As a VALIDATOR, I want to Approve a validation request that does not exist (attribute exists). ' +
         'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
         params.owner = OWNER;
         params.type = IDENTITY_CARD;
-        params.secret = SECRET;
-        params.publicKey = PUBLIC_KEY;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
 
         let request = createAnswerAttributeValidationRequest(params);
         postApproveValidationAttributeRequest(request, function (err, res) {
@@ -2809,10 +2812,125 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
 });
 
+describe('CREATE VALIDATION REQUESTS WHEN MULTIPLE ATTRIBUTES OF THE SAME TYPE EXIST', function () {
+
+    it('As an OWNER, I want to Create an attribute (EMAIL) even if an attribute of the same type already exists for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        time = slots.getTime() + 200000;
+        param.expire_timestamp = time;
+        param.type = EMAIL;
+        param.value = EMAIL_VALUE2;
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the (OWNER, EMAIL) attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : List of "attributes" has 2 elements', function (done) {
+        getAttribute(OWNER, EMAIL, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
+            node.expect(res.body.attributes).to.have.length(2);
+            node.expect(res.body.attributes[0]).to.have.property(VALUE).to.be.eq(EMAIL_VALUE);
+            node.expect(res.body.attributes[1]).to.have.property(VALUE).to.be.eq(EMAIL_VALUE2);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create a validation request for a type (EMAIL) that has 2 attributes, without providing the attribute id. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = EMAIL;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create a validation request for a type (EMAIL) that has 2 attributes, and provide the attribute id. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+            let request = createAttributeValidationRequest(param);
+            postAttributeValidationRequest(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
+                sleep.msleep(SLEEP_TIME);
+                getBalance(OWNER, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+                });
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get validation requests (OWNER, EMAIL, VALIDATOR) for a type that has 2 attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : 2 Results, in pending approval', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+        param.owner = OWNER;
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property('attribute_validation_requests');
+            let requestsForEmailAttributes = res.body.attribute_validation_requests.filter(o => o.type === EMAIL);
+            node.expect(requestsForEmailAttributes).to.have.length(2);
+            done();
+        });
+    });
+});
+
 describe('ATTRIBUTE VALIDATION SCORE', function () {
 
     it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, ADDRESS) that was no completed validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  0', function (done) {
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0', function (done) {
 
         let param = {};
         param.type = ADDRESS;
@@ -2821,7 +2939,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         getAttributeValidationScore(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('attribute_validations').to.be.eq(0);
+            node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
             done();
         });
     });
@@ -2836,8 +2954,285 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         getAttributeValidationScore(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property('attribute_validations').to.be.eq(2);
+            node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(2);
             done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let param = {};
+        param.type = EMAIL;
+        param.owner = OWNER;
+
+        getAttributeValidationScore(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute ID. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (declined)', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+
+            getAttributeValidationScore(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute ID. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still pending approval)', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+
+            getAttributeValidationScore(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
+                done();
+            });
+        });
+    });
+});
+
+describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE', function () {
+
+    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = EMAIL;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Decline a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = EMAIL;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Cancel a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = EMAIL;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the attributeId. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            params.attributeId = data.body.attributes[1].id;
+
+            let request = createAnswerAttributeValidationRequest(params);
+            postApproveValidationAttributeRequest(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
+                sleep.msleep(SLEEP_TIME);
+                getBalance(VALIDATOR, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+                });
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'providing the attribute ID of the declined one. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still declined)', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+
+            getAttributeValidationScore(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'providing the attribute ID of the in progress one. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still in progress - pending notarization)', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+
+            getAttributeValidationScore(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a VALIDATOR, I want to Reject a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = EMAIL;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+        'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = EMAIL;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the attributeId. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            params.attributeId = data.body.attributes[1].id;
+
+            let request = createAnswerAttributeValidationRequest(params);
+            postNotarizeValidationAttributeRequest(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
+                sleep.msleep(SLEEP_TIME);
+                getBalance(VALIDATOR, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+                });
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'providing the attribute ID of the completed one. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 1 (notarization is complete)', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+
+            getAttributeValidationScore(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(1);
+                done();
+            });
         });
     });
 });
@@ -2908,7 +3303,12 @@ function createAttributeValidationRequest(param) {
     request.asset = {};
     request.asset.validation = [];
     request.asset.validation[0] = {};
-    request.asset.validation[0].type = param.type ? param.type : FIRST_NAME;
+    if (param.type) {
+        request.asset.validation[0].type = param.type;
+    }
+    if (param.attributeId) {
+        request.asset.validation[0].attributeId = param.attributeId;
+    }
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
 
@@ -2926,9 +3326,14 @@ function createAnswerAttributeValidationRequest(param) {
     request.asset = {};
     request.asset.validation = [];
     request.asset.validation[0] = {};
-    request.asset.validation[0].type = param.type ? param.type : FIRST_NAME;
     request.asset.validation[0].owner = param.owner ? param.owner : OWNER;
     request.asset.validation[0].validator = param.validator ? param.validator : VALIDATOR;
+    if (param.type) {
+        request.asset.validation[0].type = param.type;
+    }
+    if (param.attributeId) {
+        request.asset.validation[0].attributeId = param.attributeId;
+    }
     if (param.validationType){
         request.asset.validation[0].validationType = param.validationType;
     }
@@ -3017,6 +3422,10 @@ function getAttributeValidationScore(params, done) {
     }
     if (params.owner) {
         url += '&owner=' + '' + params.owner;
+    }
+
+    if (params.attributeId) {
+        url += '&attributeId=' + '' + params.attributeId;
     }
     node.get(url, done);
 

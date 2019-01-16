@@ -280,23 +280,31 @@ __private.validationRequestAnswer = function (req, cb) {
             }
         }
 
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.validation[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, data) {
-            if (err || !data.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+        let reqGetAttributesByFilter = req;
+        reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
+        reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
+        reqGetAttributesByFilter.body.id = req.body.asset.validation[0].attributeId;
+
+        attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
+            if (err || !data.attributes || data.attributes.length === 0) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND);
             }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
-            reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
 
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err || !data.attributes || data.attributes.length === 0) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND);
-                }
+            if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                return cb(messages.EXPIRED_ATTRIBUTE);
+            }
 
-                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
+            if (!req.body.asset.validation[0].attributeId && data.attributes.length > 1) {
+                return cb(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            }
+
+            let reqGetAttributeType = req;
+            reqGetAttributeType.body.name =
+                req.body.asset.validation[0].type ? req.body.asset.validation[0].type : data.attributes[0].type;
+
+            attributes.getAttributeType(reqGetAttributeType.body, function (err, dataAttributeType) {
+                if (err || !dataAttributeType.attribute_type) {
+                    return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
                 }
 
                 req.body.attributeId = data.attributes[0].id;
@@ -387,27 +395,34 @@ shared.requestAttributeValidation = function (req, cb) {
             }
         }
 
-        let reqGetAttributeType = req;
-        reqGetAttributeType.body.name = req.body.asset.validation[0].type;
-        attributes.getAttributeType(reqGetAttributeType.body, function (err, dataAttributeType) {
-            if (err || !dataAttributeType.attribute_type) {
-                return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
+        let reqGetAttributesByFilter = req;
+        reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
+        reqGetAttributesByFilter.body.type = req.body.asset.validation[0].type;
+        reqGetAttributesByFilter.body.id = req.body.asset.validation[0].attributeId;
+
+        attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
+            if (err) {
+                return cb(err);
             }
-            let reqGetAttributesByFilter = req;
-            reqGetAttributesByFilter.body.owner = req.body.asset.validation[0].owner;
-            reqGetAttributesByFilter.body.type = dataAttributeType.attribute_type.name;
 
-            attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, data) {
-                if (err) {
-                    return cb(err);
-                }
+            if (!data.attributes || data.attributes.length === 0) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND);
+            }
 
-                if (!data.attributes || data.attributes.length === 0) {
-                    return cb(messages.ATTRIBUTE_NOT_FOUND);
-                }
+            if (!req.body.asset.validation[0].attributeId && data.attributes.length > 1) {
+                return cb(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            }
 
-                if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
-                    return cb(messages.EXPIRED_ATTRIBUTE);
+            if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
+                return cb(messages.EXPIRED_ATTRIBUTE);
+            }
+
+            let reqGetAttributeType = req;
+            reqGetAttributeType.body.name =
+                req.body.asset.validation[0].type ? req.body.asset.validation[0].type : data.attributes[0].type;
+            attributes.getAttributeType(reqGetAttributeType.body, function (err, dataAttributeType) {
+                if (err || !dataAttributeType.attribute_type) {
+                    return cb(messages.ATTRIBUTE_TYPE_NOT_FOUND);
                 }
 
                 let attributeTypeOptions = JSON.parse(dataAttributeType.attribute_type.options)
@@ -415,9 +430,11 @@ shared.requestAttributeValidation = function (req, cb) {
                     return cb(messages.ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED);
                 }
 
-                req.body.asset.validation[0].attribute_id = data.attributes[0].id;
+                req.body.asset.validation[0].attribute_id =
+                    req.body.asset.validation[0].id ? req.body.asset.validation[0].id : data.attributes[0].id;
+
                 req.body.validator = req.body.asset.validation[0].validator;
-                req.body.attributeId = data.attributes[0].id;
+                req.body.attributeId = req.body.asset.validation[0].attribute_id;
                 req.body.status = constants.validationRequestStatus.PENDING_APPROVAL;
 
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
@@ -483,7 +500,11 @@ shared.getAttributeValidationScore = function (req, cb) {
                 return cb(messages.ATTRIBUTE_NOT_FOUND);
             }
 
-            req.body.attribute_id = result.attributes[0].id;
+            if (!req.body.attributeId && result.attributes.length > 1) {
+                return cb(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
+            }
+
+            req.body.attribute_id = req.body.attributeId ? req.body.attributeId : result.attributes[0].id;
 
             __private.getAttributeValidationScore(req.body, function (err, res) {
                 if (err) {

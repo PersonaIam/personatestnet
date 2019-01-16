@@ -29,6 +29,7 @@ AttributeValidationRequest.prototype.create = function (data, trs) {
     trs.asset.validation = {
         type: data.type,
         owner: data.owner,
+        attributeId : data.attributeId,
         publicKey: data.sender.publicKey,
         validator : data.validator
     };
@@ -62,8 +63,8 @@ AttributeValidationRequest.prototype.verify = function (trs, sender, cb) {
         return cb('Attribute owner is undefined');
     }
 
-    if (!trs.asset.validation[0].type) {
-        return cb('Attribute type is undefined');
+    if (!trs.asset.validation[0].type && !trs.asset.validation[0].attributeId) {
+        return cb('Either the attribute type or the attributeId must be provided');
     }
 
     if (!trs.asset.validation[0].validator) {
@@ -156,15 +157,18 @@ AttributeValidationRequest.prototype.schema = {
             type: 'string',
             format: 'address'
         },
-        type: {
-            type: 'string',
-        },
         validator: {
             type: 'string',
             format: 'address'
+        },
+        type: {
+            type: 'string',
+        },
+        attributeId: {
+            type: 'integer',
         }
     },
-    required: ['owner', 'type', 'validator']
+    required: ['owner', 'validator']
 };
 
 //

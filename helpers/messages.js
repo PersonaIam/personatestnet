@@ -8,6 +8,7 @@ module.exports = {
     ACCOUNT_NOT_FOUND : 'Account not found',
     SENDER_IS_NOT_OWNER : 'Sender is not the attribute owner',
     ATTRIBUTE_NOT_FOUND : 'Attribute not found',
+    MORE_THAN_ONE_ATTRIBUTE_EXISTS : 'More than one attribute exists for this owner and type. Please provide the attributeId instead of the type',
     ATTRIBUTE_NOT_FOUND_FOR_UPDATE : 'Attribute not found for update',
     EXPIRED_ATTRIBUTE : 'Attribute is expired',
     INACTIVE_ATTRIBUTE : 'Attribute is inactive',
@@ -73,7 +74,6 @@ module.exports = {
     IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE : 'No action can be performed on an identity use request which belongs to an inactive service',
     DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
 
-    //TODO : add tests
     REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING : 'Cannot create identity use request : missing required service attributes',
     REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some attributes are expired or are missing required validations',
     REQUIRED_SERVICE_ATTRIBUTES_VALUES_ARE_MISSING : 'Cannot create identity use request : some required attribute values are not provided in the request',

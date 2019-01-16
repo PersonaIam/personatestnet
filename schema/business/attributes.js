@@ -182,16 +182,12 @@ module.exports = {
         id: 'attributes.getAttributeValidationScore',
         type: 'object',
         properties: {
-            type: {
-                type: 'string',
-                minLength: 1
-            },
             owner: {
                 type: 'string',
                 format: 'address'
             }
         },
-        required: ['type', 'owner']
+        required: ['owner']
     },
     getAttributeActiveState: {
         id: 'attributes.getAttributeActiveState',
