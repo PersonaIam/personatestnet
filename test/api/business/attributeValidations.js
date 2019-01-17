@@ -78,10 +78,11 @@ let time = 0;
 
 // TESTS
 
-describe('Send Funds', function () {
+describe('SEND FUNDS', function () {
 
     // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
-    it('Send funds - placeholder to generate public key', function (done) {
+    it('Send funds - placeholder to generate public key. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -104,7 +105,8 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the other owner', function (done) {
+    it('Send funds - to the other owner. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -127,7 +129,8 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the validator', function (done) {
+    it('Send funds - to the validator. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -150,7 +153,8 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the second validator', function (done) {
+    it('Send funds - to the second validator. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -177,7 +181,7 @@ describe('Send Funds', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('As an OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
+    it('Create an attribute (OWNER, FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -203,7 +207,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (PHONE_NUMBER) for myself. ' +
+    it('Create an attribute (OWNER, PHONE_NUMBER). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -234,7 +238,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (BIRTHPLACE) for myself. ' +
+    it('Create an attribute (OWNER, BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -265,7 +269,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (ADDRESS) for myself. ' +
+    it('Create an attribute (OWNER, ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -296,7 +300,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (IDENTITY_CARD) for myself. ' +
+    it('Create an attribute (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -335,7 +339,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OTHER_OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
+    it('Create an attribute (OTHER_OWNER, FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -368,7 +372,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OTHER_OWNER, I want to Create an attribute of file type (IDENTITY_CARD), associating the FIRST_NAME to it. ' +
+    it('Create an attribute of file type (OTHER_OWNER, IDENTITY_CARD), associating the FIRST_NAME to it. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -410,7 +414,7 @@ describe('CREATE ATTRIBUTES', function () {
 
 describe('EXPIRED ATTRIBUTES', function () {
 
-    it('As an OWNER, I want to Create a non-expirable attribute (EMAIL) and provide an expiration timestamp in the past. ' +
+    it('Create a non-expirable attribute (OWNER, EMAIL) and provide an expiration timestamp in the past. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -442,7 +446,7 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a validation request for a non-expirable attribute (EMAIL) which has an expiration timestamp in the past. ' +
+    it('Create a validation request for a non-expirable attribute (OWNER, EMAIL) which has an expiration timestamp in the past. ' +
         'EXPECTED : FAILURE. ERROR : EXPIRED_ATTRIBUTE', function (done) {
 
         let param = {};
@@ -461,7 +465,7 @@ describe('EXPIRED ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Update the expire_timestamp of a non-expirable attribute (EMAIL) and provide an expiration timestamp in the future. ' +
+    it('Update the expire_timestamp of a non-expirable attribute (OWNER, EMAIL) and provide an expiration timestamp in the future. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         getAttribute(OWNER, EMAIL, function (err, res) {
@@ -584,7 +588,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a validation request for a non-file attribute (BIRTHPLACE). ' +
+    it('Create a validation request for a non-file attribute (BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -615,7 +619,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD), and another validator (VALIDATOR_2). ' +
+    it('Create a validation request for a file type attribute (IDENTITY_CARD), and another validator (VALIDATOR_2). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -646,7 +650,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a file attribute (OWNER, IDENTITY_CARD), which has only 2 PENDING_APPROVAL validation requests.' +
+    it('As a PUBLIC user, I want to Get the details of a file attribute (OWNER, IDENTITY_CARD), which has 2 PENDING_APPROVAL validation requests.' +
         'EXPECTED : SUCCESS. RESULT : Attribute Details (active is false)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -825,6 +829,25 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
 describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
 
+    it('As a PUBLIC user, I want to Get the validation requests for a given user (OWNER), with multiple validation requests. ' +
+        'EXPECTED : SUCCESS. RESULT : 5 Validation Requests', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+
+        getAttributeValidationRequest(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
+            node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(5);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
+            done();
+        });
+    });
+
     it('As a PUBLIC user, I want to Get the validation requests for a given VALIDATOR. ' +
         'EXPECTED : SUCCESS. RESULT : 4 Validation Requests, all in PENDING_APPROVAL', function (done) {
 
@@ -905,25 +928,6 @@ describe('GET ATTRIBUTE VALIDATION REQUESTS', function () {
                 node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(0);
                 done();
             });
-        });
-    });
-
-    it('As a PUBLIC user, I want to Get the validation requests for a given user (OWNER), with multiple validation requests. ' +
-        'EXPECTED : SUCCESS. RESULT : 5 Validation Requests', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-
-        getAttributeValidationRequest(param, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(5);
-            node.expect(res.body).to.have.property('attribute_validation_requests').to.have.length(5);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-            node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.eq(null);
-            done();
         });
     });
 
@@ -1120,7 +1124,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a VALIDATOR_2, I want to Approve a validation request (OWNER, IDENTITY_CARD) that is in PENDING_APPROVAL. ' +
+    it('Approve a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that is in PENDING_APPROVAL. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1153,7 +1157,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a VALIDATOR, I want to Approve a validation request (OWNER, PHONE_NUMBER) that is in PENDING_APPROVAL (to be rejected). ' +
+    it('Approve a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that is in PENDING_APPROVAL (to be rejected). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1213,7 +1217,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was approved. ' +
+    it('Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1239,7 +1243,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was approved. ' +
+    it('Get the details for a validation request (OWNER, PHONE_NUMBER, VALIDATOR) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1303,7 +1307,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    // Approve/Decline when IN_PROGRESS
+    // Actions on a IN_PROGRESS validation request
 
     it('As a VALIDATOR, I want to Approve a validation request (OWNER, IDENTITY_CARD) that is already IN_PROGRESS. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
@@ -1605,7 +1609,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    // Actions on a Declined validation request
+    // Actions on a DECLINED validation request
 
     it('As a VALIDATOR, I want to Decline a validation request (OWNER, EMAIL) that is already declined. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
@@ -1840,6 +1844,8 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
+    // Unsuccessful Notarization
+
     it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) without providing a validation type. ' +
         'EXPECTED : FAILURE. ERROR : MISSING_VALIDATION_TYPE', function (done) {
 
@@ -1956,7 +1962,34 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
-    it('As a VALIDATOR_2, I want to Notarize a validation request (OWNER, IDENTITY_CARD) correctly. ' +
+    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was correctly notarized. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
+
+        let param = {};
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            param.attributeId = res.body.attributes[0].id;
+
+            getAttributeValidationRequest(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('attribute_validation_requests');
+                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validation_type').to.be.eq(constants.validationType.FACE_TO_FACE);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // successful notarization
+                done();
+            });
+        });
+    });
+
+    it('Notarize a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) correctly. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1987,33 +2020,6 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
                 node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
             });
             done();
-        });
-    });
-
-    it('As a PUBLIC user, I want to Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR) that was correctly notarized. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with status COMPLETED', function (done) {
-
-        let param = {};
-        param.validator = VALIDATOR;
-
-        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
-            param.attributeId = res.body.attributes[0].id;
-
-            getAttributeValidationRequest(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property('attribute_validation_requests');
-                node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('attribute_id').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.COMPLETED);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('validation_type').to.be.eq(constants.validationType.FACE_TO_FACE);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // successful notarization
-                done();
-            });
         });
     });
 
@@ -2814,7 +2820,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
 describe('CREATE VALIDATION REQUESTS WHEN MULTIPLE ATTRIBUTES OF THE SAME TYPE EXIST', function () {
 
-    it('As an OWNER, I want to Create an attribute (EMAIL) even if an attribute of the same type already exists for myself. ' +
+    it('Create an attribute (EMAIL) even if an attribute of the same type already exists for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2846,7 +2852,7 @@ describe('CREATE VALIDATION REQUESTS WHEN MULTIPLE ATTRIBUTES OF THE SAME TYPE E
         });
     });
 
-    it('As a PUBLIC user, I want to Get the (OWNER, EMAIL) attributes. ' +
+    it('Get the (OWNER, EMAIL) attributes. ' +
         'EXPECTED : SUCCESS. RESULT : List of "attributes" has 2 elements', function (done) {
         getAttribute(OWNER, EMAIL, function (err, res) {
             console.log(res.body);
@@ -2959,7 +2965,8 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute type. ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'by providing the attribute type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let param = {};
@@ -2974,7 +2981,8 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute ID. ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'by providing the attribute id of the declined one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (declined)', function (done) {
 
         let param = {};
@@ -2991,8 +2999,9 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, providing the attribute ID. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still pending approval)', function (done) {
+    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+        'by providing the attribute id of the pending approval one. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (pending approval)', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -3011,7 +3020,8 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
 
 describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE', function () {
 
-    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let params = {};
@@ -3030,7 +3040,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a VALIDATOR, I want to Decline a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+    it('As a VALIDATOR, I want to Decline a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let params = {};
@@ -3050,7 +3061,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As an OWNER, I want to Cancel a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+    it('As an OWNER, I want to Cancel a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let params = {};
@@ -3069,7 +3081,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the attributeId. ' +
+    it('As a VALIDATOR, I want to Approve a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the attribute id. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -3106,7 +3119,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
     });
 
     it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
-        'providing the attribute ID of the declined one. ' +
+        'by providing the attribute id of the declined one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still declined)', function (done) {
 
         let param = {};
@@ -3124,7 +3137,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
     });
 
     it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
-        'providing the attribute ID of the in progress one. ' +
+        'by providing the attribute id of the in progress one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still in progress - pending notarization)', function (done) {
 
         let param = {};
@@ -3141,7 +3154,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a VALIDATOR, I want to Reject a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+    it('As a VALIDATOR, I want to Reject a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let params = {};
@@ -3161,7 +3175,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the type. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
         let params = {};
@@ -3181,7 +3196,8 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, by providing the attributeId. ' +
+    it('As a VALIDATOR, I want to Notarize a validation request for an attribute (EMAIL) with multiple values of the same type, ' +
+        'by providing the attribute id. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -3219,7 +3235,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
     });
 
     it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
-        'providing the attribute ID of the completed one. ' +
+        'by providing the attribute ID of the completed one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 1 (notarization is complete)', function (done) {
 
         let param = {};

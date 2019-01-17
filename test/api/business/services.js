@@ -40,10 +40,11 @@ let descriptionTooLong = new Array(1 + maxLength + 1).join('x');
 
 // TESTS
 
-describe('Send Funds', function () {
+describe('SEND FUNDS', function () {
 
     // this test is only used to generate the public key for the provider account, it is not supposed to actually send the amount
-    it('Send funds - placeholder to generate public key', function (done) {
+    it('Send funds - placeholder to generate public key. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -70,7 +71,8 @@ describe('Send Funds', function () {
 
 describe('LIST SERVICES', function () {
 
-    it('As a PUBLIC user, I want to Get the List of Services. EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
+    it('As a PUBLIC user, I want to Get the List of Services when there are none in the system. ' +
+        'EXPECTED : SUCCESS. RESULT : Empty List', function (done) {
         listServices(function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -139,7 +141,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Create a new Service. ' +
+    it('As a PROVIDER, I want to Create a new Service successfully. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -255,7 +257,7 @@ describe('CREATE SERVICE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the List of Services which belong to a given provider. ' +
+    it('Get the List of Services which belong to a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 2 Services', function (done) {
         getServices({provider : PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -334,7 +336,7 @@ describe('INACTIVATE SERVICE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an Inactive service. ' +
+    it('As a PUBLIC user, I want to Get the details of a service, based on name and provider. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE_NAME, provider : PROVIDER}, function (err, res) {
             console.log(res.body);
@@ -358,18 +360,7 @@ describe('INACTIVATE SERVICE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the List of Services that inactive and belong to a given provider. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
-        getServices({status : 'INACTIVE', provider: PROVIDER}, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(1);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
-            done();
-        });
-    });
-
-    it('As a PUBLIC user, I want to Get the List of Services that inactive and belong to a given provider. ' +
+    it('As a PUBLIC user, I want to Get the List of Services that are active for a given provider. ' +
         'EXPECTED : SUCCESS. RESULT : 1 result', function (done) {
         getServices({status : 'ACTIVE', provider: PROVIDER}, function (err, res) {
             console.log(res.body);

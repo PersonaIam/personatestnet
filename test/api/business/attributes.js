@@ -54,10 +54,11 @@ let time = 0;
 
 // TESTS
 
-describe('Send Funds', function () {
+describe('SEND FUNDS', function () {
 
     // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
-    it('Send funds - placeholder to generate public key', function (done) {
+    it('Send funds - placeholder to generate public key. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -81,7 +82,8 @@ describe('Send Funds', function () {
         });
     });
 
-    it('Send funds - to the other owner', function (done) {
+    it('Send funds - to the other owner. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -184,7 +186,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a non file attribute (PHONE_NUMBER). ' +
+    it('Create a non file attribute (PHONE_NUMBER). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -215,7 +217,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a non file attribute (BIRTHPLACE). ' +
+    it('Create a non file attribute (BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -484,7 +486,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As an OTHER_OWNER, I want to Create a non file attribute (FIRST_NAME). ' +
+    it('Create a non file attribute (OTHER_OWNER, FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -517,7 +519,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
+    it('Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Contains "attributes" as an array with 1 element', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
             console.log(res.body);
@@ -594,7 +596,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a non file attribute (ADDRESS). ' +
+    it('Create a non file attribute (OWNER, ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -909,7 +911,7 @@ describe('UPDATE ATTRIBUTE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
+    it('Get the details of a recently updated attribute (OWNER, ADDRESS). ' +
         'EXPECTED : SUCCESS. RESULT : Contains "value" as the address provided in the second update', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, res) {
@@ -973,7 +975,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
+    it('Get the details of a recently updated attribute (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Contains an "associations" property', function (done) {
 
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
@@ -1005,7 +1007,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As an OWNER, I want to Update an attribute (ADDRESS) by providing a new association (FIRST_NAME). ' +
+    it('As an OWNER, I want to Update a non file attribute (ADDRESS) by providing a new association (FIRST_NAME). ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {
@@ -1033,7 +1035,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
         });
     });
 
-    it('As an OWNER, I want to Update an attribute (ADDRESS) by providing a new association (IDENTITY_CARD). ' +
+    it('As an OWNER, I want to Update a non file attribute (ADDRESS) by providing a new file type association (IDENTITY_CARD). ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE', function (done) {
 
         getAttribute(OWNER, ADDRESS, function (err, addressAttribute) {

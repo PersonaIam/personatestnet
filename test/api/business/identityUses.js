@@ -91,10 +91,11 @@ let ipfsTransaction = {};
 
 // TESTS
 
-describe('Prerequisites ', function () {
+describe('SEND FUNDS', function () {
 
     // this test is only used to generate the public key for the owner account, it is not supposed to actually send the amount
-    it('Send funds, placeholder to generate the public key', function (done) {
+    it('Send funds, placeholder to generate the public key. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 10000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -117,7 +118,8 @@ describe('Prerequisites ', function () {
         });
     });
 
-    it('Send funds to the other owner', function (done) {
+    it('Send funds to the other owner. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -140,7 +142,8 @@ describe('Prerequisites ', function () {
         });
     });
 
-    it('Send funds to the validator', function (done) {
+    it('Send funds to the validator. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -163,7 +166,8 @@ describe('Prerequisites ', function () {
         });
     });
 
-    it('Send funds to the second validator', function (done) {
+    it('Send funds to the second validator. ' +
+        'EXPECTED : SUCCESS. RESULT : Funds are sent', function (done) {
         let amountToSend = 100000;
         let expectedFee = node.expectedFee(amountToSend);
 
@@ -214,7 +218,7 @@ describe('Prerequisites ', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('As an OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
+    it('Create an attribute (OWNER, FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
         sleep.msleep(SLEEP_TIME);
         let unconfirmedBalance = 0;
@@ -240,7 +244,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (PHONE_NUMBER) for myself. ' +
+    it('Create an attribute (PHONE_NUMBER) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -271,7 +275,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute (BIRTHPLACE) for myself. ' +
+    it('Create an attribute (BIRTHPLACE) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -302,7 +306,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (based on OWNER and ATTRIBUTE_TYPE). ' +
+    it('Get the details of an attribute (based on OWNER and ATTRIBUTE_TYPE). ' +
         'EXPECTED : SUCCESS. RESULT : Attribute Details', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
@@ -321,7 +325,7 @@ describe('CREATE ATTRIBUTES', function () {
 
 describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
-    it('As an OWNER, I want to Create an attribute of file type (IDENTITY_CARD) for myself. ' +
+    it('Create an attribute of file type (OWNER, IDENTITY_CARD) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -360,7 +364,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of the transaction that created a file type attribute. ' +
+    it('Get the details of the transaction that created a file type attribute. ' +
         'EXPECTED : SUCCESS. RESULT : The transaction attribute value is the IPFS hash of the saved file (document)', function (done) {
         node.expect(ipfsTransaction).to.have.property(TRANSACTION_ID).to.be.a('string');
 
@@ -388,7 +392,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a file type attribute (OWNER, IDENTITY_CARD). ' +
+    it('Get the details of a file type attribute (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Attribute Details (the value is the IPFS Hash)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -409,7 +413,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('As an OTHER_OWNER, I want to Create an attribute (FIRST_NAME) for myself. ' +
+    it('Create an attribute (OTHER_OWNER, FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -442,7 +446,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OTHER_OWNER, I want to Create an attribute of file type (IDENTITY_CARD) for myself, with associations (FIRST_NAME). ' +
+    it('Create an attribute of file type (OTHER_OWNER, IDENTITY_CARD) for myself, with associations (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -480,7 +484,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As an OTHER_OWNER, I want to Create an attribute (ADDRESS) for myself. ' +
+    it('Create an attribute (OTHER_OWNER, ADDRESS) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -511,7 +515,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get all the attributes of a given OWNER. ' +
+    it('Get all the attributes of a given OWNER. ' +
         'EXPECTED : SUCCESS. RESULT : Multiple attributes (5) of certain given types', function (done) {
         getAttributesForOwner(OWNER, function (err, res) {
             console.log(res.body);
@@ -538,18 +542,7 @@ describe('CREATE ATTRIBUTES', function () {
 
 describe('CREATE SERVICES', function() {
 
-    it('As a PUBLIC user, I want to Get the List of Services that are inactive. ' +
-        'EXPECTED : SUCCESS. RESULT : No results', function (done) {
-        getServices({status : 'INACTIVE'}, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body.services).to.have.length(0);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
-            done();
-        });
-    });
-
-    it('As a PROVIDER, I want to Create a service for myself. ' +
+    it('Create a service for PROVIDER. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -575,7 +568,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will store the approved + ended Identity Use request. ' +
+    it('Create a service for myself, which will store the approved + ended Identity Use request. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -603,7 +596,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will store the canceled Identity Use request. ' +
+    it('Create a service for myself, which will store the canceled Identity Use request. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -631,7 +624,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will store the declined Identity Use request. ' +
+    it('Create a service for myself, which will store the declined Identity Use request. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -659,7 +652,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will be used to create requests on an inactive service. ' +
+    it('Create a service for myself, which will be used to create requests on an inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -687,7 +680,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will be used to approve requests on an inactive service. ' +
+    it('Create a service for myself, which will be used to approve requests on an inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -715,7 +708,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will be used to end requests on an inactive service. ' +
+    it('Create a service for myself, which will be used to end requests on an inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -743,7 +736,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will be used to decline requests on an inactive service. ' +
+    it('Create a service for myself, which will be used to decline requests on an inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -771,7 +764,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will be used to cancel requests on an inactive service. ' +
+    it('Create a service for myself, which will be used to cancel requests on an inactive service. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -799,7 +792,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself, which will require a single validation per attribute. ' +
+    it('Create a service for myself, which will require a single validation per attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -828,8 +821,8 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PUBLIC user, I want to Get all the services that belong to the user PROVIDER. ' +
-        'EXPECTED : SUCCESS. RESULT : The services list, which has 10 results', function (done) {
+    it('Get all the services that belong to the user PROVIDER. ' +
+        'EXPECTED : SUCCESS. RESULT : The services list, with 10 results', function (done) {
         getServices({provider: PROVIDER}, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -842,7 +835,7 @@ describe('CREATE SERVICES', function() {
         });
     });
 
-    it('As a PROVIDER, I want to Create a service for myself (2 attribute types), which will require a single validation per attribute. ' +
+    it('Create a service for myself (with 2 attribute types), which will require a single validation per attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -878,7 +871,7 @@ describe('CREATE SERVICES', function() {
 
 describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
-    it('As an OWNER, I want to Create an attribute validation request for an IDENTITY_CARD attribute. ' +
+    it('Create an attribute validation request for an IDENTITY_CARD attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -909,7 +902,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute validation request for a PHONE_NUMBER attribute. ' +
+    it('Create an attribute validation request for a PHONE_NUMBER attribute. ' +
         'EXPECTED : SUCCESS, RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -940,7 +933,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute validation request for a BIRTHPLACE attribute. ' +
+    it('Create an attribute validation request for a BIRTHPLACE attribute. ' +
         'EXPECTED : SUCCESS, RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -971,7 +964,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an attribute validation request for an IDENTITY_CARD attribute, using a different validator (VALIDATOR_2). ' +
+    it('Create an attribute validation request for an IDENTITY_CARD attribute, using a different validator (VALIDATOR_2). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1002,7 +995,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute that has only PENDING_APPROVAL validation requests. '+
+    it('Get the details of an attribute that has only PENDING_APPROVAL validation requests. '+
         'EXPECTED : SUCCESS. RESULT : Attribute is still inactive ("active" is false)', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -1015,7 +1008,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation requests that belong to a given VALIDATOR. '+
+    it('Get the validation requests that belong to a given VALIDATOR. '+
         'EXPECTED : SUCCESS. RESULT : VALIDATOR has multiple validation requests (3)', function (done) {
 
         let param = {};
@@ -1043,7 +1036,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
 describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
 
-    it('As a VALIDATOR, I want to Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
+    it('Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1075,7 +1068,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a VALIDATOR_2, I want to Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
+    it('Approve a PENDING_APPROVAL validation request (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1108,7 +1101,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of 2 validation requests after they were APPROVED. ' +
+    it('Get the details of 2 validation requests after they were APPROVED. ' +
         'EXPECTED : SUCCESS. RESULT : The 2 validation requests\' statuses are IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1134,7 +1127,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a VALIDATOR, I want to Approve a PENDING_APPROVAL validation request (OWNER, PHONE_NUMBER), which will later be used for rejection. ' +
+    it('Approve a PENDING_APPROVAL validation request (OWNER, PHONE_NUMBER), which will later be used for rejection. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1167,7 +1160,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a validation request (OWNER, PHONE_NUMBER) that is APPROVED. ' +
+    it('Get the details of a validation request (OWNER, PHONE_NUMBER) that is APPROVED. ' +
         'EXPECTED : SUCCESS. RESULT : The validation request status is now IN_PROGRESS', function (done) {
 
         let param = {};
@@ -1191,7 +1184,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As an OWNER, I want to Cancel a PENDING_APPROVAL validation request which belongs to me. ' +
+    it('Cancel a PENDING_APPROVAL validation request which belongs to me. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1224,7 +1217,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a validation request that is CANCELED. ' +
+    it('Get the details of a validation request that is CANCELED. ' +
         'EXPECTED : SUCCESS. RESULT : The validation request status is CANCELED', function (done) {
 
         let param = {};
@@ -1250,7 +1243,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a VALIDATOR, I want to Notarize an APPROVED validation request (OWNER, IDENTITY_CARD). ' +
+    it('Notarize an APPROVED validation request (OWNER, IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1284,7 +1277,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a validation request (OWNER, IDENTITY_CARD) that was notarized. ' +
+    it('Get the details of a validation request (OWNER, IDENTITY_CARD) that was notarized. ' +
         'EXPECTED : SUCCESS. RESULT : The validation request status is COMPLETED', function (done) {
 
         let param = {};
@@ -1311,7 +1304,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, IDENTITY_CARD) that has a notarized validation request. ' +
+    it('Get the details of an attribute (OWNER, IDENTITY_CARD) that has a notarized validation request. ' +
         'EXPECTED : SUCCESS. RESULT : The attribute is ACTIVE' , function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
             console.log(res.body);
@@ -1324,7 +1317,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) that is IN_PROGRESS. ' +
+    it('Reject a validation request (OWNER, PHONE_NUMBER) that is IN_PROGRESS. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1358,7 +1351,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of a validation request (OWNER, PHONE_NUMBER) that is REJECTED. ' +
+    it('Get the details of a validation request (OWNER, PHONE_NUMBER) that is REJECTED. ' +
         'EXPECTED : SUCCESS. RESULT : The validation request status is REJECTED and a reason exists for the rejection', function (done) {
 
         let param = {};
@@ -1546,7 +1539,22 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As a VALIDATOR_2, I want to Notarize a validation request (OWNER, IDENTITY_CARD). ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute which has 1 completed notarizations. ' +
+        'EXPECTED : SUCCESS. RESULT : Attribute is active', function (done) {
+        getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq('QmNh1KGj4vndExrkT5AKV965zVJBbWBXbzVzmzpYXrsEoF');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(IDENTITY_CARD);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
+            done();
+        });
+    });
+
+    it('Notarize a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1614,8 +1622,8 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE_NAME) that ' +
-        'requires 2 validations. ' +
+    it('As an OWNER, I want to Create an Identity Use Request for an attribute that has 2 completed validations ' +
+        'and a service (SERVICE_NAME) that requires 2 validations. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -1649,7 +1657,7 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE2_NAME) that ' +
+    it('Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE2_NAME) that ' +
         'requires 2 validations ( will be used for Approve + End Request). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -1684,7 +1692,7 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE3_NAME) that ' +
+    it('Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE3_NAME) that ' +
         'requires 2 validations ( will be used for Cancel Request). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -1719,7 +1727,7 @@ describe('CREATE IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As an OWNER, I want to Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE4_NAME) that ' +
+    it('Create an Identity Use Request for an attribute that has 2 completed validations and a service (SERVICE4_NAME) that ' +
         'requires 2 validations (will be used for Decline Request). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -1787,7 +1795,7 @@ describe('CREATE IDENTITY USE REQUEST', function () {
     });
 
     it('As a PUBLIC user, I want to Get the details of all Identity Use Requests (based on PROVIDER, SERVICE, OWNER). ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, details include number of validation requests', function (done) {
+        'EXPECTED : SUCCESS. RESULT : 1 Result, details include 2 validation requests', function (done) {
 
         let param = {};
 
@@ -1958,7 +1966,7 @@ describe('END IDENTITY USE REQUEST', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Approve an Identity Use Request which is in PENDING_APPROVAL status (to be used later by END Request action). ' +
+    it('Approve an Identity Use Request which is in PENDING_APPROVAL status (to be used later by END Request action). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2504,7 +2512,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Fifth Service ( for CREATE action )
 
-    it('As a PROVIDER, I want to Inactivate one of my ACTIVE services. ' +
+    it('Inactivate one of my ACTIVE services. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2537,7 +2545,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an INACTIVE service (based on the service name). ' +
+    it('Get the details of an INACTIVE service (based on the service name). ' +
         'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE5_NAME}, function (err, res) {
             console.log(res.body);
@@ -2570,7 +2578,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Sixth Service ( for APPROVE action )
 
-    it('As an OWNER, I want to Create an Identity Use Request, having all the required notarizations (to be used for APPROVE on INACTIVE service). ' +
+    it('Create an Identity Use Request, having all the required notarizations (to be used for APPROVE on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2604,7 +2612,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Inactivate one of my ACTIVE services (to be used for APPROVE on INACTIVE service). ' +
+    it('Inactivate one of my ACTIVE services (to be used for APPROVE on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2637,7 +2645,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an INACTIVE service (based on the service name). ' +
+    it('Get the details of an INACTIVE service (based on the service name). ' +
         'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE6_NAME}, function (err, res) {
             console.log(res.body);
@@ -2670,7 +2678,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Seventh Service ( for END action )
 
-    it('As an OWNER, I want to Create an Identity Use Request, having all the required notarizations (to be used for END on INACTIVE service). ' +
+    it('Create an Identity Use Request, having all the required notarizations (to be used for END on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2704,7 +2712,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Approve an Identity Use Request (to be used for END on INACTIVE service). ' +
+    it('Approve an Identity Use Request (to be used for END on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2737,7 +2745,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Inactivate one of my ACTIVE services (to be used for END on INACTIVE service). ' +
+    it('Inactivate one of my ACTIVE services (to be used for END on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2770,7 +2778,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an INACTIVE service (based on the service name). ' +
+    it('Get the details of an INACTIVE service (based on the service name). ' +
         'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE7_NAME}, function (err, res) {
             console.log(res.body);
@@ -2803,7 +2811,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Eighth Service ( for DECLINE action )
 
-    it('As an OWNER, I want to Create an Identity Use Request, having all the required notarizations (to be used for DECLINE on INACTIVE service). ' +
+    it('Create an Identity Use Request, having all the required notarizations (to be used for DECLINE on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2837,7 +2845,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Inactivate one of my ACTIVE services (to be used for DECLINE on INACTIVE service). ' +
+    it('Inactivate one of my ACTIVE services (to be used for DECLINE on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2870,7 +2878,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an INACTIVE service (based on the service name). ' +
+    it('Get the details of an INACTIVE service (based on the service name). ' +
         'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE8_NAME}, function (err, res) {
             console.log(res.body);
@@ -2904,7 +2912,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
 
     // Inactivate Ninth Service ( for CANCEL action )
 
-    it('As an OWNER, I want to Create an Identity Use Request, having all the required notarizations (to be used for CANCEL on INACTIVE service). ' +
+    it('Create an Identity Use Request, having all the required notarizations (to be used for CANCEL on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2937,7 +2945,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PROVIDER, I want to Inactivate one of my ACTIVE services (to be used for CANCEL on INACTIVE service). ' +
+    it('Inactivate one of my ACTIVE services (to be used for CANCEL on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -2970,7 +2978,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an INACTIVE service (based on the service name). ' +
+    it('Get the details of an INACTIVE service (based on the service name). ' +
         'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
         getServices({name: SERVICE9_NAME}, function (err, res) {
             console.log(res.body);
