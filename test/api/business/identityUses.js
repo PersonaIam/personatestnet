@@ -62,12 +62,9 @@ const SERVICE11_NAME = 'Audrey';        // to be used by Create Identity Use Req
 
 const DESCRIPTION_VALUE = 'Modus';
 
-const REASON_FOR_DECLINE_1024_GOOD =
+const REASON_1024_GOOD =
     '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
-const REASON_FOR_REJECT_1024_GOOD =
-    '1000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
-
-const REASON_FOR_DECLINE_1025_TOO_LONG =
+const REASON_1025_TOO_LONG =
     '10000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000001';
 
 // RESULTS
@@ -1333,7 +1330,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
         params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-        params.reason = REASON_FOR_REJECT_1024_GOOD;
+        params.reason = REASON_1024_GOOD;
 
         let request = createAnswerAttributeValidationRequest(params);
         postRejectValidationAttributeRequest(request, function (err, res) {
@@ -1370,7 +1367,7 @@ describe('ATTRIBUTE VALIDATION REQUEST ACTIONS ', function () {
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('status').to.be.eq(constants.validationRequestStatus.REJECTED);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_FOR_REJECT_1024_GOOD);
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('reason').to.be.eq(REASON_1024_GOOD);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
@@ -1914,7 +1911,7 @@ describe('APPROVE IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -1956,6 +1953,7 @@ describe('END IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2008,6 +2006,7 @@ describe('END IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2017,6 +2016,46 @@ describe('END IDENTITY USE REQUEST', function () {
             done();
         });
     });
+
+    it('As an OWNER, I want to End an ACTIVE Identity Use Request, without providing a reason. ' +
+        'EXPECTED : FAILURE. ERROR : END_IDENTITY_USE_REQUEST_NO_REASON', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.END_IDENTITY_USE_REQUEST_NO_REASON);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to End an ACTIVE Identity Use Request, by providing a reason that is too long. ' +
+        'EXPECTED : FAILURE. ERROR : REASON_TOO_BIG_END', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_1025_TOO_LONG;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REASON_TOO_BIG_END);
+            done();
+        });
+    });
+
 
     it('As an OWNER, I want to End an ACTIVE Identity Use Request. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -2034,6 +2073,7 @@ describe('END IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2097,7 +2137,7 @@ describe('END IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2136,6 +2176,7 @@ describe('END IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE2_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2158,7 +2199,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2198,7 +2239,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         params.publicKey = PROVIDER_PUBLIC_KEY;
         params.serviceName = SERVICE3_NAME;
         params.serviceProvider = PROVIDER;
-        params.reason = REASON_FOR_DECLINE_1025_TOO_LONG;
+        params.reason = REASON_1025_TOO_LONG;
 
         let request = createAnswerIdentityUseRequest(params);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2243,7 +2284,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2274,7 +2315,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                     node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
                     node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.DECLINED);
-                    node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(REASON_FOR_DECLINE_1024_GOOD);
+                    node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(REASON_1024_GOOD);
                     done();
                 });
             });
@@ -2289,7 +2330,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2347,6 +2388,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE3_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2439,7 +2481,7 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {
@@ -2497,6 +2539,7 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE4_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2799,6 +2842,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         param.publicKey = PUBLIC_KEY;
         param.serviceName = SERVICE7_NAME;
         param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postEndIdentityUseRequest(request, function (err, res) {
@@ -2899,7 +2943,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         param.publicKey = PROVIDER_PUBLIC_KEY;
         param.serviceName = SERVICE8_NAME;
         param.serviceProvider = PROVIDER;
-        param.reason = REASON_FOR_DECLINE_1024_GOOD;
+        param.reason = REASON_1024_GOOD;
 
         let request = createAnswerIdentityUseRequest(param);
         postDeclineIdentityUseRequest(request, function (err, res) {

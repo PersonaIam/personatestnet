@@ -430,7 +430,9 @@ IPFSModule.prototype.accept = function (peer) {
             const {body: {addresses}} = res;
 
             __private.connectToAddresses(addresses, function (err) {
-                library.logger.error(err.message);
+                if (err) {
+                    library.logger.error(err.message);
+                }
             });
         }
         catch (e) {

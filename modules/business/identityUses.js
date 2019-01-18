@@ -511,6 +511,14 @@ shared.declineIdentityUseRequest = function (req, cb) {
 
 shared.endIdentityUseRequest = function (req, cb) {
 
+    if (!req.body.asset.identityuse[0].reason) {
+        return cb(messages.END_IDENTITY_USE_REQUEST_NO_REASON)
+    }
+
+    if (req.body.asset.identityuse[0].reason.length > 1024) {
+        return cb(messages.REASON_TOO_BIG_END)
+    }
+
     req.body.asset.identityuse[0].answer = constants.identityUseRequestActions.END;
     __private.identityUseAnswer(req, function (err, res) {
         if (err) {

@@ -71,6 +71,10 @@ IdentityUseEnd.prototype.verify = function (trs, sender, cb) {
         return cb('Identity use service provider is undefined');
     }
 
+    if (!trs.asset.identityuse[0].reason) {
+        return cb('Identity use end reason is undefined');
+    }
+
     return cb(null, trs);
 
 };
@@ -195,8 +199,9 @@ IdentityUseEnd.prototype.dbSave = function (trs) {
     params.id = trs.asset.identityUseRequestId;
     params.status = constants.identityUseRequestStatus.ENDED;
     params.action = constants.identityUseRequestActions.END;
+    params.reason = trs.asset.identityuse[0].reason;
 
-    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseRequest, params).then(function (err) {
+    library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseWithReason, params).then(function (err) {
     });
 
     return {

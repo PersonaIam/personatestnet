@@ -435,15 +435,19 @@ shared.requestAttributeValidation = function (req, cb) {
 
                 req.body.validator = req.body.asset.validation[0].validator;
                 req.body.attributeId = req.body.asset.validation[0].attribute_id;
-                req.body.status = constants.validationRequestStatus.PENDING_APPROVAL;
 
-                __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
+                __private.getAttributeValidationRequests(req.body, function (err, validationRequests) {
 
                     if (err) {
                         return cb(err);
                     }
-                    if (attributeValidationRequests) {
+
+                    if (validationRequests && validationRequests[0].status === constants.validationRequestStatus.PENDING_APPROVAL) {
                         return cb(messages.PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS);
+                    }
+
+                    if (validationRequests && validationRequests[0].status === constants.validationRequestStatus.COMPLETED) {
+                        return cb(messages.COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS);
                     }
                     attributes.buildTransaction({
                             req: req,

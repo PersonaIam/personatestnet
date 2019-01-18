@@ -19,6 +19,7 @@ module.exports = {
     ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no associations and therefore cannot be validated',
 
     PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has a pending approval validation request for the given attribute',
+    COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has a completed validation request for the given attribute',
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
 
     ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
@@ -55,10 +56,14 @@ module.exports = {
     MISSING_NUMBER_OF_VALIDATIONS_REQUIRED : 'Service attribute validations required number is not provided. Nothing to create',
     MISSING_OWNER_ADDRESS : 'Missing required property: owner',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
+
+    // reasons
     REASON_TOO_BIG_DECLINE : 'The reason for declining a request is limited to 1024 characters',
     REASON_TOO_BIG_REJECT : 'The reason for rejecting a request is limited to 1024 characters',
+    REASON_TOO_BIG_END : 'The reason for ending a request is limited to 1024 characters',
     REJECT_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when rejecting a validation request',
     DECLINE_ATTRIBUTE_VALIDATION_REQUEST_NO_REASON : 'A reason must be specified when declining a validation request',
+    END_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when ending an identity use request',
 
     SERVICE_ALREADY_EXISTS : 'A service with this name already exists for this provider',
     SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',

@@ -1947,6 +1947,24 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         });
     });
 
+    it('As an OWNER, I want to Create a validation request for an attribute (IDENTITY_CARD) which already has a COMPLETED validation request. ' +
+        'EXPECTED : FAILURE. ERROR : COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = IDENTITY_CARD;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS);
+            done();
+        });
+    });
+
+
     it('As a PUBLIC user, I want to Get the details for an attribute (OWNER, IDENTITY_CARD) that was correctly notarized once. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true', function (done) {
         getAttribute(OWNER, IDENTITY_CARD, function (err, res) {
