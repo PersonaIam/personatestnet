@@ -244,13 +244,26 @@ shared.requestIdentityUse = function (req, cb) {
                         req.body.serviceId = serviceResult.services[0].id;
                         req.body.owner = req.body.asset.identityuse[0].owner;
 
-                        __private.getIdentityUseRequestsByFilter(req.body, function (err, identityUseRequests) {
+                        __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
                             if (err) {
                                 return cb(err);
                             }
+                            let identityUseRequests = data.identityUseRequests;
 
-                            if (identityUseRequests && identityUseRequests.length === 0) {
-                                return cb(messages.IDENTITY_USE_REQUEST_ALREADY_EXISTS);
+                            // Filter out canceled, ended and declined identity use requests, creating a new request should be allowed in these cases
+                            let statusesToFilterOut = [];
+                            statusesToFilterOut.push(constants.identityUseRequestStatus.ENDED);
+                            statusesToFilterOut.push(constants.identityUseRequestStatus.DECLINED);
+                            statusesToFilterOut.push(constants.identityUseRequestStatus.CANCELED);
+                            if (identityUseRequests && identityUseRequests.length > 0) {
+                                identityUseRequests = identityUseRequests.filter(identityUseRequest => statusesToFilterOut.indexOf(identityUseRequest.status) === -1)
+                            }
+                            if (identityUseRequests && identityUseRequests.length > 0 && identityUseRequests[0].status === constants.identityUseRequestStatus.PENDING_APPROVAL) {
+                                return cb(messages.PENDING_APPROVAL_IDENTITY_USE_REQUEST_ALREADY_EXISTS);
+                            }
+
+                            if (identityUseRequests && identityUseRequests.length > 0 && identityUseRequests[0].status === constants.identityUseRequestStatus.ACTIVE) {
+                                return cb(messages.ACTIVE_IDENTITY_USE_REQUEST_ALREADY_EXISTS);
                             }
 
                             req.body.asset.identityuse[0].serviceId = serviceResult.services[0].id;
@@ -376,6 +389,19 @@ __private.identityUseAnswer = function (req, cb) {
                         if (err || !data.identityUseRequests || data.identityUseRequests.length === 0) {
                             return cb(messages.IDENTITY_USE_REQUEST_MISSING_FOR_ACTION);
                         }
+
+                        // Filter out canceled, completed, rejected and declined validation requests, no answer can be performed on these types of requests
+                        let statusesToFilterOut = [];
+                        statusesToFilterOut.push(constants.identityUseRequestStatus.DECLINED);
+                        statusesToFilterOut.push(constants.identityUseRequestStatus.ENDED);
+                        statusesToFilterOut.push(constants.identityUseRequestStatus.CANCELED);
+                        if (data.identityUseRequests && data.identityUseRequests.length > 0) {
+                            data.identityUseRequests = data.identityUseRequests.filter(identityUseRequest => statusesToFilterOut.indexOf(identityUseRequest.status) === -1)
+                        }
+                        if (data.identityUseRequests && data.identityUseRequests.length === 0) {
+                            return cb(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
+                        }
+
                         let paramsCheckAnswer = {};
                         paramsCheckAnswer.answer = req.body.asset.identityuse[0].answer;
                         paramsCheckAnswer.status = data.identityUseRequests[0].status;

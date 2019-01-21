@@ -1883,6 +1883,25 @@ describe('APPROVE IDENTITY USE REQUEST', function () {
         });
     });
 
+    it('As an OWNER, I want to Create an Identity Use Request for a service that already has an approved identity use request' +
+        'EXPECTED : FAILURE. ERROR : ACTIVE_IDENTITY_USE_REQUEST_ALREADY_EXISTS', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ACTIVE_IDENTITY_USE_REQUEST_ALREADY_EXISTS);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Approve an Identity Use Request which is already ACTIVE. ' +
         'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
 
@@ -2110,7 +2129,7 @@ describe('END IDENTITY USE REQUEST', function () {
     });
 
     it('As a PROVIDER, I want to Approve an already ENDED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2123,13 +2142,13 @@ describe('END IDENTITY USE REQUEST', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As a PROVIDER, I want to Decline an already ENDED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2143,13 +2162,13 @@ describe('END IDENTITY USE REQUEST', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to Cancel an already ENDED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2162,13 +2181,13 @@ describe('END IDENTITY USE REQUEST', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to End an already ENDED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2182,7 +2201,7 @@ describe('END IDENTITY USE REQUEST', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2322,7 +2341,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
     });
 
     it('As a PROVIDER, I want to Decline a DECLINED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2336,13 +2355,13 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As a PROVIDER, I want to Approve a DECLINED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2355,13 +2374,13 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to Cancel a DECLINED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2374,13 +2393,13 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to End a DECLINED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2394,7 +2413,7 @@ describe('DECLINE IDENTITY USE REQUEST', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2473,7 +2492,7 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
     });
 
     it('As a PROVIDER, I want to Decline a CANCELED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2487,13 +2506,13 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         postDeclineIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As a PROVIDER, I want to Approve a CANCELED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2506,13 +2525,13 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         postApproveIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to Cancel a CANCELED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2525,13 +2544,13 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         postCancelIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
 
     it('As an OWNER, I want to End a CANCELED Identity Use Request. ' +
-        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_NOT_ACTIVE', function (done) {
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -2545,7 +2564,128 @@ describe('CANCEL IDENTITY USE REQUEST', function () {
         postEndIdentityUseRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_NOT_ACTIVE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
+            done();
+        });
+    });
+});
+
+describe('IDENTITY USE REQUESTS - ALREADY EXISTING REQUESTS ACTIONS ', function () {
+
+    it('As an OWNER, I want to Create an Identity Use Request for a service that already has a declined request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE3_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create an Identity Use Request for a service that already has a canceled request (to be used on CANCEL on INACTIVE). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE9_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create an Identity Use Request for a service that already has an ended request. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create an Identity Use Request for a service that already has a pending approval. ' +
+        'EXPECTED : FAILURE. ERROR : PENDING_APPROVAL_IDENTITY_USE_REQUEST_ALREADY_EXISTS', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE2_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.PENDING_APPROVAL_IDENTITY_USE_REQUEST_ALREADY_EXISTS);
             done();
         });
     });
@@ -2954,41 +3094,6 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         });
     });
 
-    // Inactivate Ninth Service ( for CANCEL action )
-
-    it('Create an Identity Use Request, having all the required notarizations (to be used for CANCEL on INACTIVE service). ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(OWNER, function (err, res) {
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-            balance = parseInt(res.body.balance);
-        });
-
-        let param = {};
-        param.owner = OWNER;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-        param.serviceName = SERVICE9_NAME;
-        param.serviceProvider = PROVIDER;
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(TRANSACTION_ID);
-            sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
-            });
-            done();
-        });
-    });
-
     it('Inactivate one of my ACTIVE services (to be used for CANCEL on INACTIVE service). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -3054,7 +3159,6 @@ describe('INACTIVE SERVICE ACTIONS', function () {
     });
 
 });
-
 /**
  * Utilities
  *

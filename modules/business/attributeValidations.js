@@ -312,9 +312,23 @@ __private.validationRequestAnswer = function (req, cb) {
 
                 __private.getAttributeValidationRequests(req.body, function (err, attributeValidationRequests) {
 
-                    if (err || !attributeValidationRequests) {
+                    if (err || !attributeValidationRequests || attributeValidationRequests.length === 0) {
                         return cb(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
                     }
+
+                    // Filter out canceled, completed, rejected and declined validation requests, no answer can be performed on these types of requests
+                    let statusesToFilterOut = [];
+                    statusesToFilterOut.push(constants.validationRequestStatus.REJECTED);
+                    statusesToFilterOut.push(constants.validationRequestStatus.DECLINED);
+                    statusesToFilterOut.push(constants.validationRequestStatus.COMPLETED);
+                    statusesToFilterOut.push(constants.validationRequestStatus.CANCELED);
+                    if (attributeValidationRequests && attributeValidationRequests.length > 0) {
+                        attributeValidationRequests = attributeValidationRequests.filter(validationRequest => statusesToFilterOut.indexOf(validationRequest.status) === -1)
+                    }
+                    if (attributeValidationRequests && attributeValidationRequests.length === 0) {
+                        return cb(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
+                    }
+
                     let paramsCheckAnswer = {};
                     paramsCheckAnswer.answer = req.body.asset.validation[0].answer;
                     paramsCheckAnswer.status = attributeValidationRequests[0].status;
@@ -442,11 +456,23 @@ shared.requestAttributeValidation = function (req, cb) {
                         return cb(err);
                     }
 
-                    if (validationRequests && validationRequests[0].status === constants.validationRequestStatus.PENDING_APPROVAL) {
+                    // Filter out canceled, rejected and declined validation requests, creating a new request should be allowed in these cases
+                    let statusesToFilterOut = [];
+                    statusesToFilterOut.push(constants.validationRequestStatus.REJECTED);
+                    statusesToFilterOut.push(constants.validationRequestStatus.DECLINED);
+                    statusesToFilterOut.push(constants.validationRequestStatus.CANCELED);
+                    if (validationRequests && validationRequests.length > 0) {
+                        validationRequests = validationRequests.filter(validationRequest => statusesToFilterOut.indexOf(validationRequest.status) === -1)
+                    }
+                    if (validationRequests && validationRequests.length > 0 && validationRequests[0].status === constants.validationRequestStatus.PENDING_APPROVAL) {
                         return cb(messages.PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS);
                     }
 
-                    if (validationRequests && validationRequests[0].status === constants.validationRequestStatus.COMPLETED) {
+                    if (validationRequests && validationRequests.length > 0 && validationRequests[0].status === constants.validationRequestStatus.IN_PROGRESS) {
+                        return cb(messages.IN_PROGRESS_VALIDATION_REQUEST_ALREADY_EXISTS);
+                    }
+
+                    if (validationRequests && validationRequests.length > 0 && validationRequests[0].status === constants.validationRequestStatus.COMPLETED) {
                         return cb(messages.COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS);
                     }
                     attributes.buildTransaction({

@@ -526,6 +526,85 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
+    it('As a VALIDATOR, I want to Decline a validation request that does not exist (attribute exists). ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Cancel a validation request that does not exist (attribute exists). ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = SECRET;
+        params.publicKey = PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postCancelValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Notarize a validation request that does not exist (attribute exists). ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Reject a validation request that does not exist (attribute exists). ' +
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_FOR_ACTION', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_REJECT_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postRejectValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+            done();
+        });
+    });
+
     it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -701,7 +780,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
 
     it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD), ' +
         'but an active validation request already exists for the provided VALIDATOR. ' +
-        'EXPECTED : FAILURE. ERROR : VALIDATOR_ALREADY_HAS_PENDING_APPROVAL_VALIDATION_REQUEST_FOR_ATTRIBUTE', function (done) {
+        'EXPECTED : FAILURE. ERROR : PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS', function (done) {
 
         let param = {};
         param.owner = OWNER;
@@ -1211,11 +1290,30 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('type');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('owner');
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('timestamp').to.be.at.least(1);
-                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1); // the request was approved - action
+                node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
         });
     });
+
+    it('As an OWNER, I want to Create a validation request for a file type attribute (IDENTITY_CARD), even though an IN_PROGRESS ' +
+        'request already exists for this attribute. ' +
+        'EXPECTED : FAILURE. ERROR : IN_PROGRESS_VALIDATION_REQUEST_ALREADY_EXISTS', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = IDENTITY_CARD;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IN_PROGRESS_VALIDATION_REQUEST_ALREADY_EXISTS);
+            done();
+        });
+    });
+
 
     it('Get the details for a validation request (OWNER, IDENTITY_CARD, VALIDATOR_2) that was approved. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with status IN_PROGRESS', function (done) {
@@ -1612,7 +1710,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     // Actions on a DECLINED validation request
 
     it('As a VALIDATOR, I want to Decline a validation request (OWNER, EMAIL) that is already declined. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1626,7 +1724,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postDeclineValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -1659,7 +1757,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Approve a validation request (OWNER, EMAIL) that is already declined. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1673,7 +1771,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -1705,7 +1803,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Notarize a validation request (OWNER, EMAIL) that is already declined. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1719,7 +1817,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -1751,7 +1849,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Reject a validation request (OWNER, EMAIL) that is already declined. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1766,7 +1864,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -1798,7 +1896,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As an OWNER, I want to Cancel a validation request (OWNER, BIRTHPLACE) that is already declined. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -1813,7 +1911,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2146,7 +2244,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     // Actions on a COMPLETED validation request
 
     it('As a VALIDATOR, I want to Decline a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2160,7 +2258,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postDeclineValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2192,7 +2290,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Approve a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2206,7 +2304,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2238,7 +2336,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Notarize a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2252,7 +2350,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2284,7 +2382,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Reject a validation request (OWNER, IDENTITY_CARD) which is already completed. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2298,7 +2396,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2330,7 +2428,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As an OWNER, I want to Cancel a validation request (OWNER, IDENTITY_CARD) which is already notarized. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2343,7 +2441,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2377,7 +2475,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     // Actions on a REJECTED validation request
 
     it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2391,7 +2489,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postDeclineValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2423,7 +2521,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Reject a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2437,7 +2535,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2469,7 +2567,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Approve a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2482,7 +2580,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2514,7 +2612,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Notarize a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2528,7 +2626,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2560,7 +2658,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As an OWNER, I want to Cancel a validation request (OWNER, PHONE_NUMBER) which is already rejected. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2573,7 +2671,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2607,7 +2705,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     // Actions on a CANCELED validation request
 
     it('As a VALIDATOR, I want to Approve a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2620,7 +2718,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postApproveValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2652,7 +2750,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Decline a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2666,7 +2764,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postDeclineValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2698,7 +2796,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Notarize a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2712,7 +2810,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2744,7 +2842,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As a VALIDATOR, I want to Reject a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2758,7 +2856,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -2790,7 +2888,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
     });
 
     it('As an OWNER, I want to Cancel a validation request (OWNER, BIRTHPLACE) which is already canceled. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL', function (done) {
+        'EXPECTED : FAILURE. ERROR : VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION', function (done) {
 
         let params = {};
         params.validator = VALIDATOR;
@@ -2803,7 +2901,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
         postCancelValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION);
             done();
         });
     });
@@ -3269,6 +3367,136 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
             });
         });
     });
+});
+
+describe('CREATE VALIDATION REQUESTS - ALREADY EXISTING REQUESTS SCENARIOS', function () {
+
+    it('As an OWNER, I want to Create a validation request (OWNER, PHONE_NUMBER), even though a rejected request already exists. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = PHONE_NUMBER;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
+    it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that has maximum length (1024 characters). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = PHONE_NUMBER;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON_FOR_DECLINE_1024_GOOD;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postDeclineValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+            });
+            done();
+        });
+    });
+    it('As an OWNER, I want to Create a validation request (OWNER, PHONE_NUMBER), even though a declined request already exists. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = PHONE_NUMBER;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
+    it('Create a validation request (OWNER, BIRTHPLACE) even though a canceled request already exists. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = BIRTHPLACE;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
 });
 
 /**

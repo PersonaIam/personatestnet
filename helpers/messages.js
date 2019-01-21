@@ -19,8 +19,10 @@ module.exports = {
     ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED : 'Attribute has no associations and therefore cannot be validated',
 
     PENDING_APPROVAL_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has a pending approval validation request for the given attribute',
+    IN_PROGRESS_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has an in progress validation request for the given attribute',
     COMPLETED_VALIDATION_REQUEST_ALREADY_EXISTS : 'Validator already has a completed validation request for the given attribute',
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
+    VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION : 'There is no validation request that is pending approval or in progress for this attribute',
 
     ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
     ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
@@ -68,6 +70,9 @@ module.exports = {
     SERVICE_ALREADY_EXISTS : 'A service with this name already exists for this provider',
     SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',
 
+    PENDING_APPROVAL_IDENTITY_USE_REQUEST_ALREADY_EXISTS : 'A pending approval identity use request already exists',
+    ACTIVE_IDENTITY_USE_REQUEST_ALREADY_EXISTS : 'An active identity use request already exists',
+    IDENTITY_USE_REQUEST_MISSING_IN_STATUS_FOR_ACTION : 'There is no identity use request that is pending approval or active for this attribute',
     IDENTITY_USE_REQUEST_MISSING_FOR_ACTION : 'There is no identity use request for this action',
     IDENTITY_USE_REQUEST_NOT_ACTIVE: 'The specified identity use request must be active for the action to take place',
     IDENTITY_USE_REQUEST_NOT_PENDING_APPROVAL : 'The specified identity use request must be in pending approval status for the action to take place',
