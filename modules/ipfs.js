@@ -175,6 +175,7 @@ __private.addHashToQueue = function (ipfsHash, cb) {
 __private.getHashFromQueue = function (ipfsHash, cb) {
     library.db.query(sql.IpfsSql.getHashFromQueue, {ipfsHash})
         .then(function (rows) {
+            library.logger.info('INSIDE getHashFromQueue ' + rows);
             let data = {};
 
             if (rows.length > 0) {
@@ -407,7 +408,8 @@ IPFSModule.prototype.apply = function (queuedHash, cb) {
 
         const {id, hash} = res;
 
-        __private.pin(hash, function (err) {
+        if (hash) { 
+          __private.pin(hash, function (err) {
             if (err) cb(err, null);
 
             __private.removeHashFromQueue(id, function (err, res) {
@@ -415,7 +417,10 @@ IPFSModule.prototype.apply = function (queuedHash, cb) {
 
                 cb(null, res);
             });
-        });
+          });
+        } else {
+          cb(null, 'No IPFS pin required on this node');
+        }
     });
 };
 

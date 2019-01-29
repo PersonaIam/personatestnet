@@ -1,5 +1,5 @@
 {
-  "port": 4101,
+  "port": 4111,
   "address": "0.0.0.0",
   "version": "0.0.1",
   "fileLogLevel": "info",
@@ -10,8 +10,8 @@
     "host": "localhost",
     "port": 5432,
     "database": "persona_testnet",
-    "user": null,
-    "password": "password",
+    "user": "postgres",
+    "password": "postgres",
     "poolSize": 20,
     "poolIdleTimeout": 30000,
     "reapIntervalMillis": 1000,
@@ -55,6 +55,10 @@
       {
         "ip": "5.135.75.68",
         "port": 4101
+      },
+      {
+        "ip" : "5.135.75.69",
+        "port": 4101
       }
     ],
     "blackList": [],
@@ -97,10 +101,10 @@
   "ssl": {
     "enabled": false,
     "options": {
-      "port": 443,
+      "port": 444,
       "address": "0.0.0.0",
-      "key": "./ssl/ark.key",
-      "cert": "./ssl/ark.crt"
+      "key": "/home/personaminer/certificate/persona.im.key",
+      "cert": "/home/personaminer/certificate/persona.im.pem"
     }
   },
   "network": "testnet",

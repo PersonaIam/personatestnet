@@ -150,7 +150,10 @@ Peer.prototype.fetchHeight = function(cb){
 
 Peer.prototype.fetchStatus = function(cb){
 	var that = this;
-  this.request('/peer/status', {method:'GET', timeout: 2000}, function(err, res){
+  var options = {method:'GET', timeout: 2000}
+  var headers = {version : 1, os : 'linux', port : 4111, nethash : modules.system.getNethash()};
+   options.headers = headers;
+  this.request('/peer/status', options, function(err, res){
 		if(!err){
 			that.height = res.body.height;
 			that.blockheader = res.body.header;
@@ -171,10 +174,11 @@ Peer.prototype.fetchStatus = function(cb){
 			}
 			else {
 				that.counterror = 0;
-        that.status = "OK";
-      }
+                                that.status = "OK";
+                        }
 		}
 		else {
+                        library.logger.warn(err);
 			that.counterror++;
 		}
 		return cb && cb(err, res);
