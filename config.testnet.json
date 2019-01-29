@@ -1,5 +1,5 @@
 {
-  "port": 4111,
+  "port": 4101,
   "address": "0.0.0.0",
   "version": "0.0.1",
   "fileLogLevel": "info",
@@ -10,8 +10,8 @@
     "host": "localhost",
     "port": 5432,
     "database": "persona_testnet",
-    "user": "postgres",
-    "password": "postgres",
+    "user": null,
+    "password": "password",
     "poolSize": 20,
     "poolIdleTimeout": 30000,
     "reapIntervalMillis": 1000,
