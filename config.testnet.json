@@ -55,10 +55,6 @@
       {
         "ip": "5.135.75.68",
         "port": 4101
-      },
-      {
-        "ip" : "5.135.75.69",
-        "port": 4101
       }
     ],
     "blackList": [],
@@ -77,16 +73,6 @@
     "coldstart": 6,
     "force": true,
     "secret": [
-      "stereo film safe human nature hello october divide joy robust mask trend",
-      "thank drop steak chalk rail ensure alcohol explain advance jelly gospel river",
-      "science check shock can anger photo panther deputy puzzle fan affair model",
-      "aisle correct junior cereal crane pioneer crucial advance fiction note unfair retreat",
-      "balcony vast barrel bundle kite clock decade december program report light program",
-      "canyon goose pull heavy bronze place jewel deliver kitten cycle they output",
-      "ramp club legal spin satoshi antique water recall axis supply trial combine",
-      "army hold man exhibit agent mail obvious law champion rotate joy powder",
-      "exhaust artist pottery scheme weird crop stove over drama unveil poet popular",
-      "coconut victory science dilemma bright replace voyage goddess become toy actress smart"
     ],
     "access": {
       "whiteList": [
