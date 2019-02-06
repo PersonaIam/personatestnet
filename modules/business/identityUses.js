@@ -212,17 +212,18 @@ shared.requestIdentityUse = function (req, cb) {
                     let serviceAttributes = JSON.parse(serviceResult.services[0].attribute_types);
                     let reqGetAttributesByFilter = req;
                     reqGetAttributesByFilter.body.owner = req.body.asset.identityuse[0].owner;
-                    reqGetAttributesByFilter.body.validationsRequired = serviceResult.services[0].validations_required;
 
                     attributes.getAttributesByFilter(reqGetAttributesByFilter.body, function (err, ownerAttributes) {
                         if (err) {
                             return cb(err);
                         }
-                        let ownerAttributesActiveAndNotExpired = ownerAttributes.attributes.filter(attribute =>
+                        let ownerAttributesActiveNotExpiredWithValidations = ownerAttributes.attributes.filter(attribute =>
 
-                            attribute.active && (!attribute.expire_timestamp || attribute.expire_timestamp > slots.getTime()));
+                            attribute.active &&                                                                 // attribute has to be active
+                            (!attribute.expire_timestamp || attribute.expire_timestamp > slots.getTime()) &&    // attribute has to not be expired
+                            attribute.completed >= serviceResult.services[0].validations_required );            // attribute has to have minimum required validations
 
-                        let ownerAttributesActiveAndNotExpiredTypes = ownerAttributesActiveAndNotExpired.map(attribute => attribute.type);
+                        let ownerAttributesToCheck = ownerAttributesActiveNotExpiredWithValidations.map(attribute => attribute.type);
 
                         let ownerAttributeTypes = ownerAttributes.attributes.map(attribute => attribute.type);
 
@@ -233,7 +234,7 @@ shared.requestIdentityUse = function (req, cb) {
                             return cb(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING);
                         }
 
-                        if (_.intersection(ownerAttributesActiveAndNotExpiredTypes, serviceAttributes).length !== serviceAttributes.length) {
+                        if (_.intersection(ownerAttributesToCheck, serviceAttributes).length !== serviceAttributes.length) {
                             return cb(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
                         }
 

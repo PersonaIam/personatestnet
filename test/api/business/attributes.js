@@ -991,7 +991,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
     });
 
     it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, FIRST_NAME) that is part of an association. ' +
-        'EXPECTED : SUCCESS. RESULT : The attribute is associated, not documented and not active', function (done) {
+        'EXPECTED : SUCCESS. RESULT : The attribute is associated, documented and not active', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -999,7 +999,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
             node.expect(res.body.attributes).to.have.length(1);
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
-            node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(false);
+            node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(true);
             node.expect(res.body.attributes[0]).to.have.property('associated').to.eq(true);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');

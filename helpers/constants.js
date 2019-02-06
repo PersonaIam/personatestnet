@@ -128,6 +128,7 @@ module.exports = {
 	enrolmentCreditAddress: 'Thq2jDtsuQLUGNvfYiNwGALQLAbmUupvRB',
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
 
+	VALIDATIONS_REQUIRED : 1,
 	FIRST_NOTARIZATION_BATCH_SIZE : 7,
     MIN_NOTARIZATIONS_IN_A_ROW : 3,
     // The maximum number of red flags (REJECTED validations with no subsequent COMPLETED validations) for the attribute to not immediately inactivate

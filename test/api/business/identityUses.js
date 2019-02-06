@@ -336,7 +336,7 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
         params.owner = OWNER;
         params.type = IDENTITY_CARD;
         params.value = 'some_random_file_content';
-        params.expire_timestamp = slots.getTime() + 20000;
+        params.expire_timestamp = slots.getTime() + 200000000;
 
         let request = createAttributeRequest(params);
 
@@ -461,7 +461,7 @@ describe('CREATE ATTRIBUTES', function () {
             param.publicKey = OTHER_PUBLIC_KEY;
             param.value = THIRD_ID_VALUE;
             param.associations = [identityCardData.body.attributes[0].id];
-            param.expire_timestamp = slots.getTime() + 200000;
+            param.expire_timestamp = slots.getTime() + 2000000000;
 
             let request = createAttributeRequest(param);
 

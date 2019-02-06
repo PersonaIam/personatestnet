@@ -249,6 +249,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
                             !attribute.rejected &&
                             ( isFirstValidationANotarizationInFirstBatch(attributeDetailsFiltered, attributeDetailsElement.id) ||
                               hasMinNotarizationsInARow(attributeDetailsFiltered, attributeDetailsElement.id));
+                        attribute.completed = attributeDetailsElement.completed;
                     }
                     attribute.associated = ownerAttributes
                         .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
