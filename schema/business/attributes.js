@@ -1,30 +1,6 @@
 'use strict';
 
 module.exports = {
-    listAttributes: {
-        id: 'attributes.getAttributesByFilter',
-        type: 'object',
-        properties: {
-            owner: {
-                type: 'string',
-                minLength: 1,
-                format: 'address'
-            },
-            type: {
-                type: 'string',
-                minimum: 1
-            },
-            value: {
-                type: 'string',
-                minLength: 0
-            },
-            timestamp: {
-                type: 'integer',
-                minimum: 0
-            }
-        },
-        required: ['owner']
-    },
     listAttributeTypes: {
         id: 'attributes.listAttributeTypes',
         type: 'object',
@@ -189,21 +165,6 @@ module.exports = {
         },
         required: ['owner']
     },
-    getAttributeActiveState: {
-        id: 'attributes.getAttributeActiveState',
-        type: 'object',
-        properties: {
-            type: {
-                type: 'string',
-                minLength: 1
-            },
-            owner: {
-                type: 'string',
-                format: 'address'
-            }
-        },
-        required: ['type', 'owner']
-    },
 
     getIdentityUseRequest: {
         id: 'attributes.getIdentityUseRequest',
@@ -228,29 +189,6 @@ module.exports = {
                 minLength: 1
             },
             owner: {
-                type: 'string',
-                format: 'address'
-            },
-        }
-    },
-
-    getAttributeShare: {
-        id: 'attributes.getAttributeShare',
-        type: 'object',
-        properties: {
-            id: {
-                type: 'integer',
-                minimum: 0
-            },
-            type: {
-                type: 'string',
-                minLength: 1
-            },
-            owner: {
-                type: 'string',
-                format: 'address'
-            },
-            applicant: {
                 type: 'string',
                 format: 'address'
             },

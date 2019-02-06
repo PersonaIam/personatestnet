@@ -298,6 +298,10 @@ __private.validationRequestAnswer = function (req, cb) {
                 return cb(messages.MORE_THAN_ONE_ATTRIBUTE_EXISTS);
             }
 
+            if (data.attributes[0].rejected) {
+                return cb(messages.REJECTED_ATTRIBUTE);
+            }
+
             let reqGetAttributeType = req;
             reqGetAttributeType.body.name =
                 req.body.asset.validation[0].type ? req.body.asset.validation[0].type : data.attributes[0].type;
@@ -429,6 +433,10 @@ shared.requestAttributeValidation = function (req, cb) {
 
             if (data.attributes[0].expire_timestamp && data.attributes[0].expire_timestamp < slots.getTime()) {
                 return cb(messages.EXPIRED_ATTRIBUTE);
+            }
+
+            if (data.attributes[0].rejected) {
+                return cb(messages.REJECTED_ATTRIBUTE);
             }
 
             let reqGetAttributeType = req;

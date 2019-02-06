@@ -127,8 +127,14 @@ module.exports = {
 	startBlockHeightForRewardSplitting: 3000000,
 	enrolmentCreditAddress: 'Thq2jDtsuQLUGNvfYiNwGALQLAbmUupvRB',
 	unconfirmedTransactionTimeOut: 10800, // 1080 blocks,
-	VALIDATIONS_REQUIRED : 1,
-    REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',
+
+	FIRST_NOTARIZATION_BATCH_SIZE : 7,
+    MIN_NOTARIZATIONS_IN_A_ROW : 3,
+    // The maximum number of red flags (REJECTED validations with no subsequent COMPLETED validations) for the attribute to not immediately inactivate
+    MIN_RED_FLAGS_IN_A_ROW_FOR_REJECTED : 3,
+
+
+	REWARD_FAUCET : 'LMs6hQAcRYmQk4vGHgE2PndcXWZxc2Du3w',
     REWARD_FAUCET_KEY : '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6',
     REWARD_ROUND_INTERVAL : 1 // TBD 1 hour in milliseconds
 };

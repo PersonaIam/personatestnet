@@ -159,20 +159,100 @@ Attributes.getAttributesByFilter = function (filter, cb) {
         attributes = filter.type ? attributes.filter(a => a.type === filter.type) : attributes;
         attributes = filter.id ? attributes.filter(a => a.id === filter.id) : attributes;
 
-        library.db.query(sql.AttributesSql.getActiveAttributesForOwner, {
-            after: slots.getTime(moment().subtract(1, 'year')),
-            expirationAfter: slots.getTime(),
+        function isAttributeRejectedWithMaxConsecutiveRedFlags(attribute) {
+            return attribute.redFlagsLast >= constants.MIN_RED_FLAGS_IN_A_ROW_FOR_REJECTED
+        }
+
+        function isAttributeRejectedWithNoMinNotarizationsInARowInFirstBatch(attributeDetails, id) {
+            let attributeDetailsLocal = attributeDetails.filter(attribute => attribute.id = id).slice(0, constants.FIRST_NOTARIZATION_BATCH_SIZE)
+            return attributeDetailsLocal.length >= constants.FIRST_NOTARIZATION_BATCH_SIZE && !hasMinNotarizationsInARow(attributeDetailsLocal)
+        }
+
+        function hasMinNotarizationsInARow(attributeDetails) {
+            let score = 0;
+            let result = false;
+            attributeDetails.forEach(detail => {
+                if (detail.action === constants.validationRequestValidatorActions.NOTARIZE) {
+                    score++;
+                }
+                if (detail.action === constants.validationRequestValidatorActions.REJECT) {
+                    score = 0;
+                }
+                if (score === constants.MIN_NOTARIZATIONS_IN_A_ROW) {
+                    result = true;
+                }
+            });
+            return result;
+        }
+
+        function isFirstValidationANotarizationInFirstBatch(attributeDetails, id) {
+            let attributeDetailsLocal = attributeDetails.filter(attribute => attribute.id = id);
+            let attributeDetail = attributeDetailsLocal.slice(0, 1);
+            return attributeDetail[0].action === constants.validationRequestValidatorActions.NOTARIZE;
+        }
+
+        function getNumberOfRedFlags(attributeDetails, id) {
+            let attributeDetailsLocal = attributeDetails.filter(attribute => attribute.id = id);
+            let score = 0;
+            let redFlags = 0;
+            attributeDetailsLocal.forEach(detail => {
+                if (detail.action === constants.validationRequestValidatorActions.NOTARIZE) {
+                    score++;
+                }
+                if (detail.action === constants.validationRequestValidatorActions.REJECT) {
+                    redFlags++;
+                    score = 0;
+                }
+                if (score === constants.MIN_NOTARIZATIONS_IN_A_ROW) {
+                    redFlags = 0;
+                }
+            });
+            return redFlags;
+        }
+
+        library.db.query(sql.AttributesSql.getAttributesWithValidationDetails, {
+            oneYearSinceNow: slots.getTime(moment().subtract(1, 'year')),
+            now: slots.getTime(),
             owner: filter.owner,
-            validations_required: filter.validationsRequired ? filter.validationsRequired : constants.VALIDATIONS_REQUIRED,
-            status: constants.validationRequestStatus.COMPLETED
+            status: [constants.validationRequestStatus.COMPLETED, constants.validationRequestStatus.REJECTED],
+            action: [constants.validationRequestValidatorActions.NOTARIZE, constants.validationRequestValidatorActions.REJECT]
         })
-            .then(function (activeAttributes) {
-                let activeAttributesIds = activeAttributes.map(row => row.id);
+            .then(function (attributeDetails) {
+                let yellowFlags = [];
+                let redFlags = [];
+                attributeDetails.forEach(adu => {
+                    adu.rejected = false;
+                    adu.yellowFlags = attributeDetails
+                        .filter(ad => ad.id === adu.id && ad.action === constants.validationRequestValidatorActions.REJECT)
+                        .length;
+                    adu.redFlagsLast = attributeDetails
+                        .filter(ad => ad.id === adu.id)
+                        .slice(-1 * constants.MIN_RED_FLAGS_IN_A_ROW_FOR_REJECTED) // get last elements, to check for rejections
+                        .filter(ad => ad.action === constants.validationRequestValidatorActions.REJECT)
+                        .length;
+                    adu.completed = attributeDetails.filter(ad => ad.id === adu.id && ad.action === constants.validationRequestValidatorActions.NOTARIZE).length
+                });
                 attributes.forEach(attribute => {
-                    attribute.active = activeAttributesIds.includes(attribute.id);
+                    attribute.active = false;
+                    attribute.yellowFlags = 0;
+                    attribute.redFlags = 0;
+                    attribute.rejected = false;
+                    let attributeDetailsFiltered = attributeDetails.filter(a => a.id === attribute.id);
+                    if (attributeDetailsFiltered && attributeDetailsFiltered.length > 0) {
+                        let attributeDetailsElement = attributeDetailsFiltered[0];
+                        attribute.yellowFlags = attributeDetailsElement.yellowFlags;
+                        attribute.redFlags = getNumberOfRedFlags(attributeDetailsFiltered, attributeDetailsElement.id);
+                        attribute.rejected =
+                            isAttributeRejectedWithMaxConsecutiveRedFlags(attributeDetailsElement) ||
+                            isAttributeRejectedWithNoMinNotarizationsInARowInFirstBatch(attributeDetailsFiltered, attributeDetailsElement.id);
+                        attribute.active =
+                            !attribute.rejected &&
+                            ( isFirstValidationANotarizationInFirstBatch(attributeDetailsFiltered, attributeDetailsElement.id) ||
+                              hasMinNotarizationsInARow(attributeDetailsFiltered, attributeDetailsElement.id));
+                    }
                     attribute.associated = ownerAttributes
                         .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
-                    attribute.documented = activeAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
+                    attribute.documented = ownerAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
                 });
                 data.attributes = attributes;
                 data.count = attributes.length;

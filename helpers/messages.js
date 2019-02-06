@@ -12,6 +12,7 @@ module.exports = {
     ATTRIBUTE_NOT_FOUND_FOR_UPDATE : 'Attribute not found for update',
     EXPIRED_ATTRIBUTE : 'Attribute is expired',
     INACTIVE_ATTRIBUTE : 'Attribute is inactive',
+    REJECTED_ATTRIBUTE : 'Attribute is rejected due to unsuccessful notarizations. Please update the attribute value and resume the notarization process',
     ATTRIBUTE_TYPE_NOT_FOUND : 'Attribute type not found',
     NOTHING_TO_UPDATE : 'Nothing to update',
     EXPIRE_TIMESTAMP_REQUIRED : 'Expire timestamp is required for this attribute type',
@@ -24,7 +25,7 @@ module.exports = {
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
     VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION : 'There is no validation request that is pending approval or in progress for this attribute',
 
-    ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
+    ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request mst be in progress for the action to take place',
     ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
 
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',

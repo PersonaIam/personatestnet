@@ -45,6 +45,7 @@ const THIRD_ID_VALUE = "QUEENS";
 const EMAIL_VALUE = 'yeezy@gmail.com';
 const EMAIL_VALUE2 = 'beehive@gmail.com';
 const PHONE_NUMBER_VALUE = '345654321';
+const SSN_VALUE = '993486735642';
 const BIRTHPLACE_VALUE = 'Calgary';
 const INCORRECT_ADDRESS = 'ABC';
 const INCORRECT_VALIDATION_TYPE = 'INCORRECT_VALIDATION_TYPE';
@@ -2185,7 +2186,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
 
         let unconfirmedBalance = 0;
         let balance = 0;
-        getBalance(OWNER, function (err, res) {
+        getBalance(VALIDATOR, function (err, res) {
             unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
             balance = parseInt(res.body.balance);
         });
@@ -2204,7 +2205,7 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(TRANSACTION_ID);
             sleep.msleep(SLEEP_TIME);
-            getBalance(OWNER, function (err, res) {
+            getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
                 node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestreject);
@@ -2929,6 +2930,168 @@ describe('ATTRIBUTE VALIDATION REQUESTS ACTIONS', function () {
                 node.expect(res.body.attribute_validation_requests[0]).to.have.property('last_update_timestamp').to.be.at.least(1);
                 done();
             });
+        });
+    });
+
+});
+
+// This suite is subject to timing issues, because it depends on exactly 4 sleep slots before the 5th test, and another sleep slot before the 6th
+
+describe('ATTRIBUTES - ACTIVE/INACTIVE FOR VALIDATED AND EXPIRED', function () {
+
+    it('Create an attribute (OWNER, SSN), with a pretty close expiration timestamp ( to be used for validation and retrieving active/inactive state). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        // this value of 45 is important for this suite of tests.
+        // the attribute must expire between tests #5 and #6 in the suite )
+        time = slots.getTime() + 45;
+        param.expire_timestamp = time;
+        param.type = SSN;
+        param.value = SSN_VALUE;
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('Create a validation request (SSN). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+
+        getAttribute(OWNER, SSN, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            let request = createAttributeValidationRequest(param);
+            postAttributeValidationRequest(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
+                sleep.msleep(SLEEP_TIME);
+                getBalance(OWNER, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+                });
+                done();
+            });
+        });
+    });
+
+    it('Approve a validation request for an attribute (SSN). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        getAttribute(OWNER, SSN, function (err, data) {
+            params.attributeId = data.body.attributes[0].id;
+
+            let request = createAnswerAttributeValidationRequest(params);
+            postApproveValidationAttributeRequest(request, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRANSACTION_ID);
+                sleep.msleep(SLEEP_TIME);
+                getBalance(VALIDATOR, function (err, res) {
+                    let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                    let balanceAfter = parseInt(res.body.balance);
+                    node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                    node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+                });
+                done();
+            });
+        });
+    });
+
+    it('Notarize a validation request for an attribute (SSN). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = SSN;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details for an attribute (OWNER, SSN) that was correctly notarized once, and is about to expire. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true ( not expired yet )', function (done) {
+        console.log(slots.getTime());
+        getAttribute(OWNER, SSN, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(SSN);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(true);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(0);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(0);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details for an attribute (OWNER, SSN) that was correctly notarized once, but has expired afterwards. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false ( has just expired )', function (done) {
+        console.log(slots.getTime());
+        sleep.msleep(SLEEP_TIME); // sleep again 10 seconds, make sure attribute expires by the time this is called
+        getAttribute(OWNER, SSN, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(SSN);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            done();
         });
     });
 
