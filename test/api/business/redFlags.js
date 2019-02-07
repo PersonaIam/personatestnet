@@ -305,7 +305,7 @@ describe('SEND FUNDS', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('Create an attribute (OWNER, BIRTHPLACE). ' +
+    it('Create an attribute (BIRTHPLACE). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -336,7 +336,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('Create an attribute (OWNER, ALIAS). ' +
+    it('Create an attribute (ALIAS). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -367,7 +367,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('Create an attribute (OWNER, LAST_NAME). ' +
+    it('Create an attribute (LAST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -393,7 +393,7 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
-    it('Create an attribute (OWNER, PHONE_NUMBER). ' +
+    it('Create an attribute (PHONE_NUMBER). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -848,7 +848,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has no validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has no validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -902,7 +902,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has (N) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (N) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -954,7 +954,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has (NN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -1006,7 +1006,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has (NNR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NNR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -1058,7 +1058,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has (NNRR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NNRR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -1110,7 +1110,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, BIRTHPLACE) that has (NNRRR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NNRRR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, 3 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
@@ -1131,7 +1131,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
     // Unsuccessful actions after attribute becomes rejected
 
     it('As a VALIDATOR, I want to Notarize a validation request (BIRTHPLACE, VALIDATOR_6) for a rejected attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
+        'EXPECTED : FAILURE. ERROR : REJECTED_ATTRIBUTE' , function (done) {
 
         let params = {};
         params.validator = VALIDATOR_6;
@@ -1151,7 +1151,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
     });
 
     it('As a VALIDATOR, I want to Reject a validation request (BIRTHPLACE, VALIDATOR_6) for a rejected attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+        'EXPECTED : FAILURE. ERROR : REJECTED_ATTRIBUTE', function (done) {
 
         let params = {};
         params.validator = VALIDATOR_3;
@@ -1305,7 +1305,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
-    it('As a PUBLIC user, I want to Get validation requests (OWNER, BIRTHPLACE, VALIDATOR) for an attribute that was just updated. ' +
+    it('As a PUBLIC user, I want to Get validation requests (BIRTHPLACE) for an attribute that was just updated. ' +
         'EXPECTED : SUCCESS. RESULT : 0 Results, existing validations happened before the last update', function (done) {
 
         let param = {};
@@ -1939,7 +1939,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('Get the details of an attribute (OWNER, ALIAS) that has (N) validations. ' +
+    it('Get the details of an attribute (ALIAS) that has (N) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -1991,7 +1991,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2043,7 +2043,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NRN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2095,7 +2095,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NRNR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2147,7 +2147,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NRNRN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2199,7 +2199,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NRNRNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2251,7 +2251,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, ALIAS) that has (NRNRNNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRNNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2394,7 +2394,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get validation requests (OWNER, ALIAS, VALIDATOR) for an attribute that was just updated. ' +
+    it('As a PUBLIC user, I want to Get validation requests (ALIAS, VALIDATOR) for an attribute that was just updated. ' +
         'EXPECTED : SUCCESS. RESULT : 0 Results, existing validations happened before the last update', function (done) {
 
         let param = {};
@@ -3028,7 +3028,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (R) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (R) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flags and 1 yellow flags', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3080,7 +3080,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3132,7 +3132,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3184,7 +3184,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RNNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RNNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 1 yellow flag', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3236,7 +3236,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RNNNR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RNNNR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3288,7 +3288,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RNNNRR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RNNNRR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3340,7 +3340,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, LAST_NAME) that has (RNNNRRR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (LAST_NAME) that has (RNNNRRR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, 3 red flags and 4 yellow flags', function (done) {
         getAttribute(OWNER, LAST_NAME, function (err, res) {
             console.log(res.body);
@@ -3853,7 +3853,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('Get the details of an attribute (OWNER, PHONE_NUMBER) that has (R) validations. ' +
+    it('Get the details of an attribute (PHONE_NUMBER) that has (R) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -3905,7 +3905,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -3957,7 +3957,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RRN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -4009,7 +4009,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RRNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -4061,7 +4061,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RRNNR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 3 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -4113,7 +4113,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RRNNRN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNRN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 3 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -4165,7 +4165,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, PHONE_NUMBER) that has (RRNNRNR) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNRNR) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, 4 red flags and 4 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
@@ -4183,10 +4183,6 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 });
-
-describe('Use Case #5 : Update Attribute and resume Validations' , function () {
-
-})
 
 /**
  * Utilities
