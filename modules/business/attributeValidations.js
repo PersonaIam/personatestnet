@@ -448,7 +448,7 @@ shared.requestAttributeValidation = function (req, cb) {
                 }
 
                 let attributeTypeOptions = JSON.parse(dataAttributeType.attribute_type.options)
-                if (attributeTypeOptions && attributeTypeOptions.documentRequired === true && !data.attributes[0].associated) {
+                if (attributeTypeOptions && attributeTypeOptions.documentRequired === true && !data.attributes[0].documented) {
                     return cb(messages.ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED);
                 }
 

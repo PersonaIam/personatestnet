@@ -94,7 +94,7 @@ describe('SEND FUNDS', function () {
             recipientId: OTHER_OWNER
         }, function (err, res) {
             transactionList.push({
-                'sender': OWNER,
+                'sender': OTHER_OWNER,
                 'recipient': OTHER_OWNER,
                 'grossSent': (amountToSend + expectedFee) / node.normalizer,
                 'fee': expectedFee / node.normalizer,
@@ -145,6 +145,17 @@ describe('ATTRIBUTE TYPES', function () {
 });
 
 describe('CREATE ATTRIBUTE', function () {
+
+    it('As a PUBLIC user, I want to Get the attributes of a user (OTHER_OWNER) that has no attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Empty "attributes" array', function (done) {
+        getAttributesForOwner(OTHER_OWNER, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            node.expect(res.body.attributes).to.have.length(0);
+            done();
+        });
+    });
 
     it('As an OWNER, I want to Create a non file attribute and provide associations. ' +
         'EXPECTED : FAILURE. ERROR : ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES', function (done) {
@@ -336,7 +347,7 @@ describe('CREATE ATTRIBUTE', function () {
         param.secret = SECRET;
         param.publicKey = PUBLIC_KEY;
         param.value = 'none';
-        param.type = 'first_name';
+        param.type = FIRST_NAME;
 
         let request = createAttributeRequest(param);
         postAttribute(request, function (err, res) {
@@ -346,6 +357,95 @@ describe('CREATE ATTRIBUTE', function () {
             done();
         });
     });
+
+    it('As an OWNER, I want to Create a non file attribute and provide as association an attribute that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.associations = [777];
+        params.expire_timestamp = slots.getTime() + 10000;
+        let request = createAttributeRequest(params);
+        postAttribute(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+            done();
+        });
+    });
+
+    it('Create a non file attribute (OTHER_OWNER, FIRST_NAME). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OTHER_OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OTHER_OWNER;
+        param.secret = OTHER_SECRET;
+        param.publicKey = OTHER_PUBLIC_KEY;
+        param.value = SECOND_NAME_VALUE;
+
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OTHER_OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create a non file attribute and provide as association an attribute that belongs to a different user. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.expire_timestamp = slots.getTime() + 10000;
+        getAttribute(OTHER_OWNER, FIRST_NAME, function (err, res) {
+            params.associations = [res.body.attributes[0].id];
+            let request = createAttributeRequest(params);
+            postAttribute(request, function (err, res) {
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+                done();
+            });
+        });
+    });
+
+    it('As an OWNER, I want to Create a non file attribute and provide as association 2 attributes, one of which belongs to a different user. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+
+        let params = {};
+        params.owner = OWNER;
+        params.type = IDENTITY_CARD;
+        params.expire_timestamp = slots.getTime() + 10000;
+        getAttribute(OWNER, PHONE_NUMBER, function (err, res1) {
+            let firstId = res1.body.attributes[0].id
+            getAttribute(OTHER_OWNER, FIRST_NAME, function (err, res) {
+                params.associations = [res.body.attributes[0].id, firstId];
+                let request = createAttributeRequest(params);
+                postAttribute(request, function (err, res) {
+                    node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                    node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+                    done();
+                });
+            });
+        });
+    });
+
 });
 
 describe('CREATE FILE TYPE ATTRIBUTES', function () {
@@ -475,50 +575,6 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
 describe('CREATE ATTRIBUTE', function () {
 
-    it('As a PUBLIC user, I want to Get the attributes of a user (OTHER_OWNER) that has no attributes. ' +
-        'EXPECTED : SUCCESS. RESULT : Empty "attributes" array', function (done) {
-        getAttributesForOwner(OTHER_OWNER, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
-            node.expect(res.body.attributes).to.have.length(0);
-            done();
-        });
-    });
-
-    it('Create a non file attribute (OTHER_OWNER, FIRST_NAME). ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(OTHER_OWNER, function (err, res) {
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-            balance = parseInt(res.body.balance);
-        });
-
-        let param = {};
-        param.owner = OTHER_OWNER;
-        param.secret = OTHER_SECRET;
-        param.publicKey = OTHER_PUBLIC_KEY;
-        param.value = SECOND_NAME_VALUE;
-
-        let request = createAttributeRequest(param);
-
-        postAttribute(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(TRANSACTION_ID);
-            sleep.msleep(SLEEP_TIME);
-            getBalance(OTHER_OWNER, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.createattribute);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
-            });
-            done();
-        });
-    });
-
     it('Get the attributes of a user (OTHER_OWNER) that has 1 attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Contains "attributes" as an array with 1 element', function (done) {
         getAttributesForOwner(OTHER_OWNER, function (err, res) {
@@ -569,6 +625,7 @@ describe('CREATE ATTRIBUTE', function () {
         });
 
         getAttribute(OTHER_OWNER, 'first_name', function (err, identityCardData) {
+            console.log(identityCardData)
             let param = {};
             param.owner = OTHER_OWNER;
             param.type = IDENTITY_CARD;
@@ -930,6 +987,22 @@ describe('UPDATE ATTRIBUTE', function () {
 
 describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
 
+    it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, FIRST_NAME) that is not part of any association. ' +
+        'EXPECTED : SUCCESS. RESULT : The attribute is not yet documented (documented = false)', function (done) {
+        getAttribute(OWNER, FIRST_NAME, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            node.expect(res.body.attributes).to.have.length(1);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(false);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
+            node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
+            done();
+        });
+    });
+
     it('As an OWNER, I want to Update an attribute (IDENTITY_CARD) by providing a new association (FIRST_NAME). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -991,7 +1064,7 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
     });
 
     it('As a PUBLIC user, I want to Get the details of an attribute (OWNER, FIRST_NAME) that is part of an association. ' +
-        'EXPECTED : SUCCESS. RESULT : The attribute is associated, documented and not active', function (done) {
+        'EXPECTED : SUCCESS. RESULT : The attribute is documented', function (done) {
         getAttribute(OWNER, FIRST_NAME, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1000,7 +1073,6 @@ describe('UPDATE ATTRIBUTE ASSOCIATIONS', function () {
             node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('documented').to.eq(true);
-            node.expect(res.body.attributes[0]).to.have.property('associated').to.eq(true);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(false);
             node.expect(res.body.attributes[0]).to.have.property('expire_timestamp');
             done();

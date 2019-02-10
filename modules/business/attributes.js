@@ -251,8 +251,6 @@ Attributes.getAttributesByFilter = function (filter, cb) {
                               hasMinNotarizationsInARow(attributeDetailsFiltered, attributeDetailsElement.id));
                         attribute.completed = attributeDetailsElement.completed;
                     }
-                    attribute.associated = ownerAttributes
-                        .filter(a => (!a.expire_timestamp || a.expire_timestamp > slots.getTime()) && a.associations && a.associations.includes(attribute.id)).length > 0;
                     attribute.documented = ownerAttributes.filter(a => a.associations && a.associations.includes(attribute.id)).length > 0;
                 });
                 data.attributes = attributes;
@@ -332,24 +330,37 @@ __private.checkAssociations = function (filter, cb) {
     if (attributeFilter.associations && attributeFilter.associations.length === 0) {
         return cb(messages.EMPTY_ASSOCIATIONS_ARRAY);
     }
-
-    Attributes.getAttributesByFilter({owner: filter.asset.attribute[0].owner}, function (err, data) {
+    library.db.query(sql.AttributesSql.getAttributesForOwner, {owner: filter.asset.attribute[0].owner}).then(function (data) {
         __private.listAttributeTypes({}, function (err, attributeTypes) {
             let attributeFileTypesNames = attributeTypes.attribute_types.filter(i => i.data_type === 'file').map(o => o.name);
             if (!filter.asset.attribute[0].attributeId) { // newly created attribute
                 if (!attributeFileTypesNames.includes(attributeFilter.type)) {
                     return cb(messages.ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES);
-                } else {
-                    return cb(null);
+                }
+            } else {
+                let originalType = data.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
+
+                if (!attributeFileTypesNames.includes(originalType)) {
+                    return cb(messages.ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE);
                 }
             }
-            let originalType = data.attributes.filter(i => i.id === filter.asset.attribute[0].attributeId)[0].type;
 
-            if (!attributeFileTypesNames.includes(originalType)) {
-                return cb(messages.ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE);
+            let dataAttributeIds = data.map(attribute => attribute.id);
+            let diffOwners = false;
+            attributeFilter.associations.forEach(function(association) {
+                if (!dataAttributeIds.includes(association)) {
+                    diffOwners = true;
+                }
+            });
+            if (diffOwners) {
+                return cb(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS)
+            } else {
+                return cb(null)
             }
-            return cb(null);
         });
+
+    }).catch(function (err) {
+        console.log(err)
     });
 };
 
@@ -827,7 +838,7 @@ shared.addAttribute = function (req, cb) {
         let reqGetAttributeType = req;
         const publicKey = req.body.publicKey;
 
-        __private.checkAssociations(req.body, function (err, data) {
+        __private.checkAssociations(req.body, function (err) {
 
             if (err) {
                 return cb(err);
@@ -966,7 +977,7 @@ shared.updateAttribute = function (req, cb) {
             }
         }
 
-        __private.checkAssociations(req.body, function (err, data) {
+        __private.checkAssociations(req.body, function (err) {
 
             if (err) {
                 return cb(err);

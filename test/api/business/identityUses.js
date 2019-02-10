@@ -46,6 +46,7 @@ const SECOND_NAME_VALUE = "QUEEN";
 const THIRD_ID_VALUE = "QUEENS";
 const PHONE_NUMBER_VALUE = '345654321';
 const BIRTHPLACE_VALUE = 'Calgary';
+const SSN_VALUE = 'MH0CVR3S';
 
 const SERVICE_NAME = 'Ada';             // to be used by Approve Identity Use Request
 const SERVICE2_NAME = 'Anabella';       // to be used by End Identity Use Request
@@ -215,7 +216,7 @@ describe('SEND FUNDS', function () {
 
 describe('CREATE ATTRIBUTES', function () {
 
-    it('Create an attribute (OWNER, FIRST_NAME) for myself. ' +
+    it('Create an attribute (FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
         sleep.msleep(SLEEP_TIME);
         let unconfirmedBalance = 0;
@@ -318,9 +319,6 @@ describe('CREATE ATTRIBUTES', function () {
             done();
         });
     });
-});
-
-describe('CREATE FILE TYPE ATTRIBUTES', function () {
 
     it('Create an attribute of file type (OWNER, IDENTITY_CARD) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -404,11 +402,6 @@ describe('CREATE FILE TYPE ATTRIBUTES', function () {
             done();
         });
     });
-});
-
-// Setup Attributes
-
-describe('CREATE ATTRIBUTES', function () {
 
     it('Create an attribute (OTHER_OWNER, FIRST_NAME) for myself. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -828,36 +821,6 @@ describe('CREATE SERVICES', function() {
             node.expect(res.body.services[0].validations_required).to.be.eq(CUSTOM_VALIDATIONS);
             node.expect(res.body.services[1].validations_required).to.be.eq(CUSTOM_VALIDATIONS);
             node.expect(res.body.services[9].validations_required).to.be.eq(ONE_VALIDATION);
-            done();
-        });
-    });
-
-    it('Create a service for myself (with 2 attribute types), which will require a single validation per attribute. ' +
-        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
-
-        let unconfirmedBalance = 0;
-        let balance = 0;
-        getBalance(PROVIDER, function (err, res) {
-            balance = parseInt(res.body.balance);
-            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
-        });
-
-        let param = {};
-        param.name = SERVICE11_NAME;
-        param.validations = ONE_VALIDATION;
-        param.attributeTypes = [IDENTITY_CARD, SSN];
-        let request = createServiceRequest(param);
-
-        postService(request, function (err, res) {
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-            node.expect(res.body).to.have.property(TRANSACTION_ID);
-            sleep.msleep(SLEEP_TIME);
-            getBalance(PROVIDER, function (err, res) {
-                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
-                let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.createservice);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
-            });
             done();
         });
     });
@@ -1429,26 +1392,6 @@ describe('CREATE IDENTITY USE REQUEST', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_SENDER_IS_NOT_OWNER_ERROR);
-            done();
-        });
-    });
-
-    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes, ' +
-        'only one of which exists. ' +
-        'EXPECTED : FAILURE. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING', function (done) {
-
-        let param = {};
-        param.owner = OWNER;
-        param.secret = SECRET;
-        param.publicKey = PUBLIC_KEY;
-        param.serviceName = SERVICE11_NAME;
-        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
-
-        let request = createIdentityUseRequest(param);
-        postIdentityUseRequest(request, function (err, res) {
-            console.log(res.body);
-            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING);
             done();
         });
     });
@@ -3159,6 +3102,358 @@ describe('INACTIVE SERVICE ACTIONS', function () {
     });
 
 });
+
+describe('MULTIPLE ATTRIBUTE TYPES AND MULTIPLE VALIDATIONS', function () {
+
+    it('Create a service with 2 attribute types, which will require 2 validations per attribute. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.name = SERVICE11_NAME;
+        param.attributeTypes = [IDENTITY_CARD, SSN];
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes and 2 validations, ' +
+        'only one of which exists and is validated twice. ' +
+        'EXPECTED : FAILURE. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE11_NAME;
+        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING);
+            done();
+        });
+    });
+
+    it('Create an attribute (SSN) for myself. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.value = SSN_VALUE;
+        param.type = SSN;
+
+        let request = createAttributeRequest(param);
+
+        postAttribute(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createattribute);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createattribute);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes and 2 validations, ' +
+        'both of the attributes exist, but only one of them is validated twice. ' +
+        'EXPECTED : FAILURE. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE11_NAME;
+        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
+            done();
+        });
+    });
+
+    it('Create an attribute validation request for SSN attribute (SSN, VALIDATOR_1). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR;
+        param.type = SSN;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
+    it('Approve a PENDING_APPROVAL validation request (SSN, VALIDATOR_1). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = SSN;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
+            });
+            done();
+        });
+    });
+
+    it('Notarize an APPROVED validation request (SSN, VALIDATOR_1). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR;
+        params.owner = OWNER;
+        params.type = SSN;
+        params.secret = VALIDATOR_SECRET;
+        params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes and 2 validations, ' +
+        'both of the attributes exist, with one of them twice, and the second validated only once. ' +
+        'EXPECTED : FAILURE. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE11_NAME;
+        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE);
+            done();
+        });
+    });
+
+    it('Create an attribute validation request for SSN attribute (SSN, VALIDATOR_2). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.validator = VALIDATOR_2;
+        param.type = SSN;
+
+        let request = createAttributeValidationRequest(param);
+        postAttributeValidationRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequest);
+            });
+            done();
+        });
+    });
+
+    it('Approve a PENDING_APPROVAL validation request (SSN, VALIDATOR_2). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR_2, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR_2;
+        params.owner = OWNER;
+        params.type = SSN;
+        params.secret = VALIDATOR_SECRET_2;
+        params.publicKey = VALIDATOR_PUBLIC_KEY_2;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postApproveValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR_2, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestapprove);
+            });
+            done();
+        });
+    });
+
+    it('Notarize an APPROVED validation request (SSN, VALIDATOR_2). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(VALIDATOR_2, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.validator = VALIDATOR_2;
+        params.owner = OWNER;
+        params.type = SSN;
+        params.secret = VALIDATOR_SECRET_2;
+        params.publicKey = VALIDATOR_PUBLIC_KEY_2;
+        params.validationType = constants.validationType.FACE_TO_FACE;
+
+        let request = createAnswerAttributeValidationRequest(params);
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(VALIDATOR_2, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+            });
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to create an Identity Use Request for a service that requires 2 attributes and 2 validations, ' +
+        'both of the attributes exist, and both of them notarized twice. ' +
+        'EXPECTED : SUCCESS. ERROR : REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE11_NAME;
+        param.values = [{type : IDENTITY_CARD, value:'HHH'},{type : SSN, value : 'ssn'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+});
+
 /**
  * Utilities
  *

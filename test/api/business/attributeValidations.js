@@ -858,7 +858,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a validation request for an attribute (ADDRESS) with no associations, but which requires an associated document. ' +
+    it('As an OWNER, I want to Create a validation request for an attribute (ADDRESS) with no associations, but which requires a documented attribute. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_WITH_NO_ASSOCIATIONS_CANNOT_BE_VALIDATED', function (done) {
 
         let param = {};
@@ -875,7 +875,7 @@ describe('CREATE ATTRIBUTE VALIDATION REQUESTS', function () {
         });
     });
 
-    it('As an OWNER, I want to Create a validation request for an attribute (EMAIL) with no associations, which does not require an associated document. ' +
+    it('As an OWNER, I want to Create a validation request for an attribute (EMAIL) with no associations, which does not require a documented attribute. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;

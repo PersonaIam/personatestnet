@@ -376,7 +376,7 @@ Transaction.prototype.process = function (trs, sender, requester, cb) {
 
 			return cb(null, trs);
 		}).catch(function (err) {
-			this.scope.logger.error(err.stack);
+			console.log(err)
 			return cb('Transaction#process error');
 		});
 	}.bind(this));

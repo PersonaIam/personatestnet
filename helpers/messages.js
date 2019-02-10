@@ -28,9 +28,10 @@ module.exports = {
     ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request mst be in progress for the action to take place',
     ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
 
+    ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
     // TODO : Add business logic & tests
-    ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one of the attributes to be associated does not belong to the current owner',
+    ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one or more of the attributes to be associated does not belong to the current owner',
     INCORRECT_VALIDATION_REQUEST_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
     INCORRECT_IDENTITY_USE_PARAMETERS : 'If the serviceName parameter is specified, the serviceProvider parameter must also be specified',
 
@@ -52,7 +53,6 @@ module.exports = {
     REWARD_ROUND_TOO_SOON : 'Not enough time has passed since the last reward round was executed',
     REWARD_ROUND_WITH_NO_UPDATE : 'Nothing to update, last reward round was completed',
 
-    ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     MISSING_VALIDATION_TYPE : 'Validation type is missing',
     MISSING_SERVICE_DESCRIPTION : 'Service description is not provided. Nothing to create',
     MISSING_ATTRIBUTE_TYPES : 'Service attribute types are not provided. Nothing to create',
