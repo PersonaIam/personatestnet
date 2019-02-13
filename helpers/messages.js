@@ -30,14 +30,14 @@ module.exports = {
 
     ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
-    // TODO : Add business logic & tests
     ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one or more of the attributes to be associated does not belong to the current owner',
     INCORRECT_VALIDATION_REQUEST_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
     INCORRECT_IDENTITY_USE_PARAMETERS : 'If the serviceName parameter is specified, the serviceProvider parameter must also be specified',
+    INCORRECT_MONTHS_VALUE : 'The "months" query parameter must be a positive integer',
+    INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
 
     //TODO : add tests or remove (applies to all items in the section below)
     IPFS_UPLOAD_FAIL : 'Failed to upload to IPFS',
-    ATTRIBUTES_LIST_FAIL : 'Failed to list attributes',
     ATTRIBUTE_TYPES_LIST_FAIL :'Failed to list attribute types',
     ATTRIBUTE_TYPE_CREATE_FAIL : 'Failed to create attribute type',
     ATTRIBUTE_GET_FAIL : 'Failed to get attribute',
@@ -58,7 +58,7 @@ module.exports = {
     MISSING_ATTRIBUTE_TYPES : 'Service attribute types are not provided. Nothing to create',
     MISSING_NUMBER_OF_VALIDATIONS_REQUIRED : 'Service attribute validations required number is not provided. Nothing to create',
     MISSING_OWNER_ADDRESS : 'Missing required property: owner',
-    INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
+    MISSING_MONTHS : 'Missing required property: months',
 
     // reasons
     REASON_TOO_BIG_DECLINE : 'The reason for declining a request is limited to 1024 characters',

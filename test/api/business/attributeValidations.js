@@ -37,6 +37,7 @@ const ADDRESS = 'address';
 const IDENTITY_CARD = 'identity_card';
 const EMAIL = 'email';
 const SSN = 'ssn';
+const MOTHERS_NAME = 'mothers_name';
 
 const ADDRESS_VALUE = 'Denver';
 const NAME_VALUE = "JOE";
@@ -69,6 +70,7 @@ const VALUE = 'value';
 const TRUE = true;
 const FALSE = false;
 const ATTRIBUTE_VALIDATIONS_RESULT = 'attribute_validations';
+const TRUST_POINTS = 'trust_points';
 
 // TEST UTILS
 
@@ -3214,7 +3216,22 @@ describe('CREATE VALIDATION REQUESTS WHEN MULTIPLE ATTRIBUTES OF THE SAME TYPE E
 
 describe('ATTRIBUTE VALIDATION SCORE', function () {
 
-    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, ADDRESS) that was no completed validations. ' +
+    it('As a PUBLIC user, I want to Get the validation score for an attribute that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
+
+        let param = {};
+        param.type = MOTHERS_NAME;
+        param.owner = OWNER;
+
+        getAttributeValidationScore(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, ADDRESS) that has no completed validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0', function (done) {
 
         let param = {};
@@ -3229,7 +3246,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, IDENTITY_CARD) that was 2 completed validations. ' +
+    it('As a PUBLIC user, I want to Get the validation score for an attribute (OWNER, IDENTITY_CARD) that has 2 completed validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" =  2', function (done) {
 
         let param = {};
@@ -3244,7 +3261,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute type. ' +
         'EXPECTED : FAILURE. ERROR : MORE_THAN_ONE_ATTRIBUTE_EXISTS', function (done) {
 
@@ -3260,7 +3277,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute id of the declined one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (declined)', function (done) {
 
@@ -3278,7 +3295,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute id of the pending approval one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (pending approval)', function (done) {
 
@@ -3291,6 +3308,154 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
                 console.log(res.body);
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
                 node.expect(res.body).to.have.property(ATTRIBUTE_VALIDATIONS_RESULT).to.be.eq(0);
+                done();
+            });
+        });
+    });
+});
+
+describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute that does not exist. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
+
+        let param = {};
+        param.attributeId = 777;
+        param.months = 777;
+
+        getAttributeCredibility(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute without providing the months parameter. ' +
+        'EXPECTED : FAILURE. ERROR : MISSING_MONTHS', function (done) {
+
+        let param = {};
+        param.attributeId = 777;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.MISSING_MONTHS);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute by providing a negative value for the months parameter. ' +
+        'EXPECTED : FAILURE. ERROR : INCORRECT_MONTHS_VALUE', function (done) {
+
+        let param = {};
+        param.months = -1;
+        getAttribute(OWNER, SSN, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_MONTHS_VALUE);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute by providing 0 as value for the months parameter. ' +
+        'EXPECTED : FAILURE. ERROR : INCORRECT_MONTHS_VALUE', function (done) {
+
+        let param = {};
+        param.months = 0;
+        getAttribute(OWNER, SSN, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_MONTHS_VALUE);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute (OWNER, ADDRESS) that has no completed validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 0', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, ADDRESS, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute (OWNER, IDENTITY_CARD) that has 2 completed validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" =  2', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, IDENTITY_CARD, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(2);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute (OWNER, IDENTITY_CARD) that has 1 completed validation. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" =  1', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, SSN, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(1);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
+        'by providing the attribute id of the one without any validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 0', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
+        'by providing the attribute id of the one that has 1 validation. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 1', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(1);
                 done();
             });
         });
@@ -3397,7 +3562,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute id of the declined one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still declined)', function (done) {
 
@@ -3415,7 +3580,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute id of the in progress one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 0 (still in progress - pending notarization)', function (done) {
 
@@ -3513,7 +3678,7 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
         });
     });
 
-    it('As a PUBLIC user, I want to Get the validation score of an attribute which has a type (EMAIL) that was 2 attributes, ' +
+    it('As a PUBLIC user, I want to Get the validation score of an attribute type (EMAIL) that has 2 attributes, ' +
         'by providing the attribute ID of the completed one. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "attribute_validations" = 1 (notarization is complete)', function (done) {
 
@@ -3852,6 +4017,22 @@ function getAttributeValidationScore(params, done) {
     if (params.attributeId) {
         url += '&attributeId=' + '' + params.attributeId;
     }
+    node.get(url, done);
+
+}
+
+function getAttributeCredibility(params, done) {
+    let url = '/api/attribute-validations/credibility';
+    if (params.attributeId || params.months) {
+        url += '?';
+    }
+    if (params.attributeId) {
+        url += 'attributeId=' + '' + params.attributeId;
+    }
+    if (params.months || params.months === 0) {
+        url += '&months=' + '' + params.months;
+    }
+
     node.get(url, done);
 
 }

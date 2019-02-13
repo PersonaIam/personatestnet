@@ -10,7 +10,7 @@ let AttributesSql = {
     ],
 
     getAttributesForOwner:'SELECT * FROM attributes where "owner" = ${owner} order by id',
-
+    getAttributeById:'SELECT * FROM attributes where "id" = ${id}',
     updateAttribute: 'UPDATE attributes ' +
     ' SET value = ${value}, timestamp = ${timestamp}, expire_timestamp = ${expire_timestamp}, associations = ${associations}' +
     ' WHERE id = ${id}',
@@ -26,7 +26,7 @@ let AttributesSql = {
     ' JOIN attribute_types at ON at.name = a.type ' +
     ' JOIN attribute_validation_requests avr ON avr.attribute_id = a.id ' +
     ' JOIN attribute_validation_request_actions avra on avra.attribute_validation_request_id = avr.id ' +
-    ' WHERE avra.timestamp > ${oneYearSinceNow} ' +                         // checks that the notarization took place within the last year
+    ' WHERE avra.timestamp > ${since} ' +                                   // checks that the notarization took place after the "since" timestamp
     ' AND (a.expire_timestamp > ${now} OR a.expire_timestamp IS NULL) ' +   // checks that the attribute is not expired
     ' AND avra.action = ANY(${action}) AND avr.status = ANY(${status}) ' +  // checks the action and status
     ' AND avra.timestamp > a.timestamp AND "owner" = ${owner} ' +
@@ -76,18 +76,12 @@ let AttributeValidationRequestsSql = {
         'type'
     ],
     getAttributeValidationRequest: 'SELECT * FROM attribute_validation_requests WHERE "id" = ${id}',
-    getActiveAttributeValidationsForAttribute :
-    'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason,avr.timestamp as timestamp,avra.timestamp as last_update_timestamp ' +
-    'FROM attribute_validation_requests avr ' +
-    'JOIN attributes a ON a.id = avr.attribute_id ' +
-    'LEFT OUTER JOIN attribute_validation_request_actions avra ON avr.id = avra.attribute_validation_request_id AND avra.timestamp = (SELECT MAX(timestamp) from attribute_validation_request_actions avra1 WHERE avra1.attribute_validation_request_id = avr.id) ' +
-    'WHERE "attribute_id" = ${attribute_id} AND avr.timestamp > a.timestamp AND avra.timestamp > ${oneYearSinceNow} ORDER by timestamp',
     getAttributeValidationsForAttributeAndStatus :
     'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason,avr.timestamp as timestamp,avra.timestamp as last_update_timestamp ' +
     'FROM attribute_validation_requests avr ' +
     'JOIN attributes a ON a.id = avr.attribute_id ' +
     'LEFT OUTER JOIN attribute_validation_request_actions avra ON avr.id = avra.attribute_validation_request_id AND avra.timestamp = (SELECT MAX(timestamp) from attribute_validation_request_actions avra1 WHERE avra1.attribute_validation_request_id = avr.id) ' +
-    'WHERE "attribute_id" = ${attribute_id} AND "status" = ${status} AND avr.timestamp > a.timestamp',
+    'WHERE "attribute_id" = ${attribute_id} AND "status" = ${status} AND avr.timestamp > a.timestamp AND avr.timestamp > ${timespan}',
     getAttributeValidationRequestsForAttribute:
     'SELECT a.owner,a.type,avr.id,avr.attribute_id,avr.status,avr.validator,avr.validation_type,avr.reason,avr.timestamp as timestamp,avra.timestamp as last_update_timestamp ' +
     'FROM attribute_validation_requests avr ' +

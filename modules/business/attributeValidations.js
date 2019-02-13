@@ -111,6 +111,7 @@ __private.attachApi = function () {
         'post /validationrequest': 'requestAttributeValidation',
         'get /validationrequest': 'getAttributeValidationRequests',
         'get /validationscore': 'getAttributeValidationScore',
+        'get /credibility': 'getAttributeValidationCredibility',
         'post /approve': 'approveValidationRequest',
         'post /decline': 'declineValidationRequest',
         'post /notarize': 'notarizeValidationRequest',
@@ -179,11 +180,35 @@ __private.getAttributeValidationRequests = function (filter, cb) {
 
 __private.getAttributeValidationScore = function (filter, cb) {
 
+    let timespanTimestamp = slots.getTime(moment().subtract(constants.MONTHS_FOR_ACTIVE_VALIDATION, 'months'));
+
     library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationsForAttributeAndStatus,
-        {attribute_id: filter.attribute_id, status : constants.validationRequestStatus.COMPLETED}).then(function (rows) {
+        {attribute_id: filter.attribute_id, status : constants.validationRequestStatus.COMPLETED, timespan : timespanTimestamp}).then(function (rows) {
 
         let attributeValidationScore = {};
         attributeValidationScore.score = rows.length;
+        return cb(null, attributeValidationScore);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
+__private.getAttributeValidationCredibility = function (filter, cb) {
+
+    if (!filter.months || filter.months <= 0) {
+        return cb('The "months" query parameter must be a positive integer')
+    }
+
+    let timespanTimestamp = slots.getTime(moment().subtract(filter.months, 'months'));
+
+    library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationsForAttributeAndStatus,
+        {   attribute_id: filter.attributeId,
+            status : constants.validationRequestStatus.COMPLETED,
+            timespan : timespanTimestamp}).then(function (rows) {
+
+        let attributeValidationScore = {};
+        attributeValidationScore.credibility = rows.length;
         return cb(null, attributeValidationScore);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
@@ -553,6 +578,33 @@ shared.getAttributeValidationScore = function (req, cb) {
                 }
 
                 return cb(null, {attribute_validations: res.score});
+            });
+        });
+    });
+};
+
+
+shared.getAttributeValidationCredibility = function (req, cb) {
+
+    library.schema.validate(req.body, schema.getAttributeValidationCredibility, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+        attributes.getAttributeById(req.body, function (err, result) {
+
+            if (!result || !result.attribute) {
+                return cb(messages.ATTRIBUTE_NOT_FOUND);
+            }
+
+            __private.getAttributeValidationCredibility(req.body, function (err, res) {
+                if (err) {
+                    return cb(err)
+                }
+                if (!res) {
+                    return cb(null, {trust_points: 0});
+                }
+
+                return cb(null, {trust_points: res.credibility});
             });
         });
     });

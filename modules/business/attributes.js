@@ -138,6 +138,24 @@ __private.attachApi = function () {
     });
 };
 
+Attributes.getAttributeById = function (filter, cb) {
+    library.db.query(sql.AttributesSql.getAttributeById, {id: filter.attributeId}).then(function (rows) {
+        let data = {};
+        if (rows.length > 0) {
+            data = {
+                attribute: rows[0]
+            };
+        } else {
+            return cb(messages.ATTRIBUTE_NOT_FOUND)
+        }
+
+        return cb(null, data);
+    }).catch(function (err) {
+        library.logger.error("stack", err.stack);
+        return cb(err.message);
+    })
+};
+
 Attributes.getAttributesByFilter = function (filter, cb) {
 
     if (!filter.owner) {
@@ -165,7 +183,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
 
         function isAttributeRejectedWithNoMinNotarizationsInARowInFirstBatch(attributeDetails, id) {
             let attributeDetailsLocal = attributeDetails.filter(attribute => attribute.id = id).slice(0, constants.FIRST_NOTARIZATION_BATCH_SIZE)
-            return attributeDetailsLocal.length >= constants.FIRST_NOTARIZATION_BATCH_SIZE && !hasMinNotarizationsInARow(attributeDetailsLocal)
+            return !hasMinNotarizationsInARow(attributeDetailsLocal)
         }
 
         function hasMinNotarizationsInARow(attributeDetails) {
@@ -211,7 +229,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
         }
 
         library.db.query(sql.AttributesSql.getAttributesWithValidationDetails, {
-            oneYearSinceNow: slots.getTime(moment().subtract(1, 'year')),
+            since: slots.getTime(moment().subtract(constants.MONTHS_FOR_ACTIVE_VALIDATION, 'months')),
             now: slots.getTime(),
             owner: filter.owner,
             status: [constants.validationRequestStatus.COMPLETED, constants.validationRequestStatus.REJECTED],

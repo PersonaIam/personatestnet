@@ -147,7 +147,6 @@ describe('SEND FUNDS', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
-            sleep.msleep(SLEEP_TIME);
             done();
         });
     });
@@ -172,7 +171,6 @@ describe('SEND FUNDS', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
-            sleep.msleep(SLEEP_TIME);
             done();
         });
     });
@@ -197,7 +195,6 @@ describe('SEND FUNDS', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
-            sleep.msleep(SLEEP_TIME);
             done();
         });
     });
@@ -246,7 +243,6 @@ describe('SEND FUNDS', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
-            sleep.msleep(SLEEP_TIME);
             done();
         });
     });
@@ -271,7 +267,6 @@ describe('SEND FUNDS', function () {
                 'txId': res.body.transactionId,
                 'type': node.txTypes.SEND
             });
-            sleep.msleep(SLEEP_TIME);
             done();
         });
     });

@@ -165,7 +165,19 @@ module.exports = {
         },
         required: ['owner']
     },
-
+    getAttributeValidationCredibility: {
+        id: 'attributes.getAttributeValidationCredibility',
+        type: 'object',
+        properties: {
+            attributeId: {
+                type: 'integer',
+            },
+            months: {
+                type: 'integer',
+            }
+        },
+        required: ['months','attributeId']
+    },
     getIdentityUseRequest: {
         id: 'attributes.getIdentityUseRequest',
         type: 'object',
