@@ -183,7 +183,7 @@ Attributes.getAttributesByFilter = function (filter, cb) {
 
         function isAttributeRejectedWithNoMinNotarizationsInARowInFirstBatch(attributeDetails, id) {
             let attributeDetailsLocal = attributeDetails.filter(attribute => attribute.id = id).slice(0, constants.FIRST_NOTARIZATION_BATCH_SIZE)
-            return !hasMinNotarizationsInARow(attributeDetailsLocal)
+            return attributeDetailsLocal.length >= constants.FIRST_NOTARIZATION_BATCH_SIZE && !hasMinNotarizationsInARow(attributeDetailsLocal)
         }
 
         function hasMinNotarizationsInARow(attributeDetails) {
