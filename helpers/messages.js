@@ -25,7 +25,7 @@ module.exports = {
     VALIDATION_REQUEST_MISSING_FOR_ACTION : 'There is no validation request for this action',
     VALIDATION_REQUEST_MISSING_IN_STATUS_FOR_ACTION : 'There is no validation request that is pending approval or in progress for this attribute',
 
-    ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request mst be in progress for the action to take place',
+    ATTRIBUTE_VALIDATION_REQUEST_NOT_IN_PROGRESS: 'The specified attribute validation request must be in progress for the action to take place',
     ATTRIBUTE_VALIDATION_REQUEST_NOT_PENDING_APPROVAL : 'The specified attribute validation request must be pending approval for the action to take place',
 
     ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
@@ -84,6 +84,8 @@ module.exports = {
     IDENTITY_USE_REQUEST_FOR_INACTIVE_SERVICE : 'An identity use request cannot be created for an inactive service',
     IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE : 'No action can be performed on an identity use request which belongs to an inactive service',
     DECLINE_IDENTITY_USE_REQUEST_NO_REASON : 'A reason must be specified when declining an identity use request',
+    IDENTITY_USE_REQUEST_REJECTED_REASON : 'One of the attributes that is part of this identity use was rejected',
+    IDENTITY_USE_REQUEST_REJECTED_NO_ACTION : 'No action can be performed on a rejected identity use request',
 
     REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING : 'Cannot create identity use request : missing required service attributes',
     REQUIRED_SERVICE_ATTRIBUTES_ARE_MISSING_EXPIRED_OR_INACTIVE : 'Cannot create identity use request : some attributes are expired or are missing required validations',

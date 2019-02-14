@@ -196,7 +196,7 @@ IdentityUseDecline.prototype.dbFields = [
 IdentityUseDecline.prototype.dbSave = function (trs) {
 
     let params = {};
-    params.id = trs.asset.identityUseRequestId;
+    params.id = [trs.asset.identityUseRequestId];
     params.status = constants.identityUseRequestStatus.DECLINED;
     params.action = constants.identityUseRequestActions.DECLINE;
     params.reason = trs.asset.identityuse[0].reason;

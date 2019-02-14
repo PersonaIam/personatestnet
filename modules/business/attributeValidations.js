@@ -11,6 +11,7 @@ let messages = require('../../helpers/messages.js');
 let constants = require('../../helpers/constants.js');
 let _ = require('lodash');
 let attributes = require('./attributes.js');
+let identityUses = require('./identityUses.js');
 
 // Private fields
 let modules, library, self, __private = {}, shared = {};
@@ -327,6 +328,8 @@ __private.validationRequestAnswer = function (req, cb) {
                 return cb(messages.REJECTED_ATTRIBUTE);
             }
 
+            let dangerOfRejection = data.attributes[0].dangerOfRejection;
+
             let reqGetAttributeType = req;
             reqGetAttributeType.body.name =
                 req.body.asset.validation[0].type ? req.body.asset.validation[0].type : data.attributes[0].type;
@@ -343,6 +346,25 @@ __private.validationRequestAnswer = function (req, cb) {
 
                     if (err || !attributeValidationRequests || attributeValidationRequests.length === 0) {
                         return cb(messages.VALIDATION_REQUEST_MISSING_FOR_ACTION);
+                    }
+
+                    if (dangerOfRejection && req.body.asset.validation[0].answer === constants.validationRequestActions.REJECT) {
+                        identityUses.getIdentityUseRequestsByFilter({owner : req.body.asset.validation[0].owner}, function (err, data) {
+                            if (data.identityUseRequests && data.identityUseRequests.length > 0) {
+                                let type = req.body.asset.validation[0].type;
+                                let identityUsesIdsToReject = [];
+                                data.identityUseRequests.forEach(function (request) {
+                                    let requestAttributeTypes = JSON.parse(request.attribute_types)
+                                    if (requestAttributeTypes && requestAttributeTypes.length > 0 &&
+                                        requestAttributeTypes.filter(attributeType => attributeType === type).length > 0) {
+                                            identityUsesIdsToReject.push(request.id)
+                                    }
+                                });
+                                if (identityUsesIdsToReject.length > 0) {
+                                    req.body.asset.identityUsesIdsToReject = identityUsesIdsToReject;
+                                }
+                            }
+                        })
                     }
 
                     // Filter out canceled, completed, rejected and declined validation requests, no answer can be performed on these types of requests

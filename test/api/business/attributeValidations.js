@@ -3426,40 +3426,6 @@ describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
             });
         });
     });
-
-    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
-        'by providing the attribute id of the one without any validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 0', function (done) {
-
-        let param = {};
-        param.months = 1;
-        getAttribute(OWNER, EMAIL, function (err, data) {
-            param.attributeId = data.body.attributes[0].id;
-            getAttributeCredibility(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(0);
-                done();
-            });
-        });
-    });
-
-    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
-        'by providing the attribute id of the one that has 1 validation. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 1', function (done) {
-
-        let param = {};
-        param.months = 1;
-        getAttribute(OWNER, EMAIL, function (err, data) {
-            param.attributeId = data.body.attributes[1].id;
-            getAttributeCredibility(param, function (err, res) {
-                console.log(res.body);
-                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
-                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(1);
-                done();
-            });
-        });
-    });
 });
 
 describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE', function () {
@@ -3695,6 +3661,40 @@ describe('ATTRIBUTE VALIDATION ACTIONS ON MULTIPLE ATTRIBUTES ON THE SAME TYPE',
             });
         });
     });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
+        'by providing the attribute id of the one without any validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 0', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[0].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points of an attribute type (EMAIL) that has 2 attributes, ' +
+        'by providing the attribute id of the one that has 1 validation. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "trust_points" = 1', function (done) {
+
+        let param = {};
+        param.months = 1;
+        getAttribute(OWNER, EMAIL, function (err, data) {
+            param.attributeId = data.body.attributes[1].id;
+            getAttributeCredibility(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(1);
+                done();
+            });
+        });
+    });
 });
 
 describe('CREATE VALIDATION REQUESTS - ALREADY EXISTING REQUESTS SCENARIOS', function () {
@@ -3730,7 +3730,7 @@ describe('CREATE VALIDATION REQUESTS - ALREADY EXISTING REQUESTS SCENARIOS', fun
         });
     });
 
-    it('As a VALIDATOR, I want to Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that has maximum length (1024 characters). ' +
+    it('Decline a validation request (OWNER, PHONE_NUMBER) by providing a reason that has maximum length (1024 characters). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;

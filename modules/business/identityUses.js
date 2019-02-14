@@ -126,7 +126,7 @@ __private.attachApi = function () {
     });
 };
 
-__private.getIdentityUseRequestsByFilter = function (filter, cb) {
+IdentityUses.getIdentityUseRequestsByFilter = function (filter, cb) {
     if (!filter.serviceProvider && !filter.serviceId && !(filter.serviceName && filter.serviceProvider) && !filter.attributeId && !filter.owner) {
         return cb(messages.INCORRECT_IDENTITY_USE_PARAMETERS);
     }
@@ -245,7 +245,7 @@ shared.requestIdentityUse = function (req, cb) {
                         req.body.serviceId = serviceResult.services[0].id;
                         req.body.owner = req.body.asset.identityuse[0].owner;
 
-                        __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
+                        IdentityUses.getIdentityUseRequestsByFilter(req.body, function (err, data) {
                             if (err) {
                                 return cb(err);
                             }
@@ -316,7 +316,7 @@ shared.getIdentityUseRequests = function (req, cb) {
             return cb(err[0].message);
         }
 
-        __private.getIdentityUseRequestsByFilter(req.body, function (err, res) {
+        IdentityUses.getIdentityUseRequestsByFilter(req.body, function (err, res) {
             if (err) {
                 return cb(err);
             }
@@ -386,7 +386,7 @@ __private.identityUseAnswer = function (req, cb) {
                     req.body.serviceId = data.services[0].id;
                     req.body.owner = req.body.asset.identityuse[0].owner;
 
-                    __private.getIdentityUseRequestsByFilter(req.body, function (err, data) {
+                    IdentityUses.getIdentityUseRequestsByFilter(req.body, function (err, data) {
                         if (err || !data.identityUseRequests || data.identityUseRequests.length === 0) {
                             return cb(messages.IDENTITY_USE_REQUEST_MISSING_FOR_ACTION);
                         }
@@ -451,6 +451,10 @@ __private.identityUseAnswer = function (req, cb) {
 };
 
 __private.checkIdentityUseAnswer = function(params, cb) {
+
+    if (params.status === constants.identityUseRequestStatus.REJECTED) {
+        return cb(messages.IDENTITY_USE_REQUEST_REJECTED_NO_ACTION);
+    }
 
     if (params.answer === constants.identityUseRequestActions.APPROVE) {
         if (params.status !== constants.identityUseRequestStatus.PENDING_APPROVAL) {

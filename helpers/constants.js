@@ -119,7 +119,8 @@ module.exports = {
         ACTIVE : 'ACTIVE',
         DECLINED : 'DECLINED',
         ENDED : 'ENDED',
-        CANCELED : 'CANCELED'
+        CANCELED : 'CANCELED',
+        REJECTED : 'REJECTED'
     },
     identityUseRequestActions : {
         APPROVE : 'APPROVE',

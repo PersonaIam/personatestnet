@@ -211,6 +211,14 @@ AttributeValidationRequestReject.prototype.dbSave = function (trs) {
     params.reason = trs.asset.validation[0].reason;
 
     library.db.query(sql.AttributeValidationRequestsSql.updateValidationRequestWithReason, params).then(function (err) {
+        if (trs.asset.identityUsesIdsToReject) {
+            let paramsReject = {};
+            paramsReject.status = constants.identityUseRequestStatus.REJECTED;
+            paramsReject.reason = messages.IDENTITY_USE_REQUEST_REJECTED_REASON;
+            paramsReject.id = trs.asset.identityUsesIdsToReject;
+            library.db.query(sql.IdentityUseRequestsSql.updateIdentityUseWithReason, paramsReject).then(function (err) {
+            });
+        }
     });
 
     return {

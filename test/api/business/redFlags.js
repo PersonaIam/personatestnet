@@ -49,6 +49,10 @@ const VALIDATOR_8 = 'LXg5EpSY53chrT5PwkguVgQvcT252mNkog';
 const VALIDATOR_SECRET_8 = "second level unit check reward build obey remind quarter shop salute topic";
 const VALIDATOR_PUBLIC_KEY_8 = '029f5c1d73571903e972e08f2489deb08d1827c1f3a82477436f378fa3bbd09d1e';
 
+const PROVIDER = 'LXg5EpSY53chrT5PwkguVgQvcT252mNkog';
+const PROVIDER_SECRET = "client river pact arrest kite order tattoo across since phone main sleep";
+const PROVIDER_PUBLIC_KEY = '0267f0c840ef35c605cb09d7400db6d21a0638d39e7b8c10ca05335537ca557830';
+
 const LAST_NAME = 'last_name';
 const PHONE_NUMBER = 'phone_number';
 const BIRTHPLACE = 'birthplace';
@@ -61,11 +65,18 @@ const NEW_BIRTHPLACE_VALUE = 'Birmingham';
 const ALIAS_VALUE = 'Styx';
 const NEW_ALIAS_VALUE = 'Spoons';
 
+const SERVICE_NAME = 'Sharon';
+const SERVICE_NAME_2 = 'Shirin';
+const DESCRIPTION_VALUE = 'Gate';
+const CUSTOM_VALIDATIONS = 1;
+
 // RESULTS
 
 const TRANSACTION_ID = 'transactionId';
 const SUCCESS = 'success';
 const ERROR = 'error';
+const STATUS = 'status';
+const REASON = 'reason';
 const TRUE = true;
 const FALSE = false;
 
@@ -419,6 +430,61 @@ describe('CREATE ATTRIBUTES', function () {
         });
     });
 
+    it('Create a service for PROVIDER based on LAST_NAME. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+        let param = {};
+        param.name = SERVICE_NAME;
+        param.attributeTypes = [BIRTHPLACE];
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
+
+    it('Create a service for PROVIDER based on PHONE_NUMBER. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            balance = parseInt(res.body.balance);
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+        });
+        let param = {};
+        param.name = SERVICE_NAME_2;
+        param.attributeTypes = [PHONE_NUMBER];
+        let request = createServiceRequest(param);
+
+        postService(request, function (err, res) {
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.createservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.createservice);
+            });
+            done();
+        });
+    });
 });
 
 describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', function () {
@@ -890,8 +956,8 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
@@ -911,6 +977,39 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(0);
             node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(0);
+            done();
+        });
+    });
+
+    it('Create an Identity Use Request for a service that requires 1 attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.values = [{type : BIRTHPLACE, value : 'Louisville'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
             done();
         });
     });
@@ -942,8 +1041,8 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
@@ -1002,7 +1101,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
     });
 
     it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NNR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, "dangerOfRejection" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1013,6 +1112,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(BIRTHPLACE);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('dangerOfRejection').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
             node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
             done();
@@ -1071,6 +1171,43 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
         });
     });
 
+    it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that is about to be rejected with 3 straight red flags if the next validation fails. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, and "dangerOfRejection" true', function (done) {
+        getAttribute(OWNER, BIRTHPLACE, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('owner').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('value').to.eq(BIRTHPLACE_VALUE);
+            node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
+            node.expect(res.body.attributes[0]).to.have.property('type').to.eq(BIRTHPLACE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('dangerOfRejection').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of an Identity Use Request which has an attribute that is about to be rejected with 3 straight red flags if the next validation fails. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, status is PENDING_APPROVAL', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                done();
+            });
+        });
+    });
+
     it('Reject a validation request (BIRTHPLACE, VALIDATOR_5). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -1106,7 +1243,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
     });
 
     it('As a PUBLIC user, I want to Get the details of an attribute (BIRTHPLACE) that has (NNRRR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, 3 red flags and 3 yellow flags', function (done) {
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, "dangerOfRejection" false, 3 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, BIRTHPLACE, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1117,6 +1254,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(BIRTHPLACE);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('dangerOfRejection').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
             node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
@@ -1236,6 +1374,103 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.REJECTED_ATTRIBUTE);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of a Rejected Identity Use Request (one of the attributes received 3 straight red flags). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, status is REJECTED', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.REJECTED);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_REASON);
+                done();
+            });
+        });
+    });
+
+    it('As a PROVIDER, I want to Approve a REJECTED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_REJECTED_NO_ACTION', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_NO_ACTION);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Decline a REJECTED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_REJECTED_NO_ACTION', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_NO_ACTION);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to End a REJECTED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_REJECTED_NO_ACTION', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_NO_ACTION);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Cancel a REJECTED Identity Use Request. ' +
+        'EXPECTED : FAILURE. ERROR : IDENTITY_USE_REQUEST_REJECTED_NO_ACTION', function (done) {
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_NO_ACTION);
             done();
         });
     });
@@ -1441,7 +1676,7 @@ describe('Use Case #1 : NNRRR - 2 Notarizations followed by 3 Rejections', funct
 
 });
 
-describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 3 Notarizations in a row', function () {
+describe('Use Case #2 : RRNRNNN - 4 Validations without a consensus followed by 3 Notarizations in a row', function () {
 
     it('Create a validation request (ALIAS, VALIDATOR). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -1900,7 +2135,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
 
     // Notarizations (N) and Rejections (R) start here ...
 
-    it('Notarize a validation request (ALIAS, VALIDATOR). ' +
+    it('Reject a validation request (ALIAS, VALIDATOR). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID' , function (done) {
 
         let unconfirmedBalance = 0;
@@ -1916,10 +2151,11 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         params.type = ALIAS;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
+        params.reason = REASON;
         params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
-        postNotarizeValidationAttributeRequest(request, function (err, res) {
+        postRejectValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(TRANSACTION_ID);
@@ -1927,15 +2163,15 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestreject);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestreject);
             });
             done();
         });
     });
 
-    it('Get the details of an attribute (ALIAS) that has (N) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
+    it('Get the details of an attribute (ALIAS) that has (R) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flags and 1 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1944,10 +2180,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(0);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(0);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
             done();
         });
     });
@@ -1986,8 +2222,8 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RR) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -1996,10 +2232,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
             done();
         });
     });
@@ -2031,15 +2267,15 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             getBalance(VALIDATOR_3, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RRN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2048,10 +2284,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
             done();
         });
     });
@@ -2090,8 +2326,8 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RRNR) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2100,10 +2336,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
         });
     });
@@ -2135,15 +2371,15 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             getBalance(VALIDATOR_5, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RRNRN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2152,10 +2388,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
         });
     });
@@ -2187,15 +2423,15 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             getBalance(VALIDATOR_6, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRNN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RRNRNN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -2204,10 +2440,10 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(ALIAS_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(ALIAS);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
         });
     });
@@ -2239,14 +2475,14 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             getBalance(VALIDATOR_7, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (NRNRNNN) validations. ' +
+    it('As a PUBLIC user, I want to Get the details of an attribute (ALIAS) that has (RRNRNNN) validations. ' +
         'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, ALIAS, function (err, res) {
             console.log(res.body);
@@ -2259,7 +2495,7 @@ describe('Use Case #2 : NRNRNNN - 4 Validations without a consensus followed by 
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(0);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
         });
     });
@@ -3068,8 +3304,8 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
             getBalance(VALIDATOR_2, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
@@ -3120,8 +3356,8 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
             getBalance(VALIDATOR_3, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
@@ -3172,8 +3408,8 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
             getBalance(VALIDATOR_4, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
@@ -3355,7 +3591,7 @@ describe('Use Case #3 : RNNNRRR - Rejection followed by 3 Notarizations and 3 mo
 
 });
 
-describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 Validations', function () {
+describe('Use Case #4 : NRNNRNR - No 3 Consecutive Notarizations in the first 7 Validations', function () {
 
     it('Create a validation request (PHONE_NUMBER, VALIDATOR). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
@@ -3814,7 +4050,7 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
 
     // Notarizations (N) and Rejections (R) start here ...
 
-    it('Reject a validation request (LAST_NAME, VALIDATOR). ' +
+    it('Notarize a validation request (LAST_NAME, VALIDATOR). ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
         let unconfirmedBalance = 0;
@@ -3830,10 +4066,10 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         params.type = PHONE_NUMBER;
         params.secret = VALIDATOR_SECRET;
         params.publicKey = VALIDATOR_PUBLIC_KEY;
-        params.reason = "reason";
+        params.validationType = constants.validationType.FACE_TO_FACE;
 
         let request = createAnswerAttributeValidationRequest(params);
-        postRejectValidationAttributeRequest(request, function (err, res) {
+        postNotarizeValidationAttributeRequest(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(TRANSACTION_ID);
@@ -3841,15 +4077,15 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             getBalance(VALIDATOR, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestreject);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestreject);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('Get the details of an attribute (PHONE_NUMBER) that has (R) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
+    it('Get the details of an attribute (PHONE_NUMBER) that has (N) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 0 red flags and 0 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -3858,10 +4094,43 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(0);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(0);
+            done();
+        });
+    });
+
+    it('Create an Identity Use Request for a service that requires 2 attributes. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE_NAME_2;
+        param.values = [{type : PHONE_NUMBER, value : '12345'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
             done();
         });
     });
@@ -3900,8 +4169,8 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NR) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -3910,10 +4179,10 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
             done();
         });
     });
@@ -3945,15 +4214,15 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             getBalance(VALIDATOR_3, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NRN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -3962,10 +4231,10 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
             done();
         });
     });
@@ -3997,15 +4266,15 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             getBalance(VALIDATOR_4, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NRNN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 1 red flag and 1 yellow flag', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -4014,10 +4283,10 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(1);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(1);
             done();
         });
     });
@@ -4056,8 +4325,8 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 3 red flags and 3 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NRNNR) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -4066,10 +4335,10 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
             done();
         });
     });
@@ -4101,15 +4370,15 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             getBalance(VALIDATOR_6, function (err, res) {
                 let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
                 let balanceAfter = parseInt(res.body.balance);
-                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestdecline);
-                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestdecline);
+                node.expect(balance - balanceAfter === constants.fees.attributevalidationrequestnotarize);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.attributevalidationrequestnotarize);
             });
             done();
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNRN) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" false, 3 red flags and 3 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NRNNRN) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" true, "rejected" false, 2 red flags and 2 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -4118,11 +4387,30 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('value').to.eq(PHONE_NUMBER_VALUE);
             node.expect(res.body.attributes[0]).to.have.property('type').to.be.a('string');
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
-            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('active').to.eq(TRUE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(FALSE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('dangerOfRejection').to.eq(TRUE);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(2);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(2);
             done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of an Identity Use Request for an attribute that is about to be rejected on the next failed notarization. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, status is PENDING_APPROVAL', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME_2}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.PENDING_APPROVAL);
+                done();
+            });
         });
     });
 
@@ -4160,8 +4448,8 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
         });
     });
 
-    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (RRNNRNR) validations. ' +
-        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, 4 red flags and 4 yellow flags', function (done) {
+    it('As a PUBLIC user, I want to Get the details of an attribute (PHONE_NUMBER) that has (NRNNRNR) validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, with "active" false, "rejected" true, "dangerOfRejection" false, 3 red flags and 3 yellow flags', function (done) {
         getAttribute(OWNER, PHONE_NUMBER, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
@@ -4172,9 +4460,29 @@ describe('Use Case #4 : RRNNRNR - No 3 Consecutive Notarizations in the first 7 
             node.expect(res.body.attributes[0]).to.have.property('type').to.eq(PHONE_NUMBER);
             node.expect(res.body.attributes[0]).to.have.property('active').to.eq(FALSE);
             node.expect(res.body.attributes[0]).to.have.property('rejected').to.eq(TRUE);
-            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(4);
-            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(4);
+            node.expect(res.body.attributes[0]).to.have.property('dangerOfRejection').to.eq(FALSE);
+            node.expect(res.body.attributes[0]).to.have.property('redFlags').to.eq(3);
+            node.expect(res.body.attributes[0]).to.have.property('yellowFlags').to.eq(3);
             done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of a Rejected Identity Use Request, where one of the attributes did not get 3 straight notarizations in the first 7 validations. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Result, status is REJECTED', function (done) {
+
+        let param = {};
+
+        getServices({provider: PROVIDER, name: SERVICE_NAME_2}, function (err, res) {
+            param.serviceId = res.body.services[0].id;
+            param.owner = OWNER;
+            getIdentityUseRequests(param, function (err, res) {
+                console.log(res.body);
+                node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+                node.expect(res.body).to.have.property('identity_use_requests').to.have.length(1);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(STATUS).to.be.eq(constants.identityUseRequestStatus.REJECTED);
+                node.expect(res.body.identity_use_requests[0]).to.have.property(REASON).to.be.eq(messages.IDENTITY_USE_REQUEST_REJECTED_REASON);
+                done();
+            });
         });
     });
 });
@@ -4287,6 +4595,66 @@ function createAnswerAttributeValidationRequest(param) {
     return request;
 }
 
+function createServiceRequest(param) {
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.service = {};
+    request.asset.service.name = param.name ? param.name : SERVICE_NAME;
+    request.asset.service.description = param.description ? param.description : DESCRIPTION_VALUE;
+    request.asset.service.provider = param.provider ? param.provider : PROVIDER;
+    request.asset.service.attributeTypes = param.attributeTypes ? param.attributeTypes : [''];
+    request.asset.service.validations_required = param.validations ? param.validations : CUSTOM_VALIDATIONS;
+
+    console.log(JSON.stringify(request));
+    return request;
+}
+
+function createIdentityUseRequest(param) {
+
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.identityuse = [];
+    request.asset.identityuse[0] = {};
+    request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
+    request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
+    request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
+    request.asset.identityuse[0].attributes = param.values ? param.values : [{type : IDENTITY_CARD, value:'HHH'}];
+
+    console.log(request);
+    return request;
+}
+
+function createAnswerIdentityUseRequest(param) {
+    let request = {};
+    if (!param) {
+        param = {}
+    }
+    request.secret = param.secret ? param.secret : SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.asset = {};
+    request.asset.identityuse = [];
+    request.asset.identityuse[0] = {};
+    request.asset.identityuse[0].owner = param.owner ? param.owner : OWNER;
+    request.asset.identityuse[0].serviceName = param.serviceName ? param.serviceName : SERVICE_NAME;
+    request.asset.identityuse[0].serviceProvider = param.serviceProvider ? param.serviceProvider : PROVIDER;
+    if (param.reason){
+        request.asset.identityuse[0].reason = param.reason;
+    }
+
+    console.log(request);
+    return request;
+}
+
 function getAttributeTypeByName(name, done) {
     node.get('/api/attributes/types?name=' + name, done);
 }
@@ -4323,6 +4691,30 @@ function postCancelValidationAttributeRequest(params, done) {
     node.post('/api/attribute-validations/cancel', params, done);
 }
 
+function postService(params, done) {
+    node.post('/api/services', params, done);
+}
+
+function postIdentityUseRequest(params, done) {
+    node.post('/api/identity-use', params, done);
+}
+
+function postApproveIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/approve', params, done);
+}
+
+function postDeclineIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/decline', params, done);
+}
+
+function postEndIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/end', params, done);
+}
+
+function postCancelIdentityUseRequest(params, done) {
+    node.post('/api/identity-use/cancel', params, done);
+}
+
 function getAttribute(owner, typeName, done) {
     getAttributeTypeByName(typeName, function (err, res) {
         let type;
@@ -4354,27 +4746,47 @@ function getAttributeValidationRequest(params, done) {
     node.get(url, done);
 }
 
-function getAttributeValidationScore(params, done) {
-    let url = '/api/attribute-validations/validationscore';
-    if (params.type || params.owner) {
-        url += '?';
-    }
-    if (params.type) {
-        url += 'type=' + '' + params.type;
-    }
-    if (params.owner) {
-        url += '&owner=' + '' + params.owner;
-    }
-
-    if (params.attributeId) {
-        url += '&attributeId=' + '' + params.attributeId;
-    }
-    node.get(url, done);
-
-}
-
 function getBalance(address, done) {
     node.get('/api/accounts/getBalance?address=' + address, done);
+}
+
+function getServices(params, done) {
+
+    let url = '/api/services';
+    if (params.name || params.provider || params.status) {
+        url += '?';
+    }
+    if (params.name) {
+        url += '&name=' + '' + params.name;
+    }
+    if (params.provider) {
+        url += '&provider=' + '' + params.provider;
+    }
+    if (params.status) {
+        url += '&status=' + '' + params.status;
+    }
+    node.get(url, done);
+}
+
+function getIdentityUseRequests(params, done) {
+    let url = '/api/identity-use';
+    if (params.owner && params.serviceId) {
+        url += '?owner=' + '' + params.owner + '&serviceId=' + '' + params.serviceId;
+    } else {
+        if (params.serviceName || params.serviceProvider || params.owner) {
+            url += '?';
+        }
+        if (params.serviceName) {
+            url += '&serviceName=' + '' + params.serviceName;
+        }
+        if (params.serviceProvider) {
+            url += '&serviceProvider=' + '' + params.serviceProvider;
+        }
+        if (params.owner) {
+            url += '&owner=' + '' + params.owner;
+        }
+    }
+    node.get(url, done);
 }
 
 function putTransaction(params, done) {

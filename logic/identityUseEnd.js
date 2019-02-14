@@ -196,7 +196,7 @@ IdentityUseEnd.prototype.dbFields = [
 IdentityUseEnd.prototype.dbSave = function (trs) {
 
     let params = {};
-    params.id = trs.asset.identityUseRequestId;
+    params.id = [trs.asset.identityUseRequestId];
     params.status = constants.identityUseRequestStatus.ENDED;
     params.action = constants.identityUseRequestActions.END;
     params.reason = trs.asset.identityuse[0].reason;

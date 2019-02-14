@@ -178,7 +178,7 @@ let IdentityUseRequestsSql = {
     'WHERE iur.owner = ${owner} AND iur.service_id = ${service_id} AND (avra.action = \'NOTARIZE\' OR avra.action = \'REJECT\')',
 
     updateIdentityUseRequest : 'UPDATE identity_use_requests SET status = ${status} WHERE id = ${id}',
-    updateIdentityUseWithReason : 'UPDATE identity_use_requests SET status = ${status}, reason = ${reason} WHERE id = ${id}',
+    updateIdentityUseWithReason : 'UPDATE identity_use_requests SET status = ${status}, reason = ${reason} WHERE id = ANY(${id})',
 };
 
 let AttributeConsumptionsSql = {
