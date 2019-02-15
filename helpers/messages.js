@@ -30,7 +30,7 @@ module.exports = {
 
     ASSOCIATIONS_NOT_SUPPORTED_FOR_NON_FILE_TYPES : 'Associations are not supported for non-file attribute types',
     ATTRIBUTE_ASSOCIATION_BASE_ATTRIBUTE_NOT_A_FILE : 'Incorrect association provided : The base attribute must be of data type file',
-    ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS : 'Incorrect association provided : one or more of the attributes to be associated does not belong to the current owner',
+    ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER : 'Incorrect association provided : one or more of the attributes to be associated does not exist or does not belong to the current owner',
     INCORRECT_VALIDATION_REQUEST_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
     INCORRECT_IDENTITY_USE_PARAMETERS : 'If the serviceName parameter is specified, the serviceProvider parameter must also be specified',
     INCORRECT_MONTHS_VALUE : 'The "months" query parameter must be a positive integer',

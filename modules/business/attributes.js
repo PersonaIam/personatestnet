@@ -302,7 +302,7 @@ __private.checkAssociations = function (filter, cb) {
                 }
             });
             if (diffOwners) {
-                return cb(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS)
+                return cb(messages.ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER)
             } else {
                 return cb(null)
             }

@@ -359,7 +359,7 @@ describe('CREATE ATTRIBUTE', function () {
     });
 
     it('As an OWNER, I want to Create a non file attribute and provide as association an attribute that does not exist. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -369,7 +369,7 @@ describe('CREATE ATTRIBUTE', function () {
         let request = createAttributeRequest(params);
         postAttribute(request, function (err, res) {
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER);
             done();
         });
     });
@@ -408,7 +408,7 @@ describe('CREATE ATTRIBUTE', function () {
     });
 
     it('As an OWNER, I want to Create a non file attribute and provide as association an attribute that belongs to a different user. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -419,14 +419,14 @@ describe('CREATE ATTRIBUTE', function () {
             let request = createAttributeRequest(params);
             postAttribute(request, function (err, res) {
                 node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+                node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER);
                 done();
             });
         });
     });
 
     it('As an OWNER, I want to Create a non file attribute and provide as association 2 attributes, one of which belongs to a different user. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS', function (done) {
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER', function (done) {
 
         let params = {};
         params.owner = OWNER;
@@ -439,7 +439,7 @@ describe('CREATE ATTRIBUTE', function () {
                 let request = createAttributeRequest(params);
                 postAttribute(request, function (err, res) {
                     node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-                    node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DIFFERENT_OWNERS);
+                    node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER);
                     done();
                 });
             });
