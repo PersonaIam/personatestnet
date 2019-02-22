@@ -1,42 +1,12 @@
-
-Persona testnet platform. For more information please refer to our website: https://persona.im.
+Persona testnet platform.
+This is a fork from Ark with additional identity management support
+For more information please refer to our website: https://persona.im.
 
 This version is still alpha, use at your own risks
-
-<!-- ## Install, Upgrade etc...
-You need to provision a linux (ubuntu tested) server (digital ocean, vultur or other).
-
-Then use the excellent ark-commander script
-```
-cd
-wget https://ark.io/ARKcommander.sh
-bash ARKcommander.sh
-```
-
-For developers, please read the "Developer Installation" section below.  
-
-or Alternatively run
-```
-cd
-wget https://ark.io/DARKcommander.sh
-bash DARKcommander.sh
-``` -->
-
-## Details
-
-This is a fork from Ark with the following features:
-- Ability to register a name with an address
-- Ability to verify a user`s name through signing the registered name
-- Ability to list the verifications
 
 ### Planned features:
 - Add IPFS in order to register documents
 -
-
-
-### Performance
-- 
-
 
 ## Developer Installation
 
@@ -50,7 +20,7 @@ To start the Vagrant environment:
 vagrant up
 ```
 
-All dependency installation and configuration for the dev environment is in the `VagrantFile`. After installation, ark-node will automatically start and log all output to the console.
+All dependency installation and configuration for the dev environment is in the `VagrantFile`. After installation, the node will automatically start and log all output to the console.
 
 To log into the Vagrant environment:
 
@@ -157,24 +127,15 @@ Obviously you can hack away tasks/createGenesisBlock.js for your own custom use.
 
 You can the start with your own chain on a single node (all delegates will forge on your single node) using:
 ```
-createdb ark_newtest
+createdb persona_newtest
 npm run start:newtest
 ```
 
 Then you can distribute the config.json (without the delegates secrets inside, and with custom peers settings) to peers to let them join your chain
 
 
-## Tests
-Load git submodule [ark-js](https://github.com/arkecosystem/ark-js):
 ```
-git submodule init
-git submodule update
-```
-
-You should run using test configurations
-
-```
-npm run start:test
+npm run start:testnet
 ```
 
 Run the test suite:
@@ -203,6 +164,7 @@ peace vanish bleak box tuna woman rally manage undo royal lucky since
 - Pavel Nekrasov <landgraf.paul@gmail.com>
 - Sebastian Stupurac <stupurac.sebastian@gmail.com>
 - Oliver Beddows <oliver@lisk.io>
+- Remus Golgot <remus@persona.im>
 
 ## License
 
@@ -212,7 +174,7 @@ Copyright (c) 2016-2017 Ark
 Copyright (c) 2016 Lisk
 Copyright (c) 2014-2015 Crypti
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:  
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
