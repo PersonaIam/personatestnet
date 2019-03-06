@@ -217,6 +217,8 @@ shared.requestIdentityUse = function (req, cb) {
                         if (err) {
                             return cb(err);
                         }
+                        req.body.asset.identityuse[0].attributes.map(attribute => {
+                            attribute.attributeId = ownerAttributes.attributes.filter(attr => attr.type === attribute.type)[0].id});
                         let ownerAttributesActiveNotExpiredWithValidations = ownerAttributes.attributes.filter(attribute =>
 
                             attribute.active &&                                                                 // attribute has to be active
