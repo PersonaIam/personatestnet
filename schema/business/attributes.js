@@ -170,13 +170,16 @@ module.exports = {
         type: 'object',
         properties: {
             attributeId: {
-                type: 'integer',
+                type: 'integer'
             },
             months: {
-                type: 'integer',
+                type: 'integer'
+            },
+            owner: {
+                type: 'string'
             }
         },
-        required: ['months','attributeId']
+        required: ['months']
     },
     getIdentityUseRequest: {
         id: 'attributes.getIdentityUseRequest',

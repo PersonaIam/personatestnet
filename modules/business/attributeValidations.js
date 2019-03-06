@@ -198,18 +198,44 @@ __private.getAttributeValidationScore = function (filter, cb) {
 __private.getAttributeValidationCredibility = function (filter, cb) {
 
     if (!filter.months || filter.months <= 0) {
-        return cb('The "months" query parameter must be a positive integer')
+        return cb(messages.INCORRECT_MONTHS_VALUE)
+    }
+    if (!filter.owner && !filter.attributeId ) {
+        return cb(messages.INCORRECT_CREDIBILITY_PARAMETERS)
+    }
+    if (filter.owner && filter.attributeId) {
+        return cb(messages.INCORRECT_CREDIBILITY_PARAMETERS)
     }
 
     let timespanTimestamp = slots.getTime(moment().subtract(filter.months, 'months'));
+    let query, params;
 
-    library.db.query(sql.AttributeValidationRequestsSql.getAttributeValidationsForAttributeAndStatus,
-        {   attribute_id: filter.attributeId,
-            status : constants.validationRequestStatus.COMPLETED,
-            timespan : timespanTimestamp}).then(function (rows) {
-
+    params = {status: constants.validationRequestStatus.COMPLETED, timespan: timespanTimestamp};
+    if (filter.attributeId) {
+        query = sql.AttributeValidationRequestsSql.getAttributeValidationsForAttributeAndStatus;
+        params.attribute_id = filter.attributeId;
+    } else if (filter.owner) {
+        query = sql.AttributeValidationRequestsSql.getAttributeValidationsForOwnerAndStatus;
+        params.owner = filter.owner;
+    }
+    library.db.query(query, params).then(function (rows) {
         let attributeValidationScore = {};
-        attributeValidationScore.credibility = rows.length;
+        if (filter.attributeId) {
+            attributeValidationScore.trust_points = rows.length;
+            attributeValidationScore.attributeId = filter.attributeId;
+        } else {
+            let attributeGroups = _.groupBy(rows, function(row) {
+                return row.attribute_id;
+            });
+            let trustPoints = [];
+            Object.keys(attributeGroups).forEach(function (group) {
+                trustPoints.push({
+                    attributeId : parseInt(group),
+                    credibility : attributeGroups[group].length
+                })
+            })
+            attributeValidationScore.trust_points = trustPoints;
+        }
         return cb(null, attributeValidationScore);
     }).catch(function (err) {
         library.logger.error("stack", err.stack);
@@ -605,19 +631,12 @@ shared.getAttributeValidationScore = function (req, cb) {
     });
 };
 
-
 shared.getAttributeValidationCredibility = function (req, cb) {
 
     library.schema.validate(req.body, schema.getAttributeValidationCredibility, function (err) {
         if (err) {
             return cb(err[0].message);
         }
-        attributes.getAttributeById(req.body, function (err, result) {
-
-            if (!result || !result.attribute) {
-                return cb(messages.ATTRIBUTE_NOT_FOUND);
-            }
-
             __private.getAttributeValidationCredibility(req.body, function (err, res) {
                 if (err) {
                     return cb(err)
@@ -626,10 +645,9 @@ shared.getAttributeValidationCredibility = function (req, cb) {
                     return cb(null, {trust_points: 0});
                 }
 
-                return cb(null, {trust_points: res.credibility});
+                return cb(null, {trust_points: res.trust_points});
             });
         });
-    });
 };
 
 shared.approveValidationRequest = function (req, cb) {

@@ -33,6 +33,7 @@ module.exports = {
     ATTRIBUTE_ASSOCIATION_DOES_NOT_EXIST_FOR_CURRENT_OWNER : 'Incorrect association provided : one or more of the attributes to be associated does not exist or does not belong to the current owner',
     INCORRECT_VALIDATION_REQUEST_PARAMETERS : 'Either the attribute id, the validation request validator or the attribute owner must be provided',
     INCORRECT_IDENTITY_USE_PARAMETERS : 'If the serviceName parameter is specified, the serviceProvider parameter must also be specified',
+    INCORRECT_CREDIBILITY_PARAMETERS : 'Either the owner or the attributeId parameters must be provided',
     INCORRECT_MONTHS_VALUE : 'The "months" query parameter must be a positive integer',
     INCORRECT_VALIDATION_TYPE : 'Incorrect validation type',
 

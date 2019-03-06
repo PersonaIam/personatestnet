@@ -3316,17 +3316,32 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
 
 describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
 
-    it('As a PUBLIC user, I want to Get the credibility/trust points for an attribute that does not exist. ' +
+    it('As a PUBLIC user, I want to Get the credibility/trust points by only providing the months parameter. ' +
         'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
 
         let param = {};
-        param.attributeId = 777;
         param.months = 777;
 
         getAttributeCredibility(param, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
-            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.ATTRIBUTE_NOT_FOUND);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_CREDIBILITY_PARAMETERS);
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points by providing both the owner and the attributeId. ' +
+        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
+
+        let param = {};
+        param.months = 777;
+        param.attributeId = 1;
+        param.owner = OWNER;
+
+        getAttributeCredibility(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.INCORRECT_CREDIBILITY_PARAMETERS);
             done();
         });
     });
@@ -3392,6 +3407,21 @@ describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
                 node.expect(res.body).to.have.property(TRUST_POINTS).to.be.eq(0);
                 done();
             });
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the credibility/trust points for all attributes of a given OWNER that has some completed validations. ' +
+        'EXPECTED : SUCCESS. RESULT : Multiple results', function (done) {
+
+        let param = {};
+        param.months = 1;
+        param.owner = OWNER;
+        getAttributeCredibility(param, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRUST_POINTS);
+            node.expect(res.body).to.have.property(TRUST_POINTS).to.have.length(3);
+            done();
         });
     });
 
@@ -4023,11 +4053,14 @@ function getAttributeValidationScore(params, done) {
 
 function getAttributeCredibility(params, done) {
     let url = '/api/attribute-validations/credibility';
-    if (params.attributeId || params.months) {
+    if (params.attributeId || params.months || params.owner) {
         url += '?';
     }
     if (params.attributeId) {
         url += 'attributeId=' + '' + params.attributeId;
+    }
+    if (params.owner) {
+        url += '&owner=' + '' + params.owner;
     }
     if (params.months || params.months === 0) {
         url += '&months=' + '' + params.months;
