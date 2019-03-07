@@ -3317,7 +3317,7 @@ describe('ATTRIBUTE VALIDATION SCORE', function () {
 describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
 
     it('As a PUBLIC user, I want to Get the credibility/trust points by only providing the months parameter. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
+        'EXPECTED : FAILURE. ERROR : INCORRECT_CREDIBILITY_PARAMETERS', function (done) {
 
         let param = {};
         param.months = 777;
@@ -3331,7 +3331,7 @@ describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
     });
 
     it('As a PUBLIC user, I want to Get the credibility/trust points by providing both the owner and the attributeId. ' +
-        'EXPECTED : FAILURE. ERROR : ATTRIBUTE_NOT_FOUND', function (done) {
+        'EXPECTED : FAILURE. ERROR : INCORRECT_CREDIBILITY_PARAMETERS', function (done) {
 
         let param = {};
         param.months = 777;
@@ -3411,7 +3411,7 @@ describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
     });
 
     it('As a PUBLIC user, I want to Get the credibility/trust points for all attributes of a given OWNER that has some completed validations. ' +
-        'EXPECTED : SUCCESS. RESULT : Multiple results', function (done) {
+        'EXPECTED : SUCCESS. RESULT : Trust Points with multiple attribute results', function (done) {
 
         let param = {};
         param.months = 1;
