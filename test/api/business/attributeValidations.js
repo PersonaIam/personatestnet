@@ -3420,7 +3420,7 @@ describe('ATTRIBUTE VALIDATION CREDIBILITY', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
             node.expect(res.body).to.have.property(TRUST_POINTS);
-            node.expect(res.body).to.have.property(TRUST_POINTS).to.have.length(3);
+            node.expect(res.body).to.have.property(TRUST_POINTS).to.have.length(2);
             done();
         });
     });
