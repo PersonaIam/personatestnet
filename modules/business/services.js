@@ -32,6 +32,11 @@ function Services(cb, scope) {
         transactionTypes.INACTIVATE_SERVICE, new ServiceInactivate()
     );
 
+    let ServiceActivate = require('../../logic/serviceActivate.js');
+    __private.assetTypes[transactionTypes.ACTIVATE_SERVICE] = library.logic.transaction.attachAssetType(
+        transactionTypes.ACTIVATE_SERVICE, new ServiceActivate()
+    );
+
     return cb(null, self);
 }
 
@@ -59,6 +64,10 @@ Services.prototype.onBind = function (scope) {
         modules: modules, library: library
     });
 
+    __private.assetTypes[transactionTypes.ACTIVATE_SERVICE].bind({
+        modules: modules, library: library
+    });
+
 };
 
 // Private methods
@@ -77,7 +86,8 @@ __private.attachApi = function () {
         'get /list': 'listServices',
         'get /': 'getService',
         'get /attributetypes': 'getServiceAttributeTypes',
-        'put /inactivate': 'inactivateService'
+        'put /inactivate': 'inactivateService',
+        'put /activate': 'activateService'
     });
 
     router.use(function (req, res, next) {
@@ -279,6 +289,55 @@ shared.inactivateService = function (req, cb) {
                         req: req,
                         keypair: keypair,
                         transactionType: transactionTypes.INACTIVATE_SERVICE
+                    },
+                    function (err, resultData) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        return cb(null, resultData);
+                    });
+            });
+    });
+}
+
+shared.activateService = function (req, cb) {
+    library.schema.validate(req.body, schema.serviceOperation, function (err) {
+        if (err) {
+            return cb(err[0].message);
+        }
+
+        if (!req.body.asset || !req.body.asset.service) {
+            return cb('Service is not provided. Nothing to create');
+        }
+        if (!library.logic.transaction.validateAddress(req.body.asset.service.provider)) {
+            return cb('Service provider address is incorrect');
+        }
+
+        let keypair;
+
+        if (!req.body.signature) {
+            keypair = library.crypto.makeKeypair(req.body.secret);
+        }
+        if (keypair && req.body.publicKey) {
+            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
+                return cb(messages.INVALID_PASSPHRASE);
+            }
+        }
+
+        Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
+            function (err, data) {
+                if (!data || !data.services) {
+                    return cb(messages.SERVICE_NOT_FOUND)
+                }
+
+                if (data.services[0].status === constants.serviceStatus.ACTIVE) {
+                    return cb(messages.SERVICE_IS_ALREADY_ACTIVE)
+                }
+
+                attributes.buildTransaction({
+                        req: req,
+                        keypair: keypair,
+                        transactionType: transactionTypes.ACTIVATE_SERVICE
                     },
                     function (err, resultData) {
                         if (err) {

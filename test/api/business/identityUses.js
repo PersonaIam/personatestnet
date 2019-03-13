@@ -2634,7 +2634,7 @@ describe('IDENTITY USE REQUESTS - ALREADY EXISTING REQUESTS ACTIONS ', function 
     });
 });
 
-describe('INACTIVE SERVICE ACTIONS', function () {
+describe('INACTIVATION SERVICE ACTIONS', function () {
 
     // Inactivate Fifth Service ( for CREATE action )
 
@@ -2652,7 +2652,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         params.name = SERVICE5_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceActionRequest(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -2752,7 +2752,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         params.name = SERVICE6_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceActionRequest(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -2885,7 +2885,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         params.name = SERVICE7_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceActionRequest(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -2986,7 +2986,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         params.name = SERVICE8_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceActionRequest(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -3051,7 +3051,7 @@ describe('INACTIVE SERVICE ACTIONS', function () {
         params.name = SERVICE9_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceActionRequest(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -3097,6 +3097,399 @@ describe('INACTIVE SERVICE ACTIONS', function () {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.IDENTITY_USE_REQUEST_ACTION_FOR_INACTIVE_SERVICE);
+            done();
+        });
+    });
+
+});
+
+describe('ACTIVATION SERVICE ACTIONS', function () {
+
+    // Activate Fifth Service ( for CREATE action )
+
+    it('Activate one of my INACTIVE services. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE5_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceActionRequest(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Create an Identity Use Request, having all the required notarizations, for an recently Activated service. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE5_NAME;
+        param.serviceProvider = PROVIDER;
+        param.values = [{type : IDENTITY_CARD, value:'HHH5'}];
+
+        let request = createIdentityUseRequest(param);
+        postIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequest);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequest);
+            });
+            done();
+        });
+    });
+
+    // Activate Sixth Service ( for APPROVE action )
+
+    it('Activate one of my INACTIVE services (to be used for APPROVE on ACTIVATED service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE6_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceActionRequest(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get the details of an Activated service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with ACTIVE status' , function (done) {
+        getServices({name: SERVICE6_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.ACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Approve an Identity Use Request made on a Service that has since been Inactivated and then Activated again. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE6_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postApproveIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestapprove);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestapprove);
+            });
+            done();
+        });
+    });
+
+    // Activate Seventh Service ( for END action )
+
+    it('Activate one of my INACTIVE services (to be used for END on ACTIVATED service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE7_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceActionRequest(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get the details of an ACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with INACTIVE status' , function (done) {
+        getServices({name: SERVICE7_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.ACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to End an Identity Use Request made on a Service that has since been Inactivated and then Activated again. ' +
+        'EXPECTED : SUCCESS. RESULT : TransactionID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE7_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postEndIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestend);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestend);
+            });
+            done();
+        });
+    });
+
+    // Inactivate Eighth Service ( for DECLINE action )
+
+    it('Activate one of my INACTIVE services (to be used for DECLINE on ACTIVATED service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE8_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceActionRequest(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get the details of an ACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with ACTIVE status' , function (done) {
+        getServices({name: SERVICE8_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.ACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Decline an Identity Use Request made on a Service that has since been Inactivated and then Activated again. ' +
+        'EXPECTED : SUCCESS. RESULT : TransactionID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = PROVIDER_SECRET;
+        param.publicKey = PROVIDER_PUBLIC_KEY;
+        param.serviceName = SERVICE8_NAME;
+        param.serviceProvider = PROVIDER;
+        param.reason = REASON_1024_GOOD;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postDeclineIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestdecline);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestdecline);
+            });
+            done();
+        });
+    });
+
+    it('Activate one of my INACTIVE services (to be used for CANCEL on ACTIVATED service). ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE9_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceActionRequest(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+
+            done();
+        });
+    });
+
+    it('Get the details of an ACTIVE service (based on the service name). ' +
+        'EXPECTED : SUCCESS. RESULT : 1 service, with ACTIVE status' , function (done) {
+        getServices({name: SERVICE9_NAME}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.ACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As an OWNER, I want to Cancel an Identity Use Request made on a Service that has since been Inactivated and then Activated again. ' +
+        'EXPECTED : SUCCESS. RESULT : TransactionId', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(OWNER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let param = {};
+        param.owner = OWNER;
+        param.secret = SECRET;
+        param.publicKey = PUBLIC_KEY;
+        param.serviceName = SERVICE9_NAME;
+        param.serviceProvider = PROVIDER;
+
+        let request = createAnswerIdentityUseRequest(param);
+        postCancelIdentityUseRequest(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+            getBalance(OWNER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.identityuserequestcancel);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.identityuserequestcancel);
+            });
             done();
         });
     });
@@ -3586,7 +3979,7 @@ function createServiceRequest(param) {
     return request;
 }
 
-function inactivateServiceRequest(param) {
+function serviceActionRequest(param) {
     let request = {};
     if (!param) {
         param = {}
@@ -3751,5 +4144,9 @@ function getServices(params, done) {
 
 function putInactivateService(params, done) {
     node.put('/api/services/inactivate', params, done);
+}
+
+function putActivateService(params, done) {
+    node.put('/api/services/activate', params, done);
 }
 

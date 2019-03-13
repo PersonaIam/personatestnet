@@ -71,6 +71,7 @@ module.exports = {
 
     SERVICE_ALREADY_EXISTS : 'A service with this name already exists for this provider',
     SERVICE_IS_ALREADY_INACTIVE : 'The service is already inactive',
+    SERVICE_IS_ALREADY_ACTIVE : 'The service is already active',
 
     PENDING_APPROVAL_IDENTITY_USE_REQUEST_ALREADY_EXISTS : 'A pending approval identity use request already exists',
     ACTIVE_IDENTITY_USE_REQUEST_ALREADY_EXISTS : 'An active identity use request already exists',

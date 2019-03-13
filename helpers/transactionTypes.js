@@ -26,6 +26,7 @@ module.exports = {
     UPDATE_REWARD_ROUND_TO_COMPLETE: 24,
     CREATE_SERVICE : 25,
     INACTIVATE_SERVICE : 26,
+    ACTIVATE_SERVICE : 27,
 };
 
 'use strict';

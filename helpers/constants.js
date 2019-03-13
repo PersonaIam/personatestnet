@@ -31,6 +31,7 @@ module.exports = {
 		updaterewardround:1,
 		createservice:1,
         inactivateservice:1,
+        activateservice:1,
         identityuserequest : 1,
         identityuserequestapprove : 1,
         identityuserequestdecline : 1,

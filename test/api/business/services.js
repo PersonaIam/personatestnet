@@ -317,7 +317,7 @@ describe('INACTIVATE SERVICE', function () {
         params.name = SERVICE_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceRequestAction(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -378,7 +378,7 @@ describe('INACTIVATE SERVICE', function () {
         params.name = NON_EXISTING_SERVICE_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceRequestAction(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
@@ -395,12 +395,98 @@ describe('INACTIVATE SERVICE', function () {
         params.name = SERVICE_NAME;
         params.provider = PROVIDER;
 
-        let request = inactivateServiceRequest(params);
+        let request = serviceRequestAction(params);
 
         putInactivateService(request, function (err, res) {
             console.log(res.body);
             node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
             node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_IS_ALREADY_INACTIVE);
+            done();
+        });
+    });
+});
+
+describe('ACTIVATE SERVICE', function () {
+
+    it('As a PROVIDER, I want to Activate one of my services. ' +
+        'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
+
+        let unconfirmedBalance = 0;
+        let balance = 0;
+        getBalance(PROVIDER, function (err, res) {
+            unconfirmedBalance = parseInt(res.body.unconfirmedBalance);
+            balance = parseInt(res.body.balance);
+        });
+
+        let params = {};
+        params.name = SERVICE_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceRequestAction(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body).to.have.property(TRANSACTION_ID);
+            sleep.msleep(SLEEP_TIME);
+
+            getBalance(PROVIDER, function (err, res) {
+                let unconfirmedBalanceAfter = parseInt(res.body.unconfirmedBalance);
+                let balanceAfter = parseInt(res.body.balance);
+                node.expect(balance - balanceAfter === constants.fees.activateservice);
+                node.expect(unconfirmedBalance - unconfirmedBalanceAfter === constants.fees.activateservice);
+            });
+            done();
+        });
+    });
+
+    it('As a PUBLIC user, I want to Get the details of a service, immediately after activation. ' +
+        'EXPECTED : SUCCESS. RESULT : 1 Service, with ACTIVE status' , function (done) {
+        getServices({name: SERVICE_NAME, provider : PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(1);
+            node.expect(res.body.services[0].status).to.be.eq(constants.serviceStatus.ACTIVE);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(1);
+            done();
+        });
+    });
+
+    it('As a PROVIDER, I want to Activate a service that is already ACTIVE. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_IS_ALREADY_ACTIVE', function (done) {
+
+        let params = {};
+        params.name = SERVICE_NAME;
+        params.provider = PROVIDER;
+
+        let request = serviceRequestAction(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_IS_ALREADY_ACTIVE);
+            done();
+        });
+    });
+
+    it('Get the List of Services that are inactive for a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : no results', function (done) {
+        getServices({status : 'INACTIVE', provider : PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(0);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(0);
+            done();
+        });
+    });
+
+    it('Get the List of Services that are active for a given provider. ' +
+        'EXPECTED : SUCCESS. RESULT : 2 results', function (done) {
+        getServices({status : 'ACTIVE', provider: PROVIDER}, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(TRUE);
+            node.expect(res.body.services).to.have.length(2);
+            node.expect(res.body).to.have.property(COUNT).to.be.eq(2);
             done();
         });
     });
@@ -433,7 +519,7 @@ function createServiceRequest(param) {
     return request;
 }
 
-function inactivateServiceRequest(param) {
+function serviceRequestAction(param) {
     let request = {};
     if (!param) {
         param = {}
@@ -498,6 +584,10 @@ function postService(params, done) {
 
 function putInactivateService(params, done) {
     node.put('/api/services/inactivate', params, done);
+}
+
+function putActivateService(params, done) {
+    node.put('/api/services/activate', params, done);
 }
 
 function getBalance(address, done) {
