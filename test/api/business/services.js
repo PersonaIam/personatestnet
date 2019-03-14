@@ -13,8 +13,8 @@ const SECRET_FAUCET = "blade early broken display angry wine diary alley panda l
 const PUBLIC_KEY_FAUCET = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
 
 const PROVIDER = 'LTAAFiSnPSsZXnNPGD6dg7cfy2gm4o6Fu7';
-const SECRET = "blade early broken display angry wine diary alley panda left spy woman";
-const PUBLIC_KEY = '025dfd3954bf009a65092cfd3f0ba718d0eb2491dd62c296a1fff6de8ccd4afed6';
+const SECRET = "simple city hundred oyster online observe barely marriage impact nephew abuse uncle";
+const PUBLIC_KEY = '03cfc6ab0fba7983067141af79d20af2bc5d0ad5f2b1875b0993166649526f7f3e';
 
 const NON_EXISTING_SERVICE_NAME = 'gonzo';
 const SERVICE_NAME = 'firstService';
@@ -303,6 +303,25 @@ describe('CREATE SERVICE', function () {
 
 describe('INACTIVATE SERVICE', function () {
 
+    it('As an OWNER, I want to Inactivate an active service that belongs to someone else. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR', function (done) {
+
+        let params = {};
+        params.name = SERVICE_NAME;
+        params.provider = PROVIDER;
+        params.secret = SECRET_FAUCET;
+        params.publicKey = PUBLIC_KEY_FAUCET;
+
+        let request = serviceRequestAction(params);
+
+        putInactivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR);
+            done();
+        });
+    });
+
     it('As a PROVIDER, I want to Inactivate one of my services. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {
 
@@ -407,6 +426,26 @@ describe('INACTIVATE SERVICE', function () {
 });
 
 describe('ACTIVATE SERVICE', function () {
+
+    it('As an OWNER, I want to Activate an inactive service that belongs to someone else. ' +
+        'EXPECTED : FAILURE. ERROR : SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR', function (done) {
+
+        let params = {};
+        params.name = SERVICE_NAME;
+
+        params.provider = PROVIDER;
+        params.secret = SECRET_FAUCET;
+        params.publicKey = PUBLIC_KEY_FAUCET;
+
+        let request = serviceRequestAction(params);
+
+        putActivateService(request, function (err, res) {
+            console.log(res.body);
+            node.expect(res.body).to.have.property(SUCCESS).to.be.eq(FALSE);
+            node.expect(res.body).to.have.property(ERROR).to.be.eq(messages.SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR);
+            done();
+        });
+    });
 
     it('As a PROVIDER, I want to Activate one of my services. ' +
         'EXPECTED : SUCCESS. RESULT : Transaction ID', function (done) {

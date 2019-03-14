@@ -251,7 +251,7 @@ shared.getServiceAttributeTypes = function (req, cb) {
     });
 };
 
-shared.inactivateService = function (req, cb) {
+__private.serviceAction = function (req, cb) {
     library.schema.validate(req.body, schema.serviceOperation, function (err) {
         if (err) {
             return cb(err[0].message);
@@ -274,78 +274,61 @@ shared.inactivateService = function (req, cb) {
                 return cb(messages.INVALID_PASSPHRASE);
             }
         }
+        modules.accounts.setAccountAndGet({publicKey: req.body.publicKey}, function (err, account) {
+            // only providers can perform actions on their own services
+            if (!account || account.address !== req.body.asset.service.provider) {
+                return cb(messages.SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR)
+            }
 
-        Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
-            function (err, data) {
-                if (!data || !data.services) {
-                    return cb(messages.SERVICE_NOT_FOUND)
-                }
+            Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
+                function (err, data) {
+                    if (!data || !data.services) {
+                        return cb(messages.SERVICE_NOT_FOUND)
+                    }
 
-                if (data.services[0].status === constants.serviceStatus.INACTIVE) {
-                    return cb(messages.SERVICE_IS_ALREADY_INACTIVE)
-                }
+                    if (data.services[0].status === constants.serviceStatus.INACTIVE && req.transactionType === transactionTypes.INACTIVATE_SERVICE) {
+                        return cb(messages.SERVICE_IS_ALREADY_INACTIVE)
+                    }
 
-                attributes.buildTransaction({
-                        req: req,
-                        keypair: keypair,
-                        transactionType: transactionTypes.INACTIVATE_SERVICE
-                    },
-                    function (err, resultData) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, resultData);
-                    });
-            });
+                    if (data.services[0].status === constants.serviceStatus.ACTIVE && req.transactionType === transactionTypes.ACTIVATE_SERVICE) {
+                        return cb(messages.SERVICE_IS_ALREADY_ACTIVE)
+                    }
+
+                    attributes.buildTransaction({
+                            req: req,
+                            keypair: keypair,
+                            transactionType: req.transactionType
+                        },
+                        function (err, resultData) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            return cb(null, resultData);
+                        });
+                });
+        });
+    });
+};
+
+shared.inactivateService = function (req, cb) {
+
+    req.transactionType = transactionTypes.INACTIVATE_SERVICE;
+    __private.serviceAction(req, function (err, res) {
+        if (err) {
+            return cb(err)
+        }
+        return cb(null, res);
     });
 }
 
 shared.activateService = function (req, cb) {
-    library.schema.validate(req.body, schema.serviceOperation, function (err) {
+
+    req.transactionType = transactionTypes.ACTIVATE_SERVICE;
+    __private.serviceAction(req, function (err, res) {
         if (err) {
-            return cb(err[0].message);
+            return cb(err)
         }
-
-        if (!req.body.asset || !req.body.asset.service) {
-            return cb('Service is not provided. Nothing to create');
-        }
-        if (!library.logic.transaction.validateAddress(req.body.asset.service.provider)) {
-            return cb('Service provider address is incorrect');
-        }
-
-        let keypair;
-
-        if (!req.body.signature) {
-            keypair = library.crypto.makeKeypair(req.body.secret);
-        }
-        if (keypair && req.body.publicKey) {
-            if (keypair.publicKey.toString('hex') !== req.body.publicKey) {
-                return cb(messages.INVALID_PASSPHRASE);
-            }
-        }
-
-        Services.getServicesByFilter({provider: req.body.asset.service.provider, name: req.body.asset.service.name},
-            function (err, data) {
-                if (!data || !data.services) {
-                    return cb(messages.SERVICE_NOT_FOUND)
-                }
-
-                if (data.services[0].status === constants.serviceStatus.ACTIVE) {
-                    return cb(messages.SERVICE_IS_ALREADY_ACTIVE)
-                }
-
-                attributes.buildTransaction({
-                        req: req,
-                        keypair: keypair,
-                        transactionType: transactionTypes.ACTIVATE_SERVICE
-                    },
-                    function (err, resultData) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        return cb(null, resultData);
-                    });
-            });
+        return cb(null, res);
     });
 }
 

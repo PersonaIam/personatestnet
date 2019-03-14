@@ -95,6 +95,7 @@ module.exports = {
 
     SERVICE_DESCRIPTION_TOO_LONG : 'The service description is limited to 2048 characters',
     SERVICE_NOT_FOUND :'No service was found for the given parameters',
+    SERVICE_ACTION_SENDER_IS_NOT_PROVIDER_ERROR : 'Only the service provider is allowed to perform actions on his own service',
 
     INVALID_OWNER_ADDRESS : 'Owner address is invalid',
     INVALID_VALIDATOR_ADDRESS : 'Validator address is invalid',
