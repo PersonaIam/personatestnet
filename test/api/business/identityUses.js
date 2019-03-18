@@ -3984,8 +3984,8 @@ function serviceActionRequest(param) {
     if (!param) {
         param = {}
     }
-    request.secret = param.secret ? param.secret : SECRET;
-    request.publicKey = param.publicKey ? param.publicKey : PUBLIC_KEY;
+    request.secret = param.secret ? param.secret : PROVIDER_SECRET;
+    request.publicKey = param.publicKey ? param.publicKey : PROVIDER_PUBLIC_KEY;
     request.asset = {};
     request.asset.service = {};
     request.asset.service.name = param.name ? param.name : SERVICE_NAME;
